@@ -1,0 +1,5 @@
+the_ROM_image:
+{
+	[bootloader]/home/race/LinuxKernels/Own/U-Boot_Files/fsbl.elf
+	/home/race/LinuxKernels/u-boot-xlnx/u-boot.elf
+}
