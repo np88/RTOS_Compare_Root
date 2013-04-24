@@ -1,0 +1,13 @@
+-p
+xc7z020clg484-1
+-lang
+vhdl
+-intstyle
+ise
+-toplevel
+no
+-ti
+arm_i
+-msg
+__xps/ise/xmsgprops.lst
+arm.mhs

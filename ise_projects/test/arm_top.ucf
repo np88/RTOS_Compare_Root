@@ -1,0 +1,39 @@
+
+
+NET "processing_system7_0_SPI1_MISO_pin" LOC = P20;
+NET "processing_system7_0_SPI1_MOSI_pin" LOC = P21;
+NET "processing_system7_0_SPI1_SCLK_pin" LOC = N20;
+NET "processing_system7_0_SPI0_MOSI_pin" LOC = P17;
+NET "processing_system7_0_SPI0_MISO_pin" LOC = P18;
+NET "processing_system7_0_SPI0_SS_pin" LOC = P16;
+NET "processing_system7_0_SPI1_SS_pin" LOC = P22;
+NET "processing_system7_0_SPI0_SCLK_pin" LOC = N19;
+
+
+NET "processing_system7_0_SPI0_SS_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI1_MISO_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI1_MOSI_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI1_SCLK_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI1_SS_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI0_MISO_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI0_MOSI_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI0_SCLK_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI0_SS1_O_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI0_SS2_O_pin" IOSTANDARD = LVCMOS12;
+NET "processing_system7_0_SPI1_SS1_O_pin" IOSTANDARD = LVCMOS12;
+
+# PlanAhead Generated IO constraints 
+
+NET "processing_system7_0_SPI1_SS2_O_pin" IOSTANDARD = LVCMOS12;
+
+# PlanAhead Generated physical constraints 
+
+NET "processing_system7_0_SPI1_SS1_O_pin" LOC = R21;
+NET "processing_system7_0_SPI0_SS1_O_pin" LOC = R18;
+NET "processing_system7_0_SPI1_SS2_O_pin" LOC = R19;
+NET "processing_system7_0_SPI0_SS2_O_pin" LOC = R20;
+
+NET "axi_gpio_0_GPIO_IO_I_pin<0>" LOC = G19 | IOSTANDARD = LVCMOS12;
+NET "axi_gpio_0_GPIO2_IO_O_pin<0>" LOC = E15 | IOSTANDARD = LVCMOS12;
+
+

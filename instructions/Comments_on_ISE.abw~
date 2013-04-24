@@ -1,0 +1,6 @@
+Creating Zynq designs:
+An error occurs when the IO standards for Zynq are not specified correctly. To aviod this map all pins and set IOSTANDARD = LVCMOS12.
+
+Creating own Board Description file:
+The /opt/Xilinx/14.4/ISE_DS/EDK/board/Xilinx/boards/ folder contains folders with xbd files for different boards. To create an own file, have a look at the file structure of e.g. the Xilinx_SP601/data/ folder (14.4). Copy and modify it for your needs. 
+

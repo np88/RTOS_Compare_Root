@@ -1,0 +1,8 @@
+INTSTYLE=ise
+INFILE=/home/race/ise_projects/test/arm_top.ncd
+OUTFILE=/home/race/ise_projects/test/arm_top.bit
+FAMILY=Zynq
+PART=xc7z020-1clg484
+WORKINGDIR=/home/race/ise_projects/test
+LICENSE=WebPack
+USER_INFO=210687105_1777488745_0_577

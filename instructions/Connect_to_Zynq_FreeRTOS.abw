@@ -15,13 +15,14 @@
 </metadata>
 <rdf>
 </rdf>
-<history version="9" edit-time="10124" last-saved="1363876208" uid="e8b6c30a-9208-11e2-8da2-95dc79c39cf5">
+<history version="10" edit-time="10219" last-saved="1366025648" uid="e8b6c30a-9208-11e2-8da2-95dc79c39cf5">
 <version id="6" started="1363858081" uid="4810ce84-921f-11e2-8da2-95dc79c39cf5" auto="0" top-xid="12"/>
 <version id="7" started="1363868013" uid="c05dca80-9220-11e2-8847-8fa34c27bbb8" auto="0" top-xid="17"/>
 <version id="9" started="1363876074" uid="d4d73448-9233-11e2-8537-bb6949213887" auto="0" top-xid="21"/>
+<version id="10" started="1366025648" uid="62ef35e2-a5c0-11e2-8a68-dd994a48c64e" auto="0" top-xid="23"/>
 </history>
 <styles>
-<s type="P" name="Normal" followedby="Current Settings" props="font-family:Times New Roman; margin-top:0pt; color:000000; margin-left:0pt; widows:2; font-style:normal; text-indent:0in; text-position:normal; margin-right:0pt; text-decoration:none; bgcolor:transparent; line-height:1.0; font-size:12pt; margin-bottom:0pt; font-variant:normal; font-weight:normal; text-align:left; font-stretch:normal"/>
+<s type="P" name="Normal" followedby="Current Settings" props="font-weight:normal; font-family:Times New Roman; margin-top:0pt; color:000000; margin-left:0pt; text-align:left; widows:2; font-style:normal; text-indent:0in; text-position:normal; font-variant:normal; bgcolor:transparent; line-height:1.0; text-decoration:none; margin-bottom:0pt; margin-right:0pt; font-size:12pt; font-stretch:normal"/>
 </styles>
 <pagesize pagetype="Letter" orientation="portrait" width="8.500000" height="11.000000" units="in" page-scale="1.000000"/>
 <section xid="11" props="page-margin-footer:0.5in; page-margin-header:0.5in">
@@ -35,13 +36,13 @@
 <p style="Normal" xid="2"><c props="font-weight:bold">Set up FreeRTOS for SDK</c><c props="font-weight:bold"></c></p>
 <p style="Normal" xid="3"><c props="font-weight:bold"></c><c></c></p>
 <p style="Normal" xid="4"><c props="font-weight:normal">Follow instructions in the FreeRTOS_Zynq_Port PDF.</c><c props="font-weight:normal"></c></p>
-<p style="Normal" xid="18"><c props="font-weight:normal"></c></p>
-<p style="Normal" xid="19"><c props="font-weight:bold">Connect to Zynq</c></p>
+<p style="Normal" xid="18"><c props="font-weight:normal"></c><c></c></p>
+<p style="Normal" xid="19"><c props="font-weight:bold">Connect to Zynq</c><c props="font-weight:bold"></c></p>
 <p style="Normal" xid="7"><c props="font-weight:normal"></c><c props="font-weight:normal">Ubuntu does not support the JTAG driver out of the box, so the driver has to be installed. The drivers are hidden within the Xilinx tools for SDK 14.4 in this folder:</c></p>
-<p style="Normal" xid="21" props="text-align:left; dom-dir:ltr; font-style:italic"><c props="font-style:italic"></c></p>
+<p style="Normal" xid="21" props="text-align:left; dom-dir:ltr; font-style:italic"><c props="font-style:italic"></c><c></c></p>
 <p style="Normal" xid="23" props="text-align:left; dom-dir:ltr; font-style:italic"><c props="font-style:italic"></c><c props="font-style:italic">/opt/Xilinx/14.4/SDK/common/bin/lin/digilent</c></p>
-<p style="Normal" xid="22" props="text-align:left; dom-dir:ltr; font-style:italic"><c props="font-style:italic"></c></p>
-<p style="Normal" xid="20"><c props="font-weight:normal"></c><c props="font-weight:normal">  Run the provided script as superuser to install the required drivers.</c></p>
+<p style="Normal" xid="22" props="text-align:left; dom-dir:ltr; font-style:italic"><c props="font-style:italic"></c><c></c></p>
+<p style="Normal" xid="20"><c props="font-weight:normal"></c><c props="font-weight:normal">Run the provided script as superuser to install the required drivers.</c></p>
 <p style="Normal" xid="5"><c props="font-weight:normal"></c><c></c></p>
 <p style="Normal" xid="6"><c props="font-weight:normal"></c></p>
 </section>

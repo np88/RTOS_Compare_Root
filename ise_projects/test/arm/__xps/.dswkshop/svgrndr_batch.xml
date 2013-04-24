@@ -1,0 +1,12 @@
+
+<RENDERBATCH>
+
+  <RENDERIMG RASNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/processing_system7_0.jpg" SVGNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/processing_system7_0.svg" TMPSVGFN="/home/race/ise_projects/test/arm/__xps/.dswkshop/processing_system7_0.svg"/>
+
+  <RENDERIMG RASNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/axi_interconnect_1.jpg" SVGNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/axi_interconnect_1.svg" TMPSVGFN="/home/race/ise_projects/test/arm/__xps/.dswkshop/axi_interconnect_1.svg"/>
+
+  <RENDERIMG RASNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/axi_gpio_0.jpg" SVGNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/axi_gpio_0.svg" TMPSVGFN="/home/race/ise_projects/test/arm/__xps/.dswkshop/axi_gpio_0.svg"/>
+
+  <RENDERIMG RASNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/arm_blkd.jpg" SVGNAME="/home/race/ise_projects/test/arm/SDK/SDK_Export/hw/imgs/arm_blkd.svg" TMPSVGFN="/home/race/ise_projects/test/arm/__xps/.dswkshop/arm_blkd.svg"/>
+
+</RENDERBATCH>
