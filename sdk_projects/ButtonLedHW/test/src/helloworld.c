@@ -39,6 +39,36 @@ static int InterruptFlag;
 static XGpio GPIOInstance_Ptr;
 //void print(char *str);
 extern char inbyte(void);
+
+void EMIO_Button_InterruptHandler(void *CallBackRef, int Bank, u32 Status)
+{
+	print("\r\n");
+	print("\r\n");
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	print(" Inside EMIO GPIO ISR \n \r ");
+
+	print(" GPIO EMIO ISR Exit\n \n \r");
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	print("\r\n");
+	print("\r\n");
+	XGpioPs_IntrClear(&psGpioInstancePtr, 3, 0x1);
+}
+
+void Button_InterruptHandler(void *data)
+{
+	print("\r\n");
+	print("\r\n");
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	print(" Inside GPIO ISR \n \r ");
+
+	print(" GPIO ISR Exit\n \n \r");
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	print("\r\n");
+	print("\r\n");
+	InterruptFlag = 1;
+	XGpio_InterruptClear(&GPIOInstance_Ptr, 0x1);
+}
+
 void Timer_InterruptHandler(void *data, u8 TmrCtrNumber)
 {
 	print("\r\n");
@@ -55,22 +85,6 @@ void Timer_InterruptHandler(void *data, u8 TmrCtrNumber)
 	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
 	print("\r\n");
 	print("\r\n");
-	InterruptFlag = 1;
-}
-
-void Button_InterruptHandler(void *data)
-{
-	print("\r\n");
-	print("\r\n");
-	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
-	print(" Inside GPIO ISR \n \r ");
-
-	print(" GPIO ISR Exit\n \n \r");
-	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
-	print("\r\n");
-	print("\r\n");
-	InterruptFlag = 1;
-	XGpio_InterruptClear(&GPIOInstance_Ptr, 0x1);
 }
 
 int SetUpInterruptSystem(XScuGic *XScuGicInstancePtr)
@@ -96,7 +110,7 @@ int ScuGicInterrupt_Init(u16 DeviceId,XTmrCtr *TimerInstancePtr)
 	* */
 	GicConfig = XScuGic_LookupConfig(DeviceId);
 	if (NULL == GicConfig) {
-	return XST_FAILURE;
+		return XST_FAILURE;
 	}
 	Status = XScuGic_CfgInitialize(&InterruptController, GicConfig,	GicConfig->CpuBaseAddress);
 	if (Status != XST_SUCCESS) {
@@ -120,6 +134,7 @@ int ScuGicInterrupt_Init(u16 DeviceId,XTmrCtr *TimerInstancePtr)
 							 (void *)TimerInstancePtr);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
+	}
 	Status = XScuGic_Connect(&InterruptController,
 							XPAR_FABRIC_AXI_GPIO_0_IP2INTC_IRPT_INTR,
 							 (Xil_ExceptionHandler)Button_InterruptHandler,
@@ -127,15 +142,30 @@ int ScuGicInterrupt_Init(u16 DeviceId,XTmrCtr *TimerInstancePtr)
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
+
+	/*
+	 * Connect the device driver handler that will be called when an
+	 * interrupt for the device occurs, the handler defined above performs
+	 * the specific interrupt processing for the device.
+	 */
+	Status = XScuGic_Connect(&InterruptController,
+							XPS_GPIO_INT_ID,
+							(Xil_ExceptionHandler)XGpioPs_IntrHandler,
+							(void *)&psGpioInstancePtr);
+	if (Status != XST_SUCCESS) {
+		return Status;
+	}
+
+	/*
+	* Enable the interrupt for the device and then cause (simulate) an
+	* interrupt so the handlers will be called
+	*/
+	XScuGic_Enable(&InterruptController, XPAR_FABRIC_AXI_GPIO_0_IP2INTC_IRPT_INTR);
+	XScuGic_Enable(&InterruptController, XPS_GPIO_INT_ID);
+	XScuGic_Enable(&InterruptController, XPAR_FABRIC_AXI_TIMER_0_INTERRUPT_INTR);
+	return XST_SUCCESS;
 }
 
-/*
-* Enable the interrupt for the device and then cause (simulate) an
-* interrupt so the handlers will be called
-*/
-XScuGic_Enable(&InterruptController, XPAR_FABRIC_AXI_TIMER_0_INTERRUPT_INTR);
-return XST_SUCCESS;
-}
 int main()
 {
 	XGpioPs_Config*GpioConfigPtr;
@@ -180,15 +210,11 @@ int main()
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-5 :Setting timer Reset Value
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	XTmrCtr_SetResetValue(&TimerInstancePtr,
-	0, //Change with generic value
-	0xf0000000);
+	XTmrCtr_SetResetValue(&TimerInstancePtr, 0, 0xf0000000);
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-6 :Setting timer Option (Interrupt Mode And Auto Reload )
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	XTmrCtr_SetOptions(&TimerInstancePtr,
-	XPAR_AXI_TIMER_0_DEVICE_ID,
-	(XTC_INT_MODE_OPTION | XTC_AUTO_RELOAD_OPTION ));
+	XTmrCtr_SetOptions(&TimerInstancePtr, XPAR_AXI_TIMER_0_DEVICE_ID, (XTC_INT_MODE_OPTION | XTC_AUTO_RELOAD_OPTION ));
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-7 :PS GPIO Intialization
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -209,12 +235,17 @@ int main()
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	XGpioPs_SetDirectionPin(&psGpioInstancePtr,	iPinNumberEMIO,uPinDirectionEMIO);
 	XGpioPs_SetOutputEnablePin(&psGpioInstancePtr, iPinNumberEMIO,0);
+	XGpioPs_IntrEnable(&psGpioInstancePtr, 3, 0x1);
+	// instance, bank, edge, rising, single edge
+	XGpioPs_SetIntrType(&psGpioInstancePtr, 3, 1, 1, 0);
+	XGpioPs_IntrEnablePin(&psGpioInstancePtr, iPinNumberEMIO);
+	XGpioPs_SetCallbackHandler(&psGpioInstancePtr, (void *) &psGpioInstancePtr, EMIO_Button_InterruptHandler);
+
 	print(" INITED FIRST EMIO \n\r");
 	// EMIO output
 	XGpioPs_SetDirectionPin(&psGpioInstancePtr, 55, uPinDirection);
-	print(" SECOND EMIO 1 \n\r");
 	XGpioPs_SetOutputEnablePin(&psGpioInstancePtr, 55, 1);
-	print(" SECOND EMIO 2 \n\r");
+
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-10 : SCUGIC interrupt controller Intialization
 	//Registration of the Timer ISR
