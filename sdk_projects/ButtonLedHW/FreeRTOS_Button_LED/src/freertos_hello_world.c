@@ -84,26 +84,16 @@ static XTmrCtr TimerInstancePtr;
 static XGpio GPIOInstance_Ptr;
 //void print(char *str);
 extern char inbyte(void);
-static u8 m55 = 0, m10 = 0;
-
 
 
 void Button_InterruptHandler(void *data)
 {
-	u32 status = XGpio_DiscreteRead(&GPIOInstance_Ptr, 1);
-	if (status&1){
-		if (m10 == 0){
-			m10 = 1;
-		}
-		else{
-			m10 = 0;
-		}
-		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
-		print(" Inside GPIO ISR \n \r ");
-		XGpioPs_WritePin(&psGpioInstancePtr,iPinNumber, m10);
-		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
-		XGpio_InterruptClear(&GPIOInstance_Ptr, 0x1);
-	}
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	print(" Inside GPIO ISR \n \r ");
+	XGpioPs_WritePin(&psGpioInstancePtr,iPinNumber, 1);
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	XTmrCtr_Start(&TimerInstancePtr,0);
+	XGpio_InterruptClear(&GPIOInstance_Ptr, 0x1);
 }
 
 void Timer_InterruptHandler(void *data, u8 TmrCtrNumber)
@@ -111,33 +101,22 @@ void Timer_InterruptHandler(void *data, u8 TmrCtrNumber)
 	print("\r\n");
 	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
 	print(" Inside Timer ISR \n \r ");
-	XTmrCtr_Stop(data,TmrCtrNumber);
-	// PS GPIO Writting
-	print("LED 'DS23' Turned ON \r\n");
-	//XGpioPs_WritePin(&psGpioInstancePtr,iPinNumber,1);
-	//XGpioPs_WritePin(&psGpioInstancePtr,55,1);
-	XTmrCtr_Reset(data,TmrCtrNumber);
+	XTmrCtr_Stop(&TimerInstancePtr,TmrCtrNumber);
+	XGpioPs_WritePin(&psGpioInstancePtr,iPinNumber,0);
+//	XGpioPs_WritePin(&psGpioInstancePtr,55,0);
+	XTmrCtr_Reset(&TimerInstancePtr,TmrCtrNumber);
 	print(" Timer ISR Exit\n \n \r");
 	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
-	print("\r\n");
 }
 
 void EMIO_Button_InterruptHandler(void *CallBackRef, int Bank, u32 Status)
 {
-//	int status = XGpioPs_ReadPin(&psGpioInstancePtr, 54);
-//	if (status){
-		if (m55 == 0){
-			m55 = 1;
-		}
-		else{
-			m55 = 0;
-		}
-		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
-		print(" Inside EMIO GPIO ISR \n \r ");
-		//XGpioPs_WritePin(&psGpioInstancePtr,55,m55);
-		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
-		XGpioPs_IntrClear(&psGpioInstancePtr, XGPIOPS_BANK2, 0x1);
-//	}
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	print(" Inside EMIO GPIO ISR \n \r ");
+	XGpioPs_WritePin(&psGpioInstancePtr,55,1);
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
+	XTmrCtr_Start(&TimerInstancePtr,0);
+	XGpioPs_IntrClear(&psGpioInstancePtr, XGPIOPS_BANK2, 0x1);
 }
 
 /*
@@ -149,7 +128,7 @@ void EMIO_Button_InterruptHandler(void *CallBackRef, int Bank, u32 Status)
 
 int main( void )
 {
-	prvInitializeExceptions();
+ 	prvInitializeExceptions();
 
 	/* Start the tasks and timer running. */
 	vTaskStartScheduler();
@@ -222,21 +201,21 @@ void vApplicationSetupHardware( void )
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-3 :AXI Timer Initialization
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//	xStatus = XTmrCtr_Initialize(&TimerInstancePtr, XPAR_AXI_TIMER_0_DEVICE_ID);
-//	if(XST_SUCCESS != xStatus)
-//		print("TIMER INIT FAILED \n\r");
+	xStatus = XTmrCtr_Initialize(&TimerInstancePtr, XPAR_AXI_TIMER_0_DEVICE_ID);
+	if(XST_SUCCESS != xStatus)
+		print("TIMER INIT FAILED \n\r");
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-4 :Set Timer Handler
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//	XTmrCtr_SetHandler(&TimerInstancePtr, Timer_InterruptHandler, &TimerInstancePtr);
+	XTmrCtr_SetHandler(&TimerInstancePtr, Timer_InterruptHandler, &TimerInstancePtr);
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-5 :Setting timer Reset Value
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//	XTmrCtr_SetResetValue(&TimerInstancePtr, 0, 0xf0000000);
+	XTmrCtr_SetResetValue(&TimerInstancePtr, 0, 0x0F000000);
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-6 :Setting timer Option (Interrupt Mode And Auto Reload )
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//	XTmrCtr_SetOptions(&TimerInstancePtr, XPAR_AXI_TIMER_0_DEVICE_ID, (XTC_INT_MODE_OPTION | XTC_AUTO_RELOAD_OPTION ));
+	XTmrCtr_SetOptions(&TimerInstancePtr, XPAR_AXI_TIMER_0_DEVICE_ID, (XTC_INT_MODE_OPTION | XTC_AUTO_RELOAD_OPTION | XTC_DOWN_COUNT_OPTION));
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Step-7 :PS GPIO Intialization
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -259,10 +238,10 @@ void vApplicationSetupHardware( void )
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	XGpioPs_SetDirectionPin(&psGpioInstancePtr,	iPinNumberEMIO, uPinDirectionEMIO);
 	XGpioPs_SetOutputEnablePin(&psGpioInstancePtr, iPinNumberEMIO, 0);
-	XGpioPs_IntrEnable(&psGpioInstancePtr, XGPIOPS_BANK2, 0x1);
+	//XGpioPs_IntrEnable(&psGpioInstancePtr, XGPIOPS_BANK2, 0x1);
 	// instance, bank, edge, rising, single edge
-	XGpioPs_SetIntrType(&psGpioInstancePtr, XGPIOPS_BANK2, 1, 1, 0);
 	XGpioPs_IntrEnablePin(&psGpioInstancePtr, iPinNumberEMIO);
+	XGpioPs_SetIntrType(&psGpioInstancePtr, XGPIOPS_BANK2, 1, 1, 0);
 	XGpioPs_SetCallbackHandler(&psGpioInstancePtr, (void *) &psGpioInstancePtr, EMIO_Button_InterruptHandler);
 
 	print(" INITED FIRST EMIO \n\r");
@@ -314,9 +293,8 @@ void vApplicationSetupHardware( void )
 	XScuGic_Enable(InterruptController, XPAR_FABRIC_AXI_TIMER_0_INTERRUPT_INTR);
 
 	// turn off all LEDs
-	//XGpioPs_WritePin(&psGpioInstancePtr, iPinNumber, 0);
-	//XGpioPs_WritePin(&psGpioInstancePtr, 55, 0);
-	//XGpioPs_WritePin(&psGpioInstancePtr, 8, 0);
+	XGpioPs_WritePin(&psGpioInstancePtr, iPinNumber, 0);
+	XGpioPs_WritePin(&psGpioInstancePtr, 55, 0);
 
 	print(" End of init \n\r");
 }
