@@ -103,7 +103,7 @@ void Timer_InterruptHandler(void *data, u8 TmrCtrNumber)
 	print(" Inside Timer ISR \n \r ");
 	XTmrCtr_Stop(&TimerInstancePtr,TmrCtrNumber);
 	XGpioPs_WritePin(&psGpioInstancePtr,iPinNumber,0);
-//	XGpioPs_WritePin(&psGpioInstancePtr,55,0);
+	XGpioPs_WritePin(&psGpioInstancePtr,55,0);
 	XTmrCtr_Reset(&TimerInstancePtr,TmrCtrNumber);
 	print(" Timer ISR Exit\n \n \r");
 	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
