@@ -84,14 +84,14 @@ static XTmrCtr TimerInstancePtr;
 static XGpio GPIOInstance_Ptr;
 //void print(char *str);
 extern char inbyte(void);
-static u8 m8 = 0, m55 = 0, m10 = 0;
+static u8 m55 = 0, m10 = 0;
 
 
 
 void Button_InterruptHandler(void *data)
 {
-//	u32 status = XGpio_DiscreteRead(&GPIOInstance_Ptr, 1);
-//	if (status&1){
+	u32 status = XGpio_DiscreteRead(&GPIOInstance_Ptr, 1);
+	if (status&1){
 		if (m10 == 0){
 			m10 = 1;
 		}
@@ -104,7 +104,7 @@ void Button_InterruptHandler(void *data)
 		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
 		XGpio_InterruptClear(&GPIOInstance_Ptr, 0x1);
 	}
-//}
+}
 
 void Timer_InterruptHandler(void *data, u8 TmrCtrNumber)
 {
@@ -114,8 +114,8 @@ void Timer_InterruptHandler(void *data, u8 TmrCtrNumber)
 	XTmrCtr_Stop(data,TmrCtrNumber);
 	// PS GPIO Writting
 	print("LED 'DS23' Turned ON \r\n");
-	XGpioPs_WritePin(&psGpioInstancePtr,iPinNumber,1);
-	XGpioPs_WritePin(&psGpioInstancePtr,55,1);
+	//XGpioPs_WritePin(&psGpioInstancePtr,iPinNumber,1);
+	//XGpioPs_WritePin(&psGpioInstancePtr,55,1);
 	XTmrCtr_Reset(data,TmrCtrNumber);
 	print(" Timer ISR Exit\n \n \r");
 	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
@@ -134,7 +134,7 @@ void EMIO_Button_InterruptHandler(void *CallBackRef, int Bank, u32 Status)
 		}
 		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
 		print(" Inside EMIO GPIO ISR \n \r ");
-		XGpioPs_WritePin(&psGpioInstancePtr,55,m55);
+		//XGpioPs_WritePin(&psGpioInstancePtr,55,m55);
 		print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n");
 		XGpioPs_IntrClear(&psGpioInstancePtr, XGPIOPS_BANK2, 0x1);
 //	}
