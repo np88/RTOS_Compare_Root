@@ -1,0 +1,156 @@
+\chapter{Benchmarking}
+Vergleichskriterien für Betriebssysteme
+\begin{itemize}
+	\item Performanz
+	\item Sicherheit
+	\item Ressourcen-/Speicherverbrauch
+	\item Speicherverwaltung
+\end{itemize}
+
+\section{Performanz}
+\begin{enumerate}
+	\item Latenzzeiten/Jitter
+		\begin{enumerate}
+			\item Interrupt durch Taster $ \rightarrow $ Aufblinken von LED (die Zeit, die dasAufblinken benötigt, kann gemessen und abgezogen werden, so dass nur die Zeit vom Drücken des Tasters bis zum Ausführen der ISR bleibt)
+			\item Andere Interruptquellen? ( $ \rightarrow $ z.B CAN, Ethernet, SPI, ...)
+			\item Verschiedene Taktzeiten von FreeRTOS
+		\end{enumerate}
+	\item Durchsatz an Daten
+		\begin{enumerate}
+			\item Ethernet
+			\item CAN
+			\item SPI
+		\end{enumerate}	
+	\item Bootzeit
+		\begin{enumerate}
+			\item Was hat Einwirkungen auf die Bootzeit?
+			\item Indikatoren $ \rightarrow $ Wann ist das System hochgefahren?
+			\item Bestimmtes Programm wird gestartet $ \rightarrow $ z.B. Aufleuchten von LED
+			\item Bestimmte Programme können den Bootvorgang aufzeichen (Bootchart)  
+		\end{enumerate}			
+	\item Scheduling/Context-Switching
+		\begin{enumerate}
+			\item Hardware-Timer $ \rightarrow $ genauer als Software-Timer 
+			\item In FreeRTOS: Axi-Timer, der im PL instanziert wird
+			\item In Linux: clock\_gettime() mit CLOCK\_MONOTONIC (braucht keinen Treiber für Axi-Timer und Zugriffszeit auf Hardware fällt weg)
+			\item Beispiel: Start Task1 and Timer $ \rightarrow $ Sleep Task1 $ \rightarrow $ WakeUp Task2 $ \rightarrow $ Timer stop
+			\item SPI
+		\end{enumerate}			
+\end{enumerate}
+
+\section{RT-Features}
+	\begin{enumerate}
+		\item Welche Unterschiede/Gemeinsamkeiten gibt es zwischen FreeRTOS und Linux?
+		\item Prioritäten 
+		\item Semaphore
+		\begin{enumerate}
+			\item Task1 setzt Timer und nimmt Semaphor $ \rightarrow $ Schlafen $ \rightarrow $ Task2 lässt Semaphor wieder los $ \rightarrow $ Timer stop
+			\item Task 1 setzt Timer und nimmt Semaphor $ \rightarrow $ Task1 lässt Semaphor wieder los und Timer wird beendet
+			\item Messen der Zeit, die benötigt wird, wenn ein Semaphor belegt ist und ein Task versucht, darauf zuzugreifen?
+		\end{enumerate}		
+		\item Message Passing (s. Semaphore)
+		\item Queues (s. Semaphore)
+		\item Flags (s. Semaphore)
+		\item Posix-Features in Linux
+	\end{enumerate}
+	
+\section{Speicherzugriffe}
+	\begin{enumerate}		
+		\item Speicherplatzverbrauch des gesamten Systems
+		\item MPU-Unterstützung
+		\item In welchem Rahmen sind dynamische Speicherzugriffe möglich?
+		\item Ggf. Zeitverbrauch bei Speicherallokation/-fragmentierung
+			\begin{enumerate}		
+				\item Allokation von z.B. 1000 Paketen und Messen der Zeit
+				\item Vergleich von Context Switch mit Speicher Allokation und ohne (?)
+				\item Vergleich von verschiedenen Methoden der Speicherallokation $ \rightarrow $ Was ist der Worst Case, der passieren kann?
+			\end{enumerate}
+	\end{enumerate}
+	
+\subsection{FreeRTOS}
+Es gibt immer eine Mindestfrakturgröße. Außerdem sind die Funktionen Thread-Save, d.h. können durch keinen anderen Task unterbrochen werden. Ausnahmen davon bildet je nach Implementierung Fall 3.
+
+\subsubsection{Heap\_1.c}
+Blöcke werden allokiert, wenn genug Speicher da ist und nie wieder freigegeben.
+
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|p{11cm}|}
+			\hline
+			 Zugriffszeit & Konstant \\	
+			\hline
+			 Worst Case & Nicht mehr genügend Speicher vorhanden  \\
+			\hline
+			 Schlussfolgerung & Schnell, aber vorher überlegen, ob der Speicher für die Lebensdauer der Anwendung reicht. \\
+			\hline
+			 Testfall & Einfaches Allozieren, da kein Rechenaufwand durch Freigaben notwendig. \\
+			\hline	
+		\end{tabular}
+		\label{theap1}
+\end{table*}
+
+
+\subsubsection{Heap\_2.c}
+Es gibt eine minimale Blockgröße. Es gibt eine Liste, in der die Blöcke nach Größe sortiert sind. Es wird immer der nächst größte Block alloziert $ \rightarrow $Iteration durch Liste. Kein Verschmelzen von Blocks bei Freigabe. Zu große Blocks werden aufgeteilt. Der neu entstandene Block wird wieder in die Liste einsortiert. Nur sinnvoll, wenn der allozierte Speicher immer in etwa die gleiche Größe hat. 
+
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|p{11cm}|}
+			\hline
+			 Zugriffszeit & Am Anfang konstant, weil nur ein Block. Sobald die Liste mehrere Elemente besitzt, ist die Zugriffszeit linear abhängig von der Länge der Liste. \\	
+			\hline
+			 Worst Case & Nicht mehr genügend Speicher vorhanden oder es ist Speicher vorhanden, aber nicht mehr an einem Stück oder es gibt sehr viele kleine Segmente in der Liste und nur ein größeres ganz hinten  \\
+			\hline
+			 Schlussfolgerung & Durch Freigaben langsamer als in Fall eins. Nicht sinnvoll, wenn allozierte Blockgröße variiert.\\
+			\hline
+			 Testfall &  Allozieren von möglichst vielen minimal großen Blöcken und einem, der die doppelte Größe hat. Alle wieder freigeben $ \rightarrow $ Lange Liste mit vielen Einträgen $ \rightarrow $ Nochmal den größeren Block allozieren. Die Zeit für die Längste Freigabe kann auch gemessen werden. \\
+			\hline	
+		\end{tabular}
+		\label{theap2}
+\end{table*}
+
+\subsubsection{Heap\_3.c}
+Maskierte malloc und free Aufrufe des jeweiligen Compilers.
+
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|p{11cm}|}
+			\hline
+			 Zugriffszeit &  \\	
+			\hline
+			 Worst Case &  \\
+			\hline
+			 Schlussfolgerung & \\
+			\hline
+			 Testfall &  \\
+			\hline	
+		\end{tabular}
+		\label{theap3}
+\end{table*}
+
+\subsubsection{Heap\_4.c}
+Liste mit Blockzeigern und Blockgröße. Liste wird durchsucht, bis ein passendes Element gefunden wird. Bei Freigabe werden nebeneinander liegende Blöcke wieder zusammengeführt.
+
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|p{11cm}|}
+			\hline
+			 Zugriffszeit & Wie in Fall zwei, aber insgesamt schneller, da Blöcke bei der Freigabe wieder zusammengeführt werden und insgesamt tendenziell weniger Blöcke durchiteriert werden müssen.\\	
+			\hline
+			 Worst Case & Wie in Fall zwei\\
+			\hline
+			 Schlussfolgerung & Flexibelste Alternative, Freigabe ist geringfügig langsamer als in Fall zwei, weil Blöcke noch zusammengeführt werden.\\
+			\hline
+			 Testfall &  Allozieren wie in Fall zwei. Freigabe von jedem zweiten Block, sodass Speicher segmentiert bleibt. Dann nochmal den hintersten Block allozieren. \\
+			\hline	
+		\end{tabular}
+		\label{theap4}
+\end{table*}
+
+\subsection{Verifizierung}
+\begin{itemize}
+	\item Unter welchen Voraussetzungen ist eine Verifizierung möglich?
+	\item Verifizierung bei einem ganz bestimmten Szenario
+\end{itemize}
+
+\subsection{Multiprozessorunterstützung}

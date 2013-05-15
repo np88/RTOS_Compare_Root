@@ -1,0 +1,249 @@
+%LaTeX
+\typeout{$Id$}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%&delatex
+\documentclass[%
+	12pt,		% 12pt font size
+	headinclude,	% 
+	%openany,	% Kapitel können auch auf der linken Seite anfangen.
+	a4paper,	% Papierformat
+	numbers=noenddot, % entgegen Duden Nr. 21, S. 21 R4 als CI festgelegt
+	changebar,      % Änderungsbalken mit \begin/\end{changebar}
+	listof=totoc,	% Was alles in der Table of Contents stehen soll
+	bibliography=totoc,
+	index=totoc,
+	version=first,
+	%draft,		% mark overfull hboxes with a thick rule, don't include
+	%		% (EPS) files, begin bibliography on a new page
+	]{diplomarbeit}
+	% noheadsepline
+
+\areaset[20mm]{160mm}{240mm}	% Binderand, Breite und Höhe nutzbarer Bereich
+
+\usepackage{bibgerm}		% Für geralpha.bst. MUSS vor babel stehen
+%\usepackage{pslatex}
+% For english, uncomment the following two lines and comment out the
+% two lines below that. Don't forget to 'make clean' when switching 
+% between languages.
+%\usepackage[german,english]{babel} % Multilingual text, order is important !
+%\selectlanguage{english}        % Select default language
+\usepackage[ngerman]{babel} % Mehrsprachiger Text, Reihenfolge wichtig!
+\usepackage[latin1]{inputenc}	% Latin1 input encoding (umlauts)
+				   % Die zuletzt genannte Sprache wird verwendet!
+\selectlanguage{ngerman}	% Wähle Standardsprache ...
+\usepackage{version}		% handle comments and different versions
+				% \begin/end{comment},
+				% \include/excludeversion{foo}
+\usepackage{longtable}		% \begin{longtable} ... see LaTeX Companion
+\usepackage{parskip}		% seperate paragraphs by skip (blank line)
+%\usepackage{amsfonts,amsmath,amssymb,array} % choose if needed
+%\usepackage{ae,aecompl}	% Benutze 'Almost European' Zeichensatz         
+%\usepackage{type1cm}	% Computer Modern type 1 fonts
+\usepackage{lmodern}	% Latin Modern nehmen, da mehr Glyphen vorhanden 
+\usepackage[T1]{fontenc}	% Verwende T1-Kodierung für Zeichensätze        
+
+
+\usepackage{changebar}
+\usepackage{makeidx}\makeindex
+
+% --------------------------------------------------------------------
+% Typ der Arbeit
+% --------------------------------------------------------------------
+% \arbeitsart{Techreport}
+% \techreportident{TR-XXXXXYY}
+% \arbeitsart{Studienarbeit}
+% \arbeitsart{IDP}
+% \arbeitsart{Praktikumsbericht}
+% \arbeitsart{Bachelor}
+% \arbeitsart{Diplomarbeit}
+\arbeitsart{Master's Thesis}
+
+% --------------------------------------------------------------------
+% Titel, Autor und sonstige Titelblatt--Angaben:
+% \betreuer{}, \band{} und \eingereicht{} setzen die
+% Style--Option `datitlepage' voraus!
+% --------------------------------------------------------------------
+\title{Das ist ein etwas l�ngerer Titel\\
+        dieses leeren Diplomarbeitsger�sts}
+\author{Nadja Peters}
+\authorsaddr{Arcisstra�e 21\\
+             80333 M�nchen}
+
+\betreuer{Dipl.--Ing. Philipp Kindt}
+% --------------------------------------------------------------------
+% bei externer Diplomarbeit
+% --------------------------------------------------------------------
+\ausgefuehrtam{bei Siemens}
+%%% oder
+%\ausgefuehrtam{%
+%  am Institut für Werkzeugmaschinen und Betriebswissenschaften\\
+%   Technische Universität München}
+%%%_optional: \band{Band1}
+%%%_optional: \eingereicht{im September 2004}
+
+% --------------------------------------------------------------------
+% eigene Definitionen f"ur die Praeambel
+% --------------------------------------------------------------------
+\input{shorthands}
+
+% --------------------------------------------------------------------
+% PDF specials
+% --------------------------------------------------------------------
+	\pdfcompresslevel=9
+        \RequirePackage[pdftex,		
+		      %% für die DRUCK-Ausgabe bitte folgende
+		      %% Einstellungen verwenden
+		       pdfpagelabels=true,
+                       bookmarks=true,
+                       pagebackref=true,       % Rücklinks im Lit.-verz.
+                       linktocpage=true,
+                       plainpages=false,
+                       hyperfootnotes=false,   % sonst doppelt definiert
+                       breaklinks=true,
+                       colorlinks=true,
+                       linkcolor=black,
+                       urlcolor=black,
+                       citecolor=black]{hyperref} 
+		%% für die .pdf-Datei-Ausgabe bitte diese
+		%% Einstellungen verwenden und obige auskommentieren! 
+%		       pdfpagelabels=true,
+%		       bookmarks=true,
+%		       pagebackref=true,	% Rücklinks im Lit.-verz.
+%		       linktocpage=true,
+%		       plainpages=false,
+%		       hyperfootnotes=false,	% sonst doppelt definiert
+%		       breaklinks=true,
+%		       colorlinks=true,
+%		       linkcolor=blue]{hyperref}
+	\makeatletter
+	\hypersetup{
+		pdftitle={\@title},
+		pdfauthor={\@author},
+		pdfsubject={Diplomarbeit},
+		pdfkeywords={keyword1,keyword2},
+	}
+	\makeatother
+
+% wenn nur einzelne Kapitel gedruckt werden sollen...
+%
+%\includeonly{meineergebnisse}
+
+% --------------------------------------------------------------------
+%%% Hier beginnt das eigentliche LaTeX--Dokument
+% --------------------------------------------------------------------
+\begin{document}
+% --------------------------------------------------------------------
+% Titelseite
+% --------------------------------------------------------------------
+\renewcommand{\thepage}{t\arabic{page}}
+\maketitle
+
+% --------------------------------------------------------------------
+% Dank 
+% --------------------------------------------------------------------
+ \pagestyle{empty}
+\cleardoublepage 
+\setcounter{page}{3}	% Laut VDI Richtlinien
+\renewcommand{\thepage}{\roman{page}}
+\begin{danksagung}
+  Vielen Dank \dots
+
+  M�nchen, im Monat Jahr
+\end{danksagung}
+
+% Hier könnte eine Widmung stehen!
+\begin{Widmung}
+% oder auch nicht. ;)
+\end{Widmung}
+
+% --------------------------------------------------------------------
+% Inhaltsverzeichnis, Abbildungsverzeichnis, Tabellenverzeichnis
+% --------------------------------------------------------------------
+\clearpage
+\pagestyle{headings}
+% Inhaltsverzeichnis soll (nur) in den PDF Bookmarks erscheinen
+\pdfbookmark[1]{\contentsname}{toc}
+\tableofcontents
+
+\listoffigures
+\listoftables
+% --------------------------------------------------------------------
+% Liste der verwendeten Symbole
+% --------------------------------------------------------------------
+\phantomsection
+\begin{listofsymbols}
+\begin{tabbing}
+sp	\= symbol-space---- \= \kill \+ \\
+
+RCS	\> Lehrstuhl f�r Realzeit-Computersysteme \\
+\end{tabbing}
+\end{listofsymbols}
+
+% --------------------------------------------------------------------
+% Abstract (Kurzfassung)
+% In Deutsch und Englisch zu verfassen laut Promotionsordnung, zumindest
+% bei elektronischer Veröffentlichung.
+% --------------------------------------------------------------------
+%\pagestyle{empty}
+\cleardoublepage 
+\begin{abstract}
+Die Kurzfassung \dots
+\end{abstract}
+
+% Man muss erzwingen, dass die Seite mit Nummer 1 rechts ist, sonst
+% kommt latex aus dem Tritt, weil ungerade Seiten immer rechts sein
+% müssen!
+\newpage{\pagestyle{plain}\cleardoublepage}
+\rmfamily	% ab jetzt mit Serifen, weil besser lesbar
+% Die Seitennumerierung wird hier mit "1" begonnen
+\renewcommand{\thepage}{\arabic{page}}
+\setcounter{page}{1}
+
+
+
+
+
+% --------------------------------------------------------------------
+% Hier beginnt der eigentliche Text
+% --------------------------------------------------------------------
+% Die Identifikation wesentlicher eigener Beiträge muß schon im
+% Inhaltsverzeichnis möglich sein.
+\include{content/Introduction}
+\include{content/Chapter1}
+\include{content/Chapter2}
+\include{content/Chapter3}
+\include{content/Conclusion}
+
+% --------------------------------------------------------------------
+% Anhang
+% --------------------------------------------------------------------
+\clearpage
+\begin{appendix}
+
+%\include{appendix}
+
+\end{appendix}
+
+% --------------------------------------------------------------------
+% Index
+% --------------------------------------------------------------------
+\clearpage
+\printindex
+
+% --------------------------------------------------------------------
+% Literaturverzeichnis
+% --------------------------------------------------------------------
+% Nicht direkt referenzierte, aber benutzte Literatur
+%\nocite{wasauchimmer}
+%
+\clearpage
+%\bibliographystyle{geralpha}
+\bibliographystyle{gerplain}
+\bibliography{literatur} % welche bib-Dateien
+
+% --------------------------------------------------------------------
+% Dokument-Ende
+% --------------------------------------------------------------------
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
