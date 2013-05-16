@@ -39,16 +39,16 @@ Vergleichskriterien für Betriebssysteme
 \end{enumerate}
 
 \subsection{Latenzzeiten von Interrupts}
-Für die Latenzzeit von Interrupts soll ein Interrupt von einer externen Quelle ausgelöst werden und dann wird gemessen, wann die Interruptserviceroutine betreten wird. Konkret wird periodisch ein GPIO-Interrupt durch einen Signalgenerator in Hardware ausgelöst. In der dazugehörigen ISR wird eine LED angeschaltet. Es wird die Zeit zwischen dem Setzen des Interruptsignals und aufblinken der LED gemessen. Von dieser Zeit muss abgezogen werden, wie lange das Anschalten der LED und die Zeitmessung an sich dauert. Grundsätzlich wird jede Messung 1024 Mal durchgeführt. Für die Zusatzmessungen sind die Durchschnittszeiten interessant. Für die Hauptmessung ist zusätzlich der Worst-Case-Fall zu beachten.
+Für die Latenzzeit von Interrupts soll ein Interrupt von einer externen Quelle ausgelöst werden und dann wird gemessen, wann die Interruptserviceroutine betreten wird. Konkret wird periodisch ein GPIO-Interrupt durch einen Signalgenerator in Hardware ausgelöst. Die GPIO wird über das EMIO-Interface angebunden. In der dazugehörigen ISR wird eine LED angeschaltet. Es wird die Zeit zwischen dem Setzen des Interruptsignals und aufblinken der LED gemessen. Von dieser Zeit muss abgezogen werden, wie lange das Anschalten der LED und die Zeitmessung an sich dauert. Grundsätzlich wird jede Messung 1024 Mal durchgeführt. Für die Zusatzmessungen sind die Durchschnittszeiten interessant. Für die Hauptmessung ist zusätzlich der Worst-Case-Fall zu beachten.
  
 \subsubsection{FreeRTOS}
-Bie FreeRTOS werden die Interrupts unabhängig vom Betriebssystem verwaltet. Der EMIO-GPIO-Interrupt hat nach dem System-Timer die höchste Priorität. 
+Bei FreeRTOS werden die Interrupts unabhängig vom Betriebssystem verwaltet. Der EMIO-GPIO-Interrupt hat nach dem System-Timer die höchste Priorität. 
 
 Ergebnis: 
 
 \begin{table*}[htb]
 	\centering
-		\begin{tabular}{|l|p{11cm}|}
+		\begin{tabular}{|l|l|}
 			\hline
 			 Anz. Messungen &  19100 \\	
 			\hline
@@ -60,6 +60,77 @@ Ergebnis:
 			\hline	
 			 Maximalwert &  768ns \\
 			\hline
+			 Durchschnittswert LED-Anschalten &  740ns \\
+			\hline
+			 Durchschnittswert Timer-Overhead &  520ns \\
+			\hline				
+			LED-Overhead bei ISR-Messung & 220ns \\
+			\hline		
+			Durchschnitt - Overhead & 536,87ns \\
+			\hline	
+			Durchschnitt - Overhead (Taktzyklen) & 806 Zyklen \\
+			\hline								
+		\end{tabular}
+		\label{theap1}
+\end{table*}
+
+\subsubsection{LinuxRT}
+Messung mit wmb():
+Ergebnis: 
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|l|}
+			\hline
+			 Anz. Messungen &  19160 \\	
+			\hline
+			 Durchschnittswert & 13,569us \\
+			\hline
+			 Standardabweichung &  1,4412us \\
+			\hline
+			 Minimalwert & 8us \\
+			\hline	
+			 Maximalwert &  28,8us \\
+			\hline
+			 Durchschnittswert LED-Anschalten &   \\
+			\hline
+			 Durchschnittswert Timer-Overhead &   \\
+			\hline				
+			LED-Overhead bei ISR-Messung &  \\
+			\hline		
+			Durchschnitt - Overhead & s \\
+			\hline	
+			Durchschnitt - Overhead (Taktzyklen) & \\
+			\hline								
+		\end{tabular}
+		\label{theap1}
+\end{table*}
+
+Messung ohne wmb():
+Ergebnis: 
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|l|}
+			\hline
+			 Anz. Messungen &  19130 \\	
+			\hline
+			 Durchschnittswert & 13,406us \\
+			\hline
+			 Standardabweichung &  1,3419us \\
+			\hline
+			 Minimalwert & 8,6us \\
+			\hline	
+			 Maximalwert &  32us \\
+			\hline
+			 Durchschnittswert LED-Anschalten &   \\
+			\hline
+			 Durchschnittswert Timer-Overhead &   \\
+			\hline				
+			LED-Overhead bei ISR-Messung &  \\
+			\hline		
+			Durchschnitt - Overhead & s \\
+			\hline	
+			Durchschnitt - Overhead (Taktzyklen) & \\
+			\hline								
 		\end{tabular}
 		\label{theap1}
 \end{table*}
