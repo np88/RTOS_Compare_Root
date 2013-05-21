@@ -43,6 +43,7 @@ Für die Latenzzeit von Interrupts soll ein Interrupt von einer externen Quelle a
  
 \subsubsection{FreeRTOS}
 Bei FreeRTOS werden die Interrupts unabhängig vom Betriebssystem verwaltet. Der EMIO-GPIO-Interrupt hat nach dem System-Timer die höchste Priorität. 
+\\\\Axi-Timer: 50 MHz
 
 Ergebnis: 
 
@@ -52,23 +53,52 @@ Ergebnis:
 			\hline
 			 Anz. Messungen &  19100 \\	
 			\hline
-			 Durchschnittswert & 756,87ns \\
+			 Durchschnittswert & 754,8ns \\
 			\hline
-			 Standardabweichung &  8,5977ns \\
+			 Standardabweichung &  8,5977ns (19.31 ns) \\
 			\hline
-			 Minimalwert & 738ns \\
+			 Minimalwert & 740ns \\
 			\hline	
-			 Maximalwert &  768ns \\
+			 Maximalwert &  780ns \\
 			\hline
-			 Durchschnittswert LED-Anschalten &  740ns \\
+			 Durchschnittswert LED-Anschalten &  700-740ns (130 ns)\\
 			\hline
-			 Durchschnittswert Timer-Overhead &  520ns \\
+			 Durchschnittswert Timer-Overhead &  520ns (9ns) \\
 			\hline				
-			LED-Overhead bei ISR-Messung & 220ns \\
+			LED-Overhead bei ISR-Messung & 220ns (121 ns)\\
 			\hline		
-			Durchschnitt - Overhead & 536,87ns \\
+			Durchschnitt - Overhead & 633,8ns \\
 			\hline	
-			Durchschnitt - Overhead (Taktzyklen) & 806 Zyklen \\
+			Durchschnitt - Overhead (Taktzyklen) & 422 Zyklen\\
+			\hline								
+		\end{tabular}
+		\label{theap1}
+\end{table*}
+
+mit Task:
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|l|}
+			\hline
+			 Anz. Messungen &  19100 \\	
+			\hline
+			 Durchschnittswert & 754,8ns \\
+			\hline
+			 Standardabweichung &  8,5977ns (19.31 ns) \\
+			\hline
+			 Minimalwert & 719ns \\
+			\hline	
+			 Maximalwert & 840ns \\
+			\hline
+			 Durchschnittswert LED-Anschalten &  700-740ns (130 ns)\\
+			\hline
+			 Durchschnittswert Timer-Overhead &  520ns (9ns) \\
+			\hline				
+			LED-Overhead bei ISR-Messung & 220ns (121 ns)\\
+			\hline		
+			Durchschnitt - Overhead & 633,8ns \\
+			\hline	
+			Durchschnitt - Overhead (Taktzyklen) & 422 Zyklen\\
 			\hline								
 		\end{tabular}
 		\label{theap1}
@@ -135,6 +165,9 @@ Ergebnis:
 		\label{theap1}
 \end{table*}
 
+Overhead Timer-Messung: $ 6 Zyklen $
+\\Overhead Registerzuweisung: $ 19 - 6 = 13 Zyklen = 19 ns $
+
 \section{RT-Features}
 	\begin{enumerate}
 		\item Welche Unterschiede/Gemeinsamkeiten gibt es zwischen FreeRTOS und Linux?
@@ -150,6 +183,13 @@ Ergebnis:
 		\item Flags (s. Semaphore)
 		\item Posix-Features in Linux
 	\end{enumerate}
+	
+	
+\subsection{Task Switching}
+\subsubsection{FreeRTOS}
+Es werden zwei Tasks \textit{Task1} und \textit{Task2} erzeugt. Diese Tasks haben einen Workload, der darin besteht, in einer For-Schleife eine Variable hochzuzählen. Nach jedem Inkrementieren der Variable wird ein Context-Switch erzwungen (mit taskYIELD()). Wenn die Variable eine bestimmte Höhre erreicht hat, wird das Experiment beendet. Es wird dabei die Zeit gemessen, die zwischen dem Betreten des ersten Tasks und dem Verlassen des letzten Tasks vergeht. Ein Task-Switch trifft also zwei Mal so häufig auf, wie die Schleife durchgelaufen wird. 
+\\\\Von der gemessenen Zeit muss noch der eigentliche Workload abgezogen werden. Dafür werden vor dem Starten der Tasks zwei For-Schleifen durchlaufen mit der gleichen Anzahl an Durchgängen wie in den Tasks.
+	
 	
 \section{Speicherzugriffe}
 	\begin{enumerate}		
