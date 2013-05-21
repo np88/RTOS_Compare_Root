@@ -1,11 +1,20 @@
 \chapter{Einleitung}
 \section{Realzeitbetriebssysteme}
-\begin{itemize}
-	\item Was sind RTOS und was macht sie aus?
-	\item Warum verwendet man sie anstatt herkömmlicher Betriebssysteme oder dedizierter Hardware?
-	\item Verschiedene Arten von RTOS und ihre Vor-/Nachteile (Wofür eignen sich bestimmte Systeme besonders gut, grober Überblick über vorhandenes)
-	\item Beschreiben der Zielhardware/Randbedingungen
-	\item Auskristallisieren, warum in der Arbeit gerade Linux RT Patch und FreeRTOS verwendet werden (evtl noch andere, z.B. MicroCOS, Xenomai)	
-\end{itemize}
+	\begin{itemize}
+		\item Was sind RTOS und was macht sie aus?
+		\item Warum verwendet man sie anstatt herkömmlicher Betriebssysteme oder dedizierter Hardware?
+		\item Verschiedene Arten von RTOS und ihre Vor-/Nachteile (Wofür eignen sich bestimmte Systeme besonders gut, grober Überblick über vorhandenes)
+		\item Beschreiben der Zielhardware/Randbedingungen
+		\item Auskristallisieren, warum in der Arbeit gerade Linux RT Patch und FreeRTOS verwendet werden (evtl noch andere, z.B. MicroCOS, Xenomai)	
+	\end{itemize}
+	
+\section{Welche Eigenschaften werden verglichen?}
+\section{Relevante Betriebssysteme}
+\subsection{Linux}
+\subsection{FreeRTOS}
+	\begin{itemize}
+		\item Tasks können die gleiche Priorität haben
+		\item Tick rate bestimmt Zeitauflösung $ \rightarrow $ je öfter es aufgerufen wird, desto mehr Zeit wird für das Betriebssystem aufgewendet (Task switches werden dann ausgeführt)
+		\item Normalerweise sollten ISR so kurz wie möglich sein. Deswegen wird ein hoch priorisierter Task aus der ISR aufgerufen, der eine Priorität größer oder gleich dem System-Interrupt hat und wird dadurch nicht durch das System unterbrochen
+	\end{itemize}
 
-%\section{}
