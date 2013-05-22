@@ -16,5 +16,8 @@
 		\item Tasks können die gleiche Priorität haben
 		\item Tick rate bestimmt Zeitauflösung $ \rightarrow $ je öfter es aufgerufen wird, desto mehr Zeit wird für das Betriebssystem aufgewendet (Task switches werden dann ausgeführt)
 		\item Normalerweise sollten ISR so kurz wie möglich sein. Deswegen wird ein hoch priorisierter Task aus der ISR aufgerufen, der eine Priorität größer oder gleich dem System-Interrupt hat und wird dadurch nicht durch das System unterbrochen
+		\item A mutex, binary semaphore and a counting semaphore is using the existing queue mechanism.
+		\item Mutexes include priority inheritance mechanism, binary semaphores do not. This makes binary semaphores the better choice for implementing synchronisation (between tasks or between tasks and an interrupt), and mutexes the better choice for implementing simple mutual exclusion.  
+		\item Rekursiver Mutex: Ein Mutex kann mehrfach gelockt werden, muss aber auch mehrfach wieder entlockt werden.
 	\end{itemize}
 
