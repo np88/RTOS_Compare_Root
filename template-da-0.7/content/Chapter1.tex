@@ -167,6 +167,7 @@ Ergebnis:
 
 Overhead Timer-Messung: $ 6 Zyklen $
 \\Overhead Registerzuweisung: $ 19 - 6 = 13 Zyklen = 19 ns $
+\\Messung der Registerzuweisung mit wmb()\footnote{wmb(These functions insert hardware memory barriers in the compiled instruction flow; their actual instantiation is platform dependent. An rmb (read memory barrier) guarantees that any reads appearing before the barrier are completed prior to the execution of any subsequent read. wmb guarantees ordering in write operations, and the mbinstruction guarantees both. Each of these functions is a superset of barrier). Das bedeutet, dass die Schreiboperationen auf die Hardware bis zu dieser Barriere abgeschlossen sein müssen und man davon ausgehen kann, dass der Hardwarezugriff bereits erfolgt ist. Somit kann man messen, wie lange ein Hardwarezugriff zum Beschreiben einer LED dauert und diese Zeit von der Gesamtzeit abziehen. Um ein sinnvolles Ergebnis zu erhalten, sollte auch die Messung mit wmb() arbeiten. } 
 
 \section{RT-Features}
 	\begin{enumerate}
@@ -186,9 +187,24 @@ Overhead Timer-Messung: $ 6 Zyklen $
 	
 	
 \subsection{Task Switching}
+Unter Task Switching versteht man die Zeit, die der Scheduler braucht, um von einem Task zu einem anderen zu wechseln. Dieser Wechsel wird nach der Scheduling-Strategie des Schedulers vollzogen, d.h. der Task wird nicht etwa durch einen Interrupt oder durch einen höher prioren Task unterbrochen.
 \subsubsection{FreeRTOS}
+\paragraph{Variante 1}
 Es werden zwei Tasks \textit{Task1} und \textit{Task2} erzeugt. Diese Tasks haben einen Workload, der darin besteht, in einer For-Schleife eine Variable hochzuzählen. Nach jedem Inkrementieren der Variable wird ein Context-Switch erzwungen (mit taskYIELD()). Wenn die Variable eine bestimmte Höhre erreicht hat, wird das Experiment beendet. Es wird dabei die Zeit gemessen, die zwischen dem Betreten des ersten Tasks und dem Verlassen des letzten Tasks vergeht. Ein Task-Switch trifft also zwei Mal so häufig auf, wie die Schleife durchgelaufen wird. 
 \\\\Von der gemessenen Zeit muss noch der eigentliche Workload abgezogen werden. Dafür werden vor dem Starten der Tasks zwei For-Schleifen durchlaufen mit der gleichen Anzahl an Durchgängen wie in den Tasks.
+\paragraph{Variante 2}
+Es werden zwei Tasks erzeugt, in denen eine For-Schleife mit der Anzahl der Testdurchläufe ausgeführt wird. In der Schleife befindet sich in der Reihenfolge:
+\begin{itemize}
+	\item Starte Messung
+	\item Erzwinge Task-Switch mit taskYield()
+	\item Stoppe Messung
+\end{itemize}
+Der Vorteil an dieser Methode ist, dass es keinen Overhead gibt. Diese Messung ist also genauer. Von dem Ergebnis muss noch die Messzeit von sechs Zyklen abgezogen werden. Zu beachten ist, dass beide Tasks damit beginnen, die Startzeit der Messung zu speichern. Das führt dazu, dass die erste Startzeit überschrieben wird. Die letzte Startzeit ist dafür ungültig und dard nicht in dem Endergebnis berücksichtigt werden. 
+
+\subsection{Preemption-Zeit}
+Die Preemption-Zeit ist die Zeit, die benötigt wird, um einen Task-Switch zu vollziehen, wenn ein niederpriorer Task durch einen Interrupt oder durch einen höherpriorisierten Task oder einen Interrupt unterbrochen wird. Das bedeutet, der Scheduler wird außerhalb des regulären Tick-Interrupts aufgerufen.
+\subsection{FreeRTOS}  
+
 	
 	
 \section{Speicherzugriffe}
