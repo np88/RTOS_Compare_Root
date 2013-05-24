@@ -165,9 +165,71 @@ Ergebnis:
 		\label{theap1}
 \end{table*}
 
-Overhead Timer-Messung: $ 6 Zyklen $
+\\Messung For-Loops in Zyklen:
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline	
+			For-Loop 0 & Runden 16 &  180  \\
+			\hline	
+			For-Loop 1 & Runden 32 &  304  \\
+			\hline	
+			For-Loop 2 & Runden 64 &  533 
+			\hline	
+			For-Loop 3 & Runden 128 &  1045  \\
+			\hline	
+			For-Loop 4 & Runden 264 &  2133  \\
+			\hline	
+			For-Loop 5 & Runden 512 &  4117  \\
+			\hline	
+			For-Loop 6 & Runden 1024 &  8213  \\
+			\hline	
+			For-Loop 7 & Runden 2048 &  16405  \\
+			\hline	
+			For-Loop 8 & Runden 4096 &  32789  \\
+			\hline	
+			For-Loop 9 & Runden 8192 & 65557  \\
+			\hline	
+		\end{tabular}
+		\label{theap1}
+\end{table*}
+
+
+\\Messung While-Loops in Zyklen:
+\begin{table*}[htb]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline	
+			Loop 0 & Runden 16 &  171  \\
+			\hline	
+			Loop 1 & Runden 32 & 301 \\
+			\hline	
+			Loop 2 & Runden 64 &  535 
+			\hline	
+			Loop 3 & Runden 128 &  1047  \\
+			\hline	
+			Loop 4 & Runden 264 &  2135  \\
+			\hline	
+			Loop 5 & Runden 512 &  4119  \\
+			\hline	
+			Loop 6 & Runden 1024 &  8215  \\
+			\hline	
+			Loop 7 & Runden 2048 &  16407  \\
+			\hline	
+			Loop 8 & Runden 4096 &  32791  \\
+			\hline	
+			Loop 9 & Runden 8192 & 65559  \\
+			\hline	
+		\end{tabular}
+		\label{theap1}
+\end{table*}
+\\Overhead Timer-Messung: $ 6 Zyklen $
 \\Overhead Registerzuweisung: $ 19 - 6 = 13 Zyklen = 19 ns $
 \\Messung der Registerzuweisung mit wmb()\footnote{wmb(These functions insert hardware memory barriers in the compiled instruction flow; their actual instantiation is platform dependent. An rmb (read memory barrier) guarantees that any reads appearing before the barrier are completed prior to the execution of any subsequent read. wmb guarantees ordering in write operations, and the mbinstruction guarantees both. Each of these functions is a superset of barrier). Das bedeutet, dass die Schreiboperationen auf die Hardware bis zu dieser Barriere abgeschlossen sein müssen und man davon ausgehen kann, dass der Hardwarezugriff bereits erfolgt ist. Somit kann man messen, wie lange ein Hardwarezugriff zum Beschreiben einer LED dauert und diese Zeit von der Gesamtzeit abziehen. Um ein sinnvolles Ergebnis zu erhalten, sollte auch die Messung mit wmb() arbeiten. } 
+
+\subsection{Unterbrechung von Task durch ISR}
+Ein Task läuft und speichert in einer While-Schleife immer die aktuelle Zeit. Er wird durch eine ISR unterbrochen. Sobald der Task wieder anläuft, wird wieder die Zeit gemessen. Die gesuchte Zeit ist die Different aus Start- und Endzeit.
+ 
 
 \section{RT-Features}
 	\begin{enumerate}
@@ -203,8 +265,15 @@ Der Vorteil an dieser Methode ist, dass es keinen Overhead gibt. Diese Messung i
 
 \subsection{Preemption-Zeit}
 Die Preemption-Zeit ist die Zeit, die benötigt wird, um einen Task-Switch zu vollziehen, wenn ein niederpriorer Task durch einen Interrupt oder durch einen höherpriorisierten Task oder einen Interrupt unterbrochen wird. Das bedeutet, der Scheduler wird außerhalb des regulären Tick-Interrupts aufgerufen.
-\subsection{FreeRTOS}  
+\subsubsection{FreeRTOS}
+Ein niederpriorer Task verrichtet Arbeit. Dieser Task wird nach einer bestimmten Zeit von einem höher-priorisierten Task unterbrochen. Es gibt zwei Funktionen in FreeRTOS, um einen Delay herbeizuführen: \textit{vTaskDelay} und \textit{vTaskDelayUntil}. \textit{vTaskDelay} wacht nach einer bestimmten Anzahl von Ticks auf. Um die Zeit zu messen, kann die Startzeit in einer Endlosschleife im arbeitenden Task dauerhaft ausgelesen werden. Wenn der Task unterbrochen wird, wurde die aktuellste Zeit vorher gespeichert. Sobald der höher priorisierte Task aufgewacht ist, wird wieder die Zeit gemessen. Das \textit{vTaskDelayUntil} wird nur jeden Tick ausgeführt. 
+\\\\Eine andere Möglichekeit, die Preemption Zeit zu messen, ist, dass ein hochpriorer Task sich selbst verabschiedet und hinterher von einem niederprioren Task aufgeweckt wird. Dieses führt direkt zu einem Context-Switch.
+\\\\Noch eine Möglichkeit ist es, einen hochpriorisierten Task 1 zu suspendieren und dann einen niederpriorisieren Task 2 laufen zu lassen. Während der Task 2 läuft, wird ein Interrupt ausgelöst, der Task 1 fortsetzt und somit einen Context-Switch erzeugt.
+\subsubsection{Linux}
 
+\subsection{Semaphor Shuffle Time}
+Die Semaphor Shuffle Time ist die Zeit, die ein Task braucht, um an einem von einem anderen Task genommenem Semaphor aufzuwachen, wenn dieser wieder losgelassen wird. Dieser Versuch kann durchgeführt werden, indem ein Task einen Semaphor nimmt und danach ein Context Switch durchgeführt wird.
+	
 	
 	
 \section{Speicherzugriffe}
