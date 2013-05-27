@@ -6,10 +6,10 @@
 \documentclass[%
 	12pt,		% 12pt font size
 	headinclude,	% 
-	%openany,	% Kapitel kÃ¶nnen auch auf der linken Seite anfangen.
+	%openany,	% Kapitel können auch auf der linken Seite anfangen.
 	a4paper,	% Papierformat
 	numbers=noenddot, % entgegen Duden Nr. 21, S. 21 R4 als CI festgelegt
-	changebar,      % Ã„nderungsbalken mit \begin/\end{changebar}
+	changebar,      % Änderungsbalken mit \begin/\end{changebar}
 	listof=totoc,	% Was alles in der Table of Contents stehen soll
 	bibliography=totoc,
 	index=totoc,
@@ -21,7 +21,7 @@
 
 \areaset[20mm]{160mm}{240mm}	% Binderand, Breite und HÃ¶he nutzbarer Bereich
 
-\usepackage{bibgerm}		% FÃ¼r geralpha.bst. MUSS vor babel stehen
+%\usepackage{bibgerm}		% Für geralpha.bst. MUSS vor babel stehen
 %\usepackage{pslatex}
 % For english, uncomment the following two lines and comment out the
 % two lines below that. Don't forget to 'make clean' when switching 
@@ -31,7 +31,7 @@
 \usepackage[ngerman]{babel} % Mehrsprachiger Text, Reihenfolge wichtig!
 \usepackage[latin1]{inputenc}	% Latin1 input encoding (umlauts)
 				   % Die zuletzt genannte Sprache wird verwendet!
-\selectlanguage{ngerman}	% WÃ¤hle Standardsprache ...
+\selectlanguage{ngerman}	% Wähle Standardsprache ...
 \usepackage{version}		% handle comments and different versions
 				% \begin/end{comment},
 				% \include/excludeversion{foo}
@@ -41,7 +41,7 @@
 %\usepackage{ae,aecompl}	% Benutze 'Almost European' Zeichensatz         
 %\usepackage{type1cm}	% Computer Modern type 1 fonts
 \usepackage{lmodern}	% Latin Modern nehmen, da mehr Glyphen vorhanden 
-\usepackage[T1]{fontenc}	% Verwende T1-Kodierung fÃ¼r ZeichensÃ¤tze        
+\usepackage[T1]{fontenc}	% Verwende T1-Kodierung für Zeichensätze        
 
 
 \usepackage{changebar}
@@ -77,22 +77,22 @@
 \ausgefuehrtam{bei Siemens}
 %%% oder
 %\ausgefuehrtam{%
-%  am Institut fÃ¼r Werkzeugmaschinen und Betriebswissenschaften\\
-%   Technische UniversitÃ¤t MÃ¼nchen}
+%  am Institut für Werkzeugmaschinen und Betriebswissenschaften\\
+%   Technische Universität München}
 %%%_optional: \band{Band1}
 %%%_optional: \eingereicht{im September 2004}
 
 % --------------------------------------------------------------------
-% eigene Definitionen f"ur die Praeambel
+% eigene Definitionen für die Praeambel
 % --------------------------------------------------------------------
-\input{shorthands}
+\input{inputs/shorthands}
 
 % --------------------------------------------------------------------
 % PDF specials
 % --------------------------------------------------------------------
 	\pdfcompresslevel=9
         \RequirePackage[pdftex,		
-		      %% fÃ¼r die DRUCK-Ausgabe bitte folgende
+		      %% für die DRUCK-Ausgabe bitte folgende
 		      %% Einstellungen verwenden
 		       pdfpagelabels=true,
                        bookmarks=true,
@@ -105,11 +105,11 @@
                        linkcolor=black,
                        urlcolor=black,
                        citecolor=black]{hyperref} 
-		%% fÃ¼r die .pdf-Datei-Ausgabe bitte diese
+		%% für die .pdf-Datei-Ausgabe bitte diese
 		%% Einstellungen verwenden und obige auskommentieren! 
 %		       pdfpagelabels=true,
 %		       bookmarks=true,
-%		       pagebackref=true,	% RÃ¼cklinks im Lit.-verz.
+%		       pagebackref=true,	% Rücklinks im Lit.-verz.
 %		       linktocpage=true,
 %		       plainpages=false,
 %		       hyperfootnotes=false,	% sonst doppelt definiert
@@ -152,7 +152,7 @@
   München, im Monat Jahr
 \end{danksagung}
 
-% Hier kÃ¶nnte eine Widmung stehen!
+% Hier könnte eine Widmung stehen!
 \begin{Widmung}
 % oder auch nicht. ;)
 \end{Widmung}
@@ -201,14 +201,11 @@ Die Kurzfassung \dots
 \setcounter{page}{1}
 
 
-
-
-
 % --------------------------------------------------------------------
 % Hier beginnt der eigentliche Text
 % --------------------------------------------------------------------
 % Die Identifikation wesentlicher eigener BeitrÃ¤ge muÃŸ schon im
-% Inhaltsverzeichnis mÃ¶glich sein.
+% Inhaltsverzeichnis möglich sein.
 \include{content/Introduction}
 \include{content/Chapter1}
 \include{content/Chapter2}

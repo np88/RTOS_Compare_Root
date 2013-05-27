@@ -265,6 +265,7 @@ Der Vorteil an dieser Methode ist, dass es keinen Overhead gibt. Diese Messung i
 
 \subsection{Preemption-Zeit}
 Die Preemption-Zeit ist die Zeit, die benötigt wird, um einen Task-Switch zu vollziehen, wenn ein niederpriorer Task durch einen Interrupt oder durch einen höherpriorisierten Task oder einen Interrupt unterbrochen wird. Das bedeutet, der Scheduler wird außerhalb des regulären Tick-Interrupts aufgerufen.
+
 \subsubsection{FreeRTOS}
 Ein niederpriorer Task verrichtet Arbeit. Dieser Task wird nach einer bestimmten Zeit von einem höher-priorisierten Task unterbrochen. Es gibt zwei Funktionen in FreeRTOS, um einen Delay herbeizuführen: \textit{vTaskDelay} und \textit{vTaskDelayUntil}. \textit{vTaskDelay} wacht nach einer bestimmten Anzahl von Ticks auf. Um die Zeit zu messen, kann die Startzeit in einer Endlosschleife im arbeitenden Task dauerhaft ausgelesen werden. Wenn der Task unterbrochen wird, wurde die aktuellste Zeit vorher gespeichert. Sobald der höher priorisierte Task aufgewacht ist, wird wieder die Zeit gemessen. Das \textit{vTaskDelayUntil} wird nur jeden Tick ausgeführt. 
 \\\\Eine andere Möglichekeit, die Preemption Zeit zu messen, ist, dass ein hochpriorer Task sich selbst verabschiedet und hinterher von einem niederprioren Task aufgeweckt wird. Dieses führt direkt zu einem Context-Switch.
@@ -272,9 +273,50 @@ Ein niederpriorer Task verrichtet Arbeit. Dieser Task wird nach einer bestimmten
 \subsubsection{Linux}
 
 \subsection{Semaphor Shuffle Time}
-Die Semaphor Shuffle Time ist die Zeit, die ein Task braucht, um an einem von einem anderen Task genommenem Semaphor aufzuwachen, wenn dieser wieder losgelassen wird. Dieser Versuch kann durchgeführt werden, indem ein Task einen Semaphor nimmt und danach ein Context Switch durchgeführt wird.
+Die Semaphor Shuffle Time ist die Zeit, die ein Task braucht, um an einem von einem anderen Task genommenem Semaphor aufzuwachen, wenn dieser wieder losgelassen wird. 
+\subsubsection{FreeRTOS}
+FreeRTOS hat mehrere Semaphorarten: 
+\begin{itemize}
+	\item Mutex mit Priority inheritance
+	\item Binäre Semaphore ohne Priority inheritance
+	\item Semaphore, die hochgezählt werden 
+\end{itemize}
+
+Mutexe und Counting Semaphores lösen beim freigeben des Semaphores einen \textit{portYield} aus, wodurch es zu einer Verzögerung kommt. 
+
+\paragraph{Mutex}
+Ein Mutex wird verwendet, um Mehrfachzugriffe auf Resourcen zu vermeiden. Mutexe können mit Priority Inheritance verwendet werden, dieser Versuch wird aber mit zwei Tasks gleicher Prioritäten durchgeführt. Wenn ein Task einen Mutex genommen hat, muss dieser ihn auch wieder freigeben. Wenn ein anderer Task an diesem Mutex wartet, wird dieser durch die Freigabe wieder aktiviert.
+\\\\Der Versuch kann durchgeführt werden, indem ein Task einen Semaphor nimmt und danach ein Context Switch durchgeführt wird. Ein zweiter Task versucht ebenfalls den Semaphor zu nehmen, wird aber blockiert. Als Folge erfolgt wieder ein Task Switch zurück zum ersten Task. Dieser startet eine Zeitmessung, lässt den Semaphor wieder los und veranlasst einen Context Switch. Nun wacht Task 2 auf, da der Semaphor losgelassen wurde. Die Zeitmessung wird beendet. Der Task lässt den Semaphor wieder los und mit einem Context Switch beginnt ein weiterer Durchlauf des Versuchs.
+\\\\Im Endergebnis muss berücksichtigt werden, dass ein Mal \textit{xSemaphoreTake}, ein Mal \textit{xSemaphoreGive} und ein Context Switch von der Gesamtzeit abgezogen werden.
+
+\paragraph{Binäre Semaphore}
+Binäre Semaphore in FreeRTOS werden ähnlich wie Signale verwendet und diesen eher der Synchronisation als dem Vermeiden von Mehrfachzugriffen. 
+\\\\In diesem Versuch wartet der erste Task an dem Semaphor. Ein zweiter Task wird gestartet, initiiert eine Zeitmessung, gibt den Semaphor frei und macht einen Context Switch. Durch das Freigeben ist nun der ander Task wieder aufgewacht und beendet die Zeitmessung. 
+\\\\Von dem Endergebnis muss ein Mal \textit{xSemaphoreGive} abgezogen werden. 
+
+\paragraph{Counting Semaphores}
+Counting Semaphores sind Semaphore, die ein bestimmtes Kontingent haben und die hochgezählt werden, wenn ein Semaphor freigelassen wird (also eine Ressource verfügbar ist) und wieder runtergezählt werden, wenn ein Semaphor genommen wird (also eine Ressource belegt ist). Ist keine Ressource verfügbar, wird an dem Semaphor gewartet. Ein Task wird wieder aktiv, sobald eine Ressource verfügbar wird. 
+\\\\Diese Semaphore können ähnlich wie Mutexe vermessen werden. Da der Mutex zuerst genommen wird, muss der Semaphor mit seiner maximalen Anzahl (im Versuch 1) initialisiert werden. Der Rest des Versuchs ist analog zum Mutex-Versuch. Am Ende müssen auch die gleichen Werte abgezogen werden. 
+
 	
+\subsubsection{Linux}
+
+\subsection{Deadlock breaking time}
+Diese Zeit ist die Zeit, die benötigt wird, um einen Deadlock durch Prioritätsinversion wieder aufzulösen. Gäbe es diese nicht, wäre folgende Situation ein Deadlock:
+\\\\Task 1 hat die niedrigste Priorität und nimmt sich Mutex M. Bevor M freigegeben wird, wird Task 1 durch Task 2 mit einer höheren Priorität unterbrochen. Task 2 wiederum wird durch Task 3 unterbrochen, was die höchste Priorität hat. Task 3 greift nach Mutex M und wird blockiert. Ohne Prioritätsinversion würde Task 2 weiterlaufen und Task 1 für immer unterbrechen, sodass die für Task 3 benötigte Ressource nie freigegeben wird. Prioritätsinversion sorgt dafür, dass Task 1 vorübergehend die Priorität von Task 3 bekommt, nicht mehr von Task 2 blockiert wird, und somit den Mutex wieder freigeben kann. Somit kann der Task mit der höchsten Priorität, Task 3, seine Arbeit beenden.
+\\\\Für die Messung ist es irrelevant, ob Task 1 zwischen der Prioritätsinversion und dem Zurückgeben des Mutex noch Arbeit verrichtet. Um die Messung so genau wie möglich zu halten, wird der Mutex direkt zurückgegeben.
+
+\subsubsection{FreeRTOS}
+
+\subsubsection{Linux}
+
+\subsection{Message Passing Latency}
+Die Message Passing Latency ist die Zeit, die ein Task braucht, um eine Message von einem anderen Task zu empfangen. In FreeRTOS werden diese Messages über Queues transportiert. Die Zeit messen kann mit folgendem Aufbau:
+\\\\Task 1 wird gestartet und wartet an der Queue auf eine Nachricht. Dabei wird der Task blockiert. Dann startet Task 2 und schreibt eine Nachricht in die Queue. Dieses bewirkt, dass der erste Task deblockiert wird. Die Zeitmessung beginnt vor dem Versenden der ersten Nachricht und endet mit dem Empfang. 
 	
+\subsubsection{FreeRTOS}
+
+\subsubsection{Linux}	
 	
 \section{Speicherzugriffe}
 	\begin{enumerate}		
