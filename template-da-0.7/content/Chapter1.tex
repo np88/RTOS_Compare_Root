@@ -64,7 +64,7 @@ Ergebnis:
 			Durchschnitt - Overhead (Taktzyklen) & 422 Zyklen\\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_no_task}
 \end{table*}
 
 mit Task:
@@ -93,7 +93,7 @@ mit Task:
 			Durchschnitt - Overhead (Taktzyklen) & 422 Zyklen\\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_task}
 \end{table*}
 
 \subsubsection{LinuxRT}
@@ -124,7 +124,7 @@ Ergebnis:
 			Durchschnitt - Overhead (Taktzyklen) & \\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_no_task_wmb}
 \end{table*}
 
 Messung ohne wmb():
@@ -154,7 +154,7 @@ Ergebnis:
 			Durchschnitt - Overhead (Taktzyklen) & \\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_task_wmb}
 \end{table*}
 
 \\Messung For-Loops in Zyklen:
@@ -183,7 +183,7 @@ Ergebnis:
 			For-Loop 9 & Runden 8192 & 65557  \\
 			\hline	
 		\end{tabular}
-		\label{theap1}
+		\label{t_for_loop}
 \end{table*}
 
 
@@ -213,7 +213,7 @@ Ergebnis:
 			Loop 9 & Runden 8192 & 65559  \\
 			\hline	
 		\end{tabular}
-		\label{theap1}
+		\label{t_while_loop}
 \end{table*}
 \\Overhead Timer-Messung: $ 6 Zyklen $
 \\Overhead Registerzuweisung: $ 19 - 6 = 13 Zyklen = 19 ns $
