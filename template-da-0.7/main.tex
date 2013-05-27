@@ -46,6 +46,7 @@
 
 \usepackage{changebar}
 \usepackage{makeidx}\makeindex
+\usepackage{acronym}
 
 % --------------------------------------------------------------------
 % Typ der Arbeit
@@ -172,14 +173,14 @@
 % Liste der verwendeten Symbole
 % --------------------------------------------------------------------
 \phantomsection
-\begin{listofsymbols}
-\begin{tabbing}
-sp	\= symbol-space---- \= \kill \+ \\
+%\begin{listofsymbols}
+\include{content/acronyms}
+%\begin{tabbing}
+%sp	\= symbol-space---- \= \kill \+ \\
 
-RCS	\> Lehrstuhl für Realzeit-Computersysteme \\
-\end{tabbing}
-\end{listofsymbols}
-
+%RCS	\> Lehrstuhl für Realzeit-Computersysteme \\
+%\end{tabbing}
+%\end{listofsymbols}
 % --------------------------------------------------------------------
 % Abstract (Kurzfassung)
 % In Deutsch und Englisch zu verfassen laut Promotionsordnung, zumindest
@@ -193,7 +194,7 @@ Die Kurzfassung \dots
 
 % Man muss erzwingen, dass die Seite mit Nummer 1 rechts ist, sonst
 % kommt latex aus dem Tritt, weil ungerade Seiten immer rechts sein
-% mÃ¼ssen!
+% müssen!
 \newpage{\pagestyle{plain}\cleardoublepage}
 \rmfamily	% ab jetzt mit Serifen, weil besser lesbar
 % Die Seitennumerierung wird hier mit "1" begonnen
@@ -204,7 +205,11 @@ Die Kurzfassung \dots
 % --------------------------------------------------------------------
 % Hier beginnt der eigentliche Text
 % --------------------------------------------------------------------
+<<<<<<< HEAD
 % Die Identifikation wesentlicher eigener BeitrÃ¤ge muÃŸ schon im
+=======
+% Die Identifikation wesentlicher eigener Beiträge muss schon im
+>>>>>>> a4fadd5671de61751ce4fe354d86c6eca5cdf7cd
 % Inhaltsverzeichnis möglich sein.
 \include{content/Introduction}
 \include{content/Chapter1}
