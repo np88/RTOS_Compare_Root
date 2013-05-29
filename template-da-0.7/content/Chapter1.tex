@@ -236,7 +236,7 @@ Ein Task läuft und speichert in einer While-Schleife immer die aktuelle Zeit. Er
 
 \subsection{RT-Features von Linux/Posix}
 \subsubsection{Threads}
-Threads in Unix sind Teile von Prozessen. Allerdings hat ein Thread einen eigenen Stack Pointer, eigene Register, Scheduling Properties, Signale und andere Daten. Ein Thread existiert, solange der Elternprozess existiert. Ein Prozess kann mehrere Threads haben. Es kann Datenaustausch von Threads im Rahmen eines Prozesses geben. Ein Thread verbraucht deutlich weniger Ressourcen als ein Prozess. Inter-Thread-Kommunikation ist deutlich schneller, weil alles in einem Adressraum stattfindet. Bei Inter-Prozess-Kommunikation ist mindestens ein Kopiervorgang von Prozess zu Prozess erforderlich.
+Threads in Unix sind Teile von Prozessen. Allerdings hat ein Thread einen eigenen Stack Pointer, eigene Register, Scheduling Properties, Signale und andere Daten. Ein Thread existiert, solange der Elternprozess existiert. Ein Prozess kann mehrere Threads haben. Es kann Datenaustausch von Threads im Rahmen eines Prozesses geben. Ein Thread verbraucht deutlich weniger Ressourcen als ein Prozess. Inter-Thread-Kommunikation ist deutlich schneller, weil alles in einem Adressraum stattfindet. Bei Inter-Prozess-Kommunikation ist mindestens ein Kopiervorgang von Prozess zu Prozess erforderlich. Um pthreads benutzen zu können, muss die pthread-Bibliothek eingebunden werden (über -lpthread) und um zum Beispiel Prioritätsvererbung für Mutexe zu verwenden, muss zusätzlich mit dem Compilerflag $ \textit{-D\_GNU\_SOURCE=1} $ kompiliert werden.  
 \subsubsection{Mutexes}
 An Mutexen kann geblockt werden, aber es kann auch ausprobiert werden, ob sie bereits gelockt sind, und dann kann was anderes gemacht werden.
 \subsubsection{Conditions}
@@ -244,13 +244,18 @@ Conditions werden im Zusammenhang mit Mutexen benutzt und dienen zur Synchronisa
 \subsubsection{Join}
 Threads können \textit{gejoint} werden. Dieses ist ein Synchronisationsmechanismus von PThreads. Wird \textit{pthread\_join} aufgerufen, blockiert der aktuelle Thread, bis der zu synchronisierende Thread beendet ist.
 \subsubsection{Message queues}
-\textit{mqd\_t}. Eine Queue muss erst erstellt werden. \textit{mq\_send} und \textit{mq\_receive} können blockend und nicht blockend aufgerufen werden, indem das Flag \textit{O\_NONBLOCK} gesetzt wird. Tasks können außerdem darüber informiert werden, dass eine Message in der Queue abgelegt wurde. Dieses funktioniert über \textit{mq\_notify}. Darüber kann ein Handler installiert werden, der ausgeführt wird, wenn eine neue Nachricht empfangen wird. Wenn ein anderer Task mit \textit{mq\_receive} an der Queue blockiert, dann wird kein Signal verschickt und der Handler nicht ausgelöst.
+\textit{mqd\_t}. Eine Queue muss erst erstellt werden. \textit{mq\_send} und \textit{mq\_receive} können blockend und nicht blockend aufgerufen werden, indem das Flag \textit{O\_NONBLOCK} gesetzt wird. Tasks können außerdem darüber informiert werden, dass eine Message in der Queue abgelegt wurde. Dieses funktioniert über \textit{mq\_notify}. Darüber kann ein Handler installiert werden, der ausgeführt wird, wenn eine neue Nachricht empfangen wird. Wenn ein anderer Task mit \textit{mq\_receive} an der Queue blockiert, dann wird kein Signal verschickt und der Handler nicht ausgelöst. The library \textit{rt} muss beim KOmpilieren gelinkt werden.
 \subsubsection{Scheduling}
 \textit{schedPxLib}
 \textit{sched\_getScheduler}, gibt entweder SCHED\_FIFO oder SCHED\_RR zurück.
-\textit{sched\_get\_priority\_max}
-\textit{sched\_get\_priority\_max}
-sched\_rr\_get\_interval
+\begin{itemize}
+	\item \textit{sched\_get\_priority\_max}  
+	\item \textit{sched\_set\_priority\_max}
+	\item \textit{sched\_rr\_get\_interval}
+	\item \textit{pthread\_setschedprio}
+	\item \textit{pthread\_kill}
+\end{itemize}
+
 \subsubsection{Semaphores}
 \textit{semPxLib}. Posix Semaphores sind zählende Semaphore. Die unterstützen Funktionen sind Prioritätsvererbung, rekurive Semaphore, Timeouts, ... . Posix Mutexes und Condition variables wurden implementiert, indem standardmäßige Semaphore verwendet wurden.
 
