@@ -157,7 +157,7 @@ Ergebnis:
 		\label{t_isr_task_wmb}
 \end{table*}
 
-\\Messung For-Loops in Zyklen:
+Messung For-Loops in Zyklen:
 \begin{table*}[htb]
 	\centering
 		\begin{tabular}{|l|l|l|}
@@ -166,7 +166,7 @@ Ergebnis:
 			\hline	
 			For-Loop 1 & Runden 32 &  304  \\
 			\hline	
-			For-Loop 2 & Runden 64 &  533 
+			For-Loop 2 & Runden 64 &  533 \\
 			\hline	
 			For-Loop 3 & Runden 128 &  1045  \\
 			\hline	
@@ -187,7 +187,7 @@ Ergebnis:
 \end{table*}
 
 
-\\Messung While-Loops in Zyklen:
+Messung While-Loops in Zyklen:
 \begin{table*}[htb]
 	\centering
 		\begin{tabular}{|l|l|l|}
@@ -196,7 +196,7 @@ Ergebnis:
 			\hline	
 			Loop 1 & Runden 32 & 301 \\
 			\hline	
-			Loop 2 & Runden 64 &  535 
+			Loop 2 & Runden 64 &  535 \\
 			\hline	
 			Loop 3 & Runden 128 &  1047  \\
 			\hline	
@@ -215,7 +215,7 @@ Ergebnis:
 		\end{tabular}
 		\label{t_while_loop}
 \end{table*}
-\\Overhead Timer-Messung: $ 6 Zyklen $
+Overhead Timer-Messung: $ 6 Zyklen $
 \\Overhead Registerzuweisung: $ 19 - 6 = 13 Zyklen = 19 ns $
 \\Messung der Registerzuweisung mit wmb()\footnote{wmb(These functions insert hardware memory barriers in the compiled instruction flow; their actual instantiation is platform dependent. An rmb (read memory barrier) guarantees that any reads appearing before the barrier are completed prior to the execution of any subsequent read. wmb guarantees ordering in write operations, and the mbinstruction guarantees both. Each of these functions is a superset of barrier). Das bedeutet, dass die Schreiboperationen auf die Hardware bis zu dieser Barriere abgeschlossen sein müssen und man davon ausgehen kann, dass der Hardwarezugriff bereits erfolgt ist. Somit kann man messen, wie lange ein Hardwarezugriff zum Beschreiben einer LED dauert und diese Zeit von der Gesamtzeit abziehen. Um ein sinnvolles Ergebnis zu erhalten, sollte auch die Messung mit wmb() arbeiten. } 
 
@@ -244,7 +244,7 @@ Conditions werden im Zusammenhang mit Mutexen benutzt und dienen zur Synchronisa
 \subsubsection{Join}
 Threads können \textit{gejoint} werden. Dieses ist ein Synchronisationsmechanismus von PThreads. Wird \textit{pthread\_join} aufgerufen, blockiert der aktuelle Thread, bis der zu synchronisierende Thread beendet ist.
 \subsubsection{Message queues}
-\textit{mqd\_t}. Eine Queue muss erst erstellt werden. \textit{mq\_send} und \textit{mq\_receive} können blockend und nicht blockend aufgerufen werden, indem das Flag \textit{O\_NONBLOCK} gesetzt wird. Tasks können außerdem darüber informiert werden, dass eine Message in der Queue abgelegt wurde. Dieses funktioniert über \textit{mq\_notify}. Darüber kann ein Handler installiert werden, der ausgeführt wird, wenn eine neue Nachricht empfangen wird. Wenn ein anderer Task mit \textit{mq\_receive} an der Queue blockiert, dann wird kein Signal verschickt und der Handler nicht ausgelöst. The library \textit{rt} muss beim KOmpilieren gelinkt werden.
+\textit{mqd\_t}. Eine Queue muss erst erstellt werden. \textit{mq\_send} und \textit{mq\_receive} können blockend und nicht blockend aufgerufen werden, indem das Flag \textit{O\_NONBLOCK} gesetzt wird. Tasks können außerdem darüber informiert werden, dass eine Message in der Queue abgelegt wurde. Dieses funktioniert über \textit{mq\_notify}. Darüber kann ein Handler installiert werden, der ausgeführt wird, wenn eine neue Nachricht empfangen wird. Wenn ein anderer Task mit \textit{mq\_receive} an der Queue blockiert, dann wird kein Signal verschickt und der Handler nicht ausgelöst. The library \textit{rt} muss beim Kompilieren gelinkt werden.
 \subsubsection{Scheduling}
 \textit{schedPxLib}
 \textit{sched\_getScheduler}, gibt entweder SCHED\_FIFO oder SCHED\_RR zurück.
@@ -252,9 +252,12 @@ Threads können \textit{gejoint} werden. Dieses ist ein Synchronisationsmechanism
 	\item \textit{sched\_get\_priority\_max}  
 	\item \textit{sched\_set\_priority\_max}
 	\item \textit{sched\_rr\_get\_interval}
+	\item \textit{sched\_yield}
+	\item \textit{sched\_rr\_get\_interval}
 	\item \textit{pthread\_setschedprio}
 	\item \textit{pthread\_kill}
 \end{itemize}
+
 
 \subsubsection{Semaphores}
 \textit{semPxLib}. Posix Semaphores sind zählende Semaphore. Die unterstützen Funktionen sind Prioritätsvererbung, rekurive Semaphore, Timeouts, ... . Posix Mutexes und Condition variables wurden implementiert, indem standardmäßige Semaphore verwendet wurden.
