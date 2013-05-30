@@ -1,5 +1,5 @@
 \chapter{Benchmarking}
-Vergleichskriterien für Betriebssysteme:
+Vergleichskriterien für Betriebssysteme
 \begin{itemize}
 	\item Performanz
 	\item Sicherheit
@@ -64,7 +64,7 @@ Ergebnis:
 			Durchschnitt - Overhead (Taktzyklen) & 422 Zyklen\\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_no_task}
 \end{table*}
 
 mit Task:
@@ -93,7 +93,7 @@ mit Task:
 			Durchschnitt - Overhead (Taktzyklen) & 422 Zyklen\\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_task}
 \end{table*}
 
 \subsubsection{LinuxRT}
@@ -124,7 +124,7 @@ Ergebnis:
 			Durchschnitt - Overhead (Taktzyklen) & \\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_no_task_wmb}
 \end{table*}
 
 Messung ohne wmb():
@@ -154,10 +154,10 @@ Ergebnis:
 			Durchschnitt - Overhead (Taktzyklen) & \\
 			\hline								
 		\end{tabular}
-		\label{theap1}
+		\label{t_isr_task_wmb}
 \end{table*}
 
-Messung For-Loops in Zyklen:
+\\Messung For-Loops in Zyklen:
 \begin{table*}[htb]
 	\centering
 		\begin{tabular}{|l|l|l|}
@@ -166,7 +166,7 @@ Messung For-Loops in Zyklen:
 			\hline	
 			For-Loop 1 & Runden 32 &  304  \\
 			\hline	
-			For-Loop 2 & Runden 64 &  533 \\
+			For-Loop 2 & Runden 64 &  533 
 			\hline	
 			For-Loop 3 & Runden 128 &  1045  \\
 			\hline	
@@ -183,10 +183,11 @@ Messung For-Loops in Zyklen:
 			For-Loop 9 & Runden 8192 & 65557  \\
 			\hline	
 		\end{tabular}
-		\label{theap1}
+		\label{t_for_loop}
 \end{table*}
 
-Messung While-Loops in Zyklen:
+
+\\Messung While-Loops in Zyklen:
 \begin{table*}[htb]
 	\centering
 		\begin{tabular}{|l|l|l|}
@@ -195,7 +196,7 @@ Messung While-Loops in Zyklen:
 			\hline	
 			Loop 1 & Runden 32 & 301 \\
 			\hline	
-			Loop 2 & Runden 64 &  535 \\
+			Loop 2 & Runden 64 &  535 
 			\hline	
 			Loop 3 & Runden 128 &  1047  \\
 			\hline	
@@ -212,7 +213,7 @@ Messung While-Loops in Zyklen:
 			Loop 9 & Runden 8192 & 65559  \\
 			\hline	
 		\end{tabular}
-		\label{theap1}
+		\label{t_while_loop}
 \end{table*}
 \\Overhead Timer-Messung: $ 6 Zyklen $
 \\Overhead Registerzuweisung: $ 19 - 6 = 13 Zyklen = 19 ns $
@@ -221,7 +222,6 @@ Messung While-Loops in Zyklen:
 \subsection{Unterbrechung von Task durch ISR}
 Ein Task läuft und speichert in einer While-Schleife immer die aktuelle Zeit. Er wird durch eine ISR unterbrochen. Sobald der Task wieder anläuft, wird wieder die Zeit gemessen. Die gesuchte Zeit ist die Different aus Start- und Endzeit.
 \\\\Die übliche Methode für Interrupt Service Routinen in FreeRTOS ist, einen hochpriorisierten Task laufen zu lassen, der an einem binären Semaphor blockiert. Wird die ISR aufgerufen, wird dieser Task wieder deblockiert. 
- 
 
 \section{RT-Features}
 	\begin{enumerate}
@@ -233,41 +233,46 @@ Ein Task läuft und speichert in einer While-Schleife immer die aktuelle Zeit. Er
 		\item Flags (s. Semaphore)
 		\item Posix-Features in Linux
 	\end{enumerate}
-	
+
 \subsection{RT-Features von Linux/Posix}
 \subsubsection{Threads}
-Threads in Unix sind Teile von Prozessen. Allerdings hat ein Thread einen eigenen Stack Pointer, eigene Register, Scheduling Properties, Signale und andere Daten. Ein Thread existiert, solange der Elternprozess existiert. Ein Prozess kann mehrere Threads haben. Es kann Datenaustausch von Threads im Rahmen eines Prozesses geben. Ein Thread verbraucht deutlich weniger Ressourcen als ein Prozess. Inter-Thread-Kommunikation ist deutlich schneller, weil alles in einem Adressraum stattfindet. Bei Inter-Prozess-Kommunikation ist mindestens ein Kopiervorgang von Prozess zu Prozess erforderlich.  
+Threads in Unix sind Teile von Prozessen. Allerdings hat ein Thread einen eigenen Stack Pointer, eigene Register, Scheduling Properties, Signale und andere Daten. Ein Thread existiert, solange der Elternprozess existiert. Ein Prozess kann mehrere Threads haben. Es kann Datenaustausch von Threads im Rahmen eines Prozesses geben. Ein Thread verbraucht deutlich weniger Ressourcen als ein Prozess. Inter-Thread-Kommunikation ist deutlich schneller, weil alles in einem Adressraum stattfindet. Bei Inter-Prozess-Kommunikation ist mindestens ein Kopiervorgang von Prozess zu Prozess erforderlich. Um pthreads benutzen zu können, muss die pthread-Bibliothek eingebunden werden (über -lpthread) und um zum Beispiel Prioritätsvererbung für Mutexe zu verwenden, muss zusätzlich mit dem Compilerflag $ \textit{-D\_GNU\_SOURCE=1} $ kompiliert werden.  
 \subsubsection{Mutexes}
-An Mutexen kann geblockt werden, aber es kann auch ausprobiert werden, ob sie bereits gelockt sind, und dann kann was anderes gemacht werden. 
+An Mutexen kann geblockt werden, aber es kann auch ausprobiert werden, ob sie bereits gelockt sind, und dann kann was anderes gemacht werden.
 \subsubsection{Conditions}
-Conditions werden im Zusammenhang mit Mutexen benutzt und dienen zur Synchronisation von mehreren Threads, die Datenabhängig sind. Zur Benutzung: An einer Condition kann gewartet werden. Zuvor muss ein bestimmter Mutex genommen worden sein. Wenn man den Befehl \textit{pthread\_cond\_wait} ausführt, dann wird damit gewartet und der Mutex automatisch losgelassen. Ein anderer Thread kann sich denselben Mutex holen und dann eine bestimmte Datenverarbeitung an einer Variable durchführen. Wenn dadurch die Bedingung erfüllt wird, ruft dieser Thread die Funktion \textit{pthread\_cond\_signal}, die den anderen Thread aufweckt, sobald der Mutex losgelassen wurde. 
+Conditions werden im Zusammenhang mit Mutexen benutzt und dienen zur Synchronisation von mehreren Threads, die Datenabhängig sind. Zur Benutzung: An einer Condition kann gewartet werden. Zuvor muss ein bestimmter Mutex genommen worden sein. Wenn man den Befehl \textit{pthread\_cond\_wait} ausführt, dann wird damit gewartet und der Mutex automatisch losgelassen. Ein anderer Thread kann sich denselben Mutex holen und dann eine bestimmte Datenverarbeitung an einer Variable durchführen. Wenn dadurch die Bedingung erfüllt wird, ruft dieser Thread die Funktion \textit{pthread\_cond\_signal}, die den anderen Thread aufweckt, sobald der Mutex losgelassen wurde.
 \subsubsection{Join}
-Threads können \textit{gejoint} werden. Dieses ist ein Synchronisationsmechanismus von PThreads. Wird  \textit{pthread\_join} aufgerufen, blockiert der aktuelle Thread, bis der zu synchronisierende Thread beendet ist. 
+Threads können \textit{gejoint} werden. Dieses ist ein Synchronisationsmechanismus von PThreads. Wird \textit{pthread\_join} aufgerufen, blockiert der aktuelle Thread, bis der zu synchronisierende Thread beendet ist.
 \subsubsection{Message queues}
-\textit{mqd\_t}. Eine Queue muss erst erstellt werden. \textit{mq\_send} und \textit{mq\_receive} können blockend und nicht blockend aufgerufen werden, indem das Flag \textit{O\_NONBLOCK} gesetzt wird. Tasks können außerdem darüber informiert werden, dass eine Message in der Queue abgelegt wurde. Dieses funktioniert über \textit{mq\_notify}. Darüber kann ein Handler installiert werden, der ausgeführt wird, wenn eine neue Nachricht empfangen wird. Wenn ein anderer Task mit \textit{mq\_receive} an der Queue blockiert, dann wird kein Signal verschickt und der Handler nicht ausgelöst. 
+\textit{mqd\_t}. Eine Queue muss erst erstellt werden. \textit{mq\_send} und \textit{mq\_receive} können blockend und nicht blockend aufgerufen werden, indem das Flag \textit{O\_NONBLOCK} gesetzt wird. Tasks können außerdem darüber informiert werden, dass eine Message in der Queue abgelegt wurde. Dieses funktioniert über \textit{mq\_notify}. Darüber kann ein Handler installiert werden, der ausgeführt wird, wenn eine neue Nachricht empfangen wird. Wenn ein anderer Task mit \textit{mq\_receive} an der Queue blockiert, dann wird kein Signal verschickt und der Handler nicht ausgelöst. The library \textit{rt} muss beim KOmpilieren gelinkt werden.
 \subsubsection{Scheduling}
 \textit{schedPxLib}
 \textit{sched\_getScheduler}, gibt entweder SCHED\_FIFO oder SCHED\_RR zurück.
-\textit{sched\_get\_priority\_max}
-\textit{sched\_get\_priority\_max}
-sched\_rr\_get\_interval
-\subsubsection{Semaphores}
-\textit{semPxLib}. Posix Semaphores sind zählende Semaphore. Die unterstützen Funktionen sind Prioritätsvererbung, rekurive Semaphore, Timeouts, ... . Posix Mutexes und Condition variables wurden implementiert, indem standardmäßige Semaphore verwendet wurden. 
+\begin{itemize}
+	\item \textit{sched\_get\_priority\_max}  
+	\item \textit{sched\_set\_priority\_max}
+	\item \textit{sched\_rr\_get\_interval}
+	\item \textit{pthread\_setschedprio}
+	\item \textit{pthread\_kill}
+\end{itemize}
 
-	
+\subsubsection{Semaphores}
+\textit{semPxLib}. Posix Semaphores sind zählende Semaphore. Die unterstützen Funktionen sind Prioritätsvererbung, rekurive Semaphore, Timeouts, ... . Posix Mutexes und Condition variables wurden implementiert, indem standardmäßige Semaphore verwendet wurden.
+
+
 \subsection{RT-Features von FreeRTOS}
 Relevante Features:
 \subsubsection{Tasks}
 Tasks unter FreeRTOS können mit verschiedenen Prioritäten erstellt werden. Der idleTask hat immer die niedrigste Priorität. Tasks haben verschiedene Zustände:
 \begin{itemize}
-	\item Running: Task wird ausgeführt. Es kann zur Zeit nur einen einzigen Task geben, der gerade ausgeführt wird.  
-	\item Ready: Wartet darauf, ausgeführt zu werden, da ein anderer Task gerade vom Scheduler gescheduled wurde
-	\item Blocked: Task wartet auf ein Ereignis und wird nicht ausgeführt. Grund kann ein Delay oder das Warten an einer Queue oder einem Semaphor sein.
-	\item Suspended: Ein Task wurde von einem anderen Task oder sich selber suspendiert. Dieser Status kann nur durch einen Aufruf der Funktion \textit{xTaskResume} fortgesetzt werden. 
+\item Running: Task wird ausgeführt. Es kann zur Zeit nur einen einzigen Task geben, der gerade ausgeführt wird.
+\item Ready: Wartet darauf, ausgeführt zu werden, da ein anderer Task gerade vom Scheduler gescheduled wurde
+\item Blocked: Task wartet auf ein Ereignis und wird nicht ausgeführt. Grund kann ein Delay oder das Warten an einer Queue oder einem Semaphor sein.
+\item Suspended: Ein Task wurde von einem anderen Task oder sich selber suspendiert. Dieser Status kann nur durch einen Aufruf der Funktion \textit{xTaskResume} fortgesetzt werden.
 \end{itemize}
 
 \subsubsection{Scheduling Policy}
-Die Policy wird \textit{Fixed Priority Preemptive Scheduling} genannt. Jedem Task wird eine eigene Priorität zugewiesen, wobei Tasks auch die gleiche Priorität haben können. Für jede Priorität existiert eine eigene Liste. 
+Die Policy wird \textit{Fixed Priority Preemptive Scheduling} genannt. Jedem Task wird eine eigene Priorität zugewiesen, wobei Tasks auch die gleiche Priorität haben können. Für jede Priorität existiert eine eigene Liste.
 
 
 \subsubsection{Queues}
@@ -275,14 +280,14 @@ Queues werden benutzt, um Nachrichten zwischen Tasks auszutauschen. Von einer Qu
 
 \subsubsection{Semaphore}
 Es gibt drei verschiedene Arten von Semaphoren (s. \ref{semaphore_shuffling_time}), Mutexe, binäre Semaphore und Counting Semaphors. Semaphore werden als Queue implementiert. Werden Semaphore als Mutexe verwendet, ist die Prioritätsvererbung ebenfalls verfügbar. Ein Task kann immer nur an einem Mutex warten, da die Implementierung der Mutexe relativ simpel ist. Wenn ein Mutex von einem niederprioren Task losgelassen wird, kriegt er automatisch seine ursprüngliche Priorität zurück. Die zur Prioritätsvererbung gehörigen Code-Teile werden über Präprozessormacros eingebunden. Sollten also keine Mutexe verwendet werden, sollte das Macro auf jeden Fall auf undefiniert bleiben.
-	
+
 	
 	
 \subsection{Task Switching}
 Unter Task Switching versteht man die Zeit, die der Scheduler braucht, um von einem Task zu einem anderen zu wechseln. Dieser Wechsel wird nach der Scheduling-Strategie des Schedulers vollzogen, d.h. der Task wird nicht etwa durch einen Interrupt oder durch einen höher prioren Task unterbrochen.
 \subsubsection{FreeRTOS}
 \paragraph{Variante 1}
-Es werden zwei Tasks \textit{Task1} und \textit{Task2} erzeugt. Diese Tasks haben einen Workload, der darin besteht, in einer For-Schleife eine Variable hoch zu zählen. Nach jedem Inkrementieren der Variable wird ein Context-Switch erzwungen (mit taskYIELD()). Wenn die Variable eine bestimmte Höhe erreicht hat, wird das Experiment beendet. Es wird dabei die Zeit gemessen, die zwischen dem Betreten des ersten Tasks und dem Verlassen des letzten Tasks vergeht. Ein Task-Switch trifft also zwei Mal so häufig auf, wie die Schleife durchgelaufen wird. 
+Es werden zwei Tasks \textit{Task1} und \textit{Task2} erzeugt. Diese Tasks haben einen Workload, der darin besteht, in einer For-Schleife eine Variable hochzuzählen. Nach jedem Inkrementieren der Variable wird ein Context-Switch erzwungen (mit taskYIELD()). Wenn die Variable eine bestimmte Höhre erreicht hat, wird das Experiment beendet. Es wird dabei die Zeit gemessen, die zwischen dem Betreten des ersten Tasks und dem Verlassen des letzten Tasks vergeht. Ein Task-Switch trifft also zwei Mal so häufig auf, wie die Schleife durchgelaufen wird. 
 \\\\Von der gemessenen Zeit muss noch der eigentliche Workload abgezogen werden. Dafür werden vor dem Starten der Tasks zwei For-Schleifen durchlaufen mit der gleichen Anzahl an Durchgängen wie in den Tasks.
 \paragraph{Variante 2}
 Es werden zwei Tasks erzeugt, in denen eine For-Schleife mit der Anzahl der Testdurchläufe ausgeführt wird. In der Schleife befindet sich in der Reihenfolge:
@@ -291,35 +296,63 @@ Es werden zwei Tasks erzeugt, in denen eine For-Schleife mit der Anzahl der Test
 	\item Erzwinge Task-Switch mit taskYield()
 	\item Stoppe Messung
 \end{itemize}
-Der Vorteil an dieser Methode ist, dass es keinen Overhead gibt. Diese Messung ist also genauer. Von dem Ergebnis muss noch die Messzeit von sechs Zyklen abgezogen werden. Zu beachten ist, dass beide Tasks damit beginnen, die Startzeit der Messung zu speichern. Das führt dazu, dass die erste Startzeit überschrieben wird. Die letzte Startzeit ist dafür ungültig und darf nicht in dem Endergebnis berücksichtigt werden. 
+Der Vorteil an dieser Methode ist, dass es keinen Overhead gibt. Diese Messung ist also genauer. Von dem Ergebnis muss noch die Messzeit von sechs Zyklen abgezogen werden. Zu beachten ist, dass beide Tasks damit beginnen, die Startzeit der Messung zu speichern. Das führt dazu, dass die erste Startzeit überschrieben wird. Die letzte Startzeit ist dafür ungültig und dard nicht in dem Endergebnis berücksichtigt werden. 
 
 \subsection{Preemption-Zeit}
-Die Preemption-Zeit ist die Zeit, die benötigt wird, um einen Task-Switch zu vollziehen, wenn ein niederpriorer Task durch einen Interrupt oder durch einen höher priorisierten Task oder einen Interrupt unterbrochen wird. Das bedeutet, der Scheduler wird außerhalb des regulären Tick-Interrupts aufgerufen.
+Die Preemption-Zeit ist die Zeit, die benötigt wird, um einen Task-Switch zu vollziehen, wenn ein niederpriorer Task durch einen Interrupt oder durch einen höherpriorisierten Task oder einen Interrupt unterbrochen wird. Das bedeutet, der Scheduler wird außerhalb des regulären Tick-Interrupts aufgerufen.
+
 \subsubsection{FreeRTOS}
-Ein niederpriorer Task verrichtet Arbeit. Dieser Task wird nach einer bestimmten Zeit von einem höher  priorisierten Task unterbrochen. Es gibt zwei Funktionen in FreeRTOS, um einen Delay herbeizuführen: \textit{vTaskDelay} und \textit{vTaskDelayUntil}. \textit{vTaskDelay} wacht nach einer bestimmten Anzahl von Ticks auf. Um die Zeit zu messen, kann die Startzeit in einer Endlosschleife im arbeitenden Task dauerhaft ausgelesen werden. Wenn der Task unterbrochen wird, wurde die aktuellste Zeit vorher gespeichert. Sobald der höher priorisierte Task aufgewacht ist, wird wieder die Zeit gemessen. Das \textit{vTaskDelayUntil} wird nur jeden Tick ausgeführt. 
-\\\\Eine andere Möglichkeit, die Preemption Zeit zu messen, ist, dass ein hochpriorer Task sich selbst verabschiedet und hinterher von einem niederprioren Task aufgeweckt wird. Dieses führt direkt zu einem Context-Switch.
-\\\\Noch eine Möglichkeit ist es, einen hoch priorisierten Task 1 zu suspendieren und dann einen niedriger priorisieren Task 2 laufen zu lassen. Während der Task 2 läuft, wird ein Interrupt ausgelöst, der Task 1 fortsetzt und somit einen Context-Switch erzeugt.
+Ein niederpriorer Task verrichtet Arbeit. Dieser Task wird nach einer bestimmten Zeit von einem höher-priorisierten Task unterbrochen. Es gibt zwei Funktionen in FreeRTOS, um einen Delay herbeizuführen: \textit{vTaskDelay} und \textit{vTaskDelayUntil}. \textit{vTaskDelay} wacht nach einer bestimmten Anzahl von Ticks auf. Um die Zeit zu messen, kann die Startzeit in einer Endlosschleife im arbeitenden Task dauerhaft ausgelesen werden. Wenn der Task unterbrochen wird, wurde die aktuellste Zeit vorher gespeichert. Sobald der höher priorisierte Task aufgewacht ist, wird wieder die Zeit gemessen. Das \textit{vTaskDelayUntil} wird nur jeden Tick ausgeführt. 
+\\\\Eine andere Möglichekeit, die Preemption Zeit zu messen, ist, dass ein hochpriorer Task sich selbst verabschiedet und hinterher von einem niederprioren Task aufgeweckt wird. Dieses führt direkt zu einem Context-Switch.
+\\\\Noch eine Möglichkeit ist es, einen hochpriorisierten Task 1 zu suspendieren und dann einen niederpriorisieren Task 2 laufen zu lassen. Während der Task 2 läuft, wird ein Interrupt ausgelöst, der Task 1 fortsetzt und somit einen Context-Switch erzeugt.
 \subsubsection{Linux}
 
-\subsection{Semaphor Shuffle Time}\label{semaphore_shuffling_time}
-Die Semaphor Shuffle Time ist die Zeit, die ein Task braucht, um an einem von einem anderen Task genommenem Semaphor aufzuwachen, wenn dieser wieder losgelassen wird. Dieser Versuch kann durchgeführt werden, indem ein Task einen Semaphor nimmt und danach ein Context-Switch durchgeführt wird.
-
-\subsection{Message Passing}
-Task 1 wartet auf eine Nachricht, Task 2 schickt eine Nachricht, Task 1 wacht auf und empfängt die Nachricht.
+\subsection{Semaphor Shuffle Time}
+Die Semaphor Shuffle Time ist die Zeit, die ein Task braucht, um an einem von einem anderen Task genommenem Semaphor aufzuwachen, wenn dieser wieder losgelassen wird. 
 \subsubsection{FreeRTOS}
-Messages werden durch Queues implementiert.
-\subsubsection{Linux}
+FreeRTOS hat mehrere Semaphorarten: 
+\begin{itemize}
+	\item Mutex mit Priority inheritance
+	\item Binäre Semaphore ohne Priority inheritance
+	\item Semaphore, die hochgezählt werden 
+\end{itemize}
+
+Mutexe und Counting Semaphores lösen beim freigeben des Semaphores einen \textit{portYield} aus, wodurch es zu einer Verzögerung kommt. 
+
+\paragraph{Mutex}
+Ein Mutex wird verwendet, um Mehrfachzugriffe auf Resourcen zu vermeiden. Mutexe können mit Priority Inheritance verwendet werden, dieser Versuch wird aber mit zwei Tasks gleicher Prioritäten durchgeführt. Wenn ein Task einen Mutex genommen hat, muss dieser ihn auch wieder freigeben. Wenn ein anderer Task an diesem Mutex wartet, wird dieser durch die Freigabe wieder aktiviert.
+\\\\Der Versuch kann durchgeführt werden, indem ein Task einen Semaphor nimmt und danach ein Context Switch durchgeführt wird. Ein zweiter Task versucht ebenfalls den Semaphor zu nehmen, wird aber blockiert. Als Folge erfolgt wieder ein Task Switch zurück zum ersten Task. Dieser startet eine Zeitmessung, lässt den Semaphor wieder los und veranlasst einen Context Switch. Nun wacht Task 2 auf, da der Semaphor losgelassen wurde. Die Zeitmessung wird beendet. Der Task lässt den Semaphor wieder los und mit einem Context Switch beginnt ein weiterer Durchlauf des Versuchs.
+\\\\Im Endergebnis muss berücksichtigt werden, dass ein Mal \textit{xSemaphoreTake}, ein Mal \textit{xSemaphoreGive} und ein Context Switch von der Gesamtzeit abgezogen werden.
+
+\paragraph{Binäre Semaphore}
+Binäre Semaphore in FreeRTOS werden ähnlich wie Signale verwendet und diesen eher der Synchronisation als dem Vermeiden von Mehrfachzugriffen. 
+\\\\In diesem Versuch wartet der erste Task an dem Semaphor. Ein zweiter Task wird gestartet, initiiert eine Zeitmessung, gibt den Semaphor frei und macht einen Context Switch. Durch das Freigeben ist nun der ander Task wieder aufgewacht und beendet die Zeitmessung. 
+\\\\Von dem Endergebnis muss ein Mal \textit{xSemaphoreGive} abgezogen werden. 
+
+\paragraph{Counting Semaphores}
+Counting Semaphores sind Semaphore, die ein bestimmtes Kontingent haben und die hochgezählt werden, wenn ein Semaphor freigelassen wird (also eine Ressource verfügbar ist) und wieder runtergezählt werden, wenn ein Semaphor genommen wird (also eine Ressource belegt ist). Ist keine Ressource verfügbar, wird an dem Semaphor gewartet. Ein Task wird wieder aktiv, sobald eine Ressource verfügbar wird. 
+\\\\Diese Semaphore können ähnlich wie Mutexe vermessen werden. Da der Mutex zuerst genommen wird, muss der Semaphor mit seiner maximalen Anzahl (im Versuch 1) initialisiert werden. Der Rest des Versuchs ist analog zum Mutex-Versuch. Am Ende müssen auch die gleichen Werte abgezogen werden. 
+
 	
-\subsection{DLB Time}
-Die Deadlock breaking time ist die Zeit, die benötigt wird, um einen potenziellen Deadlock durch Prioritätsvererbung aufzulösen. Folgendes Beispiel der Prioritätsinverion verdeutlicht die Wichtigkeit der Prioritätsvererbung:
-Ein niederpriorer Task greift nach einem Mutex M. Dann wird er von einem mittelprioren Task unterbrochen. Dieser wiederum wird von einem hochprioren Task unterbrochen, welcher ebenfalls nach dem Mutex M greift und blockiert. Damit wird wieder Task 2 aufgerufen, welcher nun für immer Task 1 und damit auch den Mutex M blockiert, sodass der höher priorisierte Task niemals ausgeführt wird.
-\\\\Mit der Prioritätsvererbung bekommt Task 1 vorübergehend die Priorität von Task 3. Damit kann er nicht von Task 2 blockiert werden und nach getaner Arbeit den Mutex wieder freigeben. Damit kann der hoch priore Task seine Arbeit verrichten.
+\subsubsection{Linux}
+
+\subsection{Deadlock breaking time}
+Diese Zeit ist die Zeit, die benötigt wird, um einen Deadlock durch Prioritätsinversion wieder aufzulösen. Gäbe es diese nicht, wäre folgende Situation ein Deadlock:
+\\\\Task 1 hat die niedrigste Priorität und nimmt sich Mutex M. Bevor M freigegeben wird, wird Task 1 durch Task 2 mit einer höheren Priorität unterbrochen. Task 2 wiederum wird durch Task 3 unterbrochen, was die höchste Priorität hat. Task 3 greift nach Mutex M und wird blockiert. Ohne Prioritätsinversion würde Task 2 weiterlaufen und Task 1 für immer unterbrechen, sodass die für Task 3 benötigte Ressource nie freigegeben wird. Prioritätsinversion sorgt dafür, dass Task 1 vorübergehend die Priorität von Task 3 bekommt, nicht mehr von Task 2 blockiert wird, und somit den Mutex wieder freigeben kann. Somit kann der Task mit der höchsten Priorität, Task 3, seine Arbeit beenden.
+\\\\Für die Messung ist es irrelevant, ob Task 1 zwischen der Prioritätsinversion und dem Zurückgeben des Mutex noch Arbeit verrichtet. Um die Messung so genau wie möglich zu halten, wird der Mutex direkt zurückgegeben.
 
 \subsubsection{FreeRTOS}
-Es werden zwei Tasks erzeugt: Task 1 und Task 3. Task 3 ist der hochpriore Task und legt sich direkt schlafen. Task eins läuft in einer Schleife. Zuerst nimmt er sich den Mutex, dann startet er Task 2. Task 2 hat die mittlere Priorität und setzt Task 3 fort. Task 3 versucht nun nach dem Mutex zu greifen und wird blockiert. Da für Mutexe in FreeRTOS eine Prioritätsvererbung stattfindet, wird wie erwartet Task 1 fortgesetzt und gibt den Mutex wieder frei. Es wird die Zeit gemessen, ab der Task 3 versucht, auf den Mutex zuzugreifen, bis der Mutex freigegeben und der Task deblockiert wird. 
 
-\subsubsection{Linux}  	
- 	
+\subsubsection{Linux}
+
+\subsection{Message Passing Latency}
+Die Message Passing Latency ist die Zeit, die ein Task braucht, um eine Message von einem anderen Task zu empfangen. In FreeRTOS werden diese Messages über Queues transportiert. Die Zeit messen kann mit folgendem Aufbau:
+\\\\Task 1 wird gestartet und wartet an der Queue auf eine Nachricht. Dabei wird der Task blockiert. Dann startet Task 2 und schreibt eine Nachricht in die Queue. Dieses bewirkt, dass der erste Task deblockiert wird. Die Zeitmessung beginnt vor dem Versenden der ersten Nachricht und endet mit dem Empfang. 
+	
+\subsubsection{FreeRTOS}
+
+\subsubsection{Linux}	
+	
 \section{Speicherzugriffe}
 	\begin{enumerate}		
 		\item Speicherplatzverbrauch des gesamten Systems
