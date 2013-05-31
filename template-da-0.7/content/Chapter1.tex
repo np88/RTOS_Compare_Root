@@ -235,6 +235,7 @@ Ein Task läuft und speichert in einer While-Schleife immer die aktuelle Zeit. Er
 	\end{enumerate}
 
 \subsection{RT-Features von Linux/Posix}
+Für Linux gibt es mehrere IPC Möglichkeiten: Die POSIX IPC und die System V IPC. Nach Möglichkeit wird die POSIX IPC benutzt, aber da nicht alle POSIX features auf dem System unterstützt werden, muss dafür auch auf die System V IPC zurückgegriffen werden.
 \subsubsection{Threads}
 Threads in Unix sind Teile von Prozessen. Allerdings hat ein Thread einen eigenen Stack Pointer, eigene Register, Scheduling Properties, Signale und andere Daten. Ein Thread existiert, solange der Elternprozess existiert. Ein Prozess kann mehrere Threads haben. Es kann Datenaustausch von Threads im Rahmen eines Prozesses geben. Ein Thread verbraucht deutlich weniger Ressourcen als ein Prozess. Inter-Thread-Kommunikation ist deutlich schneller, weil alles in einem Adressraum stattfindet. Bei Inter-Prozess-Kommunikation ist mindestens ein Kopiervorgang von Prozess zu Prozess erforderlich. Um pthreads benutzen zu können, muss die pthread-Bibliothek eingebunden werden (über -lpthread) und um zum Beispiel Prioritätsvererbung für Mutexe zu verwenden, muss zusätzlich mit dem Compilerflag $ \textit{-D\_GNU\_SOURCE=1} $ kompiliert werden.  
 \subsubsection{Mutexes}
@@ -301,6 +302,11 @@ Es werden zwei Tasks erzeugt, in denen eine For-Schleife mit der Anzahl der Test
 \end{itemize}
 Der Vorteil an dieser Methode ist, dass es keinen Overhead gibt. Diese Messung ist also genauer. Von dem Ergebnis muss noch die Messzeit von sechs Zyklen abgezogen werden. Zu beachten ist, dass beide Tasks damit beginnen, die Startzeit der Messung zu speichern. Das führt dazu, dass die erste Startzeit überschrieben wird. Die letzte Startzeit ist dafür ungültig und dard nicht in dem Endergebnis berücksichtigt werden. 
 
+\subsubsection{Linux}
+Auch hier ist das Vorgehen wie in Variante 2 von FreeRTOS. Für das taskYield wird die in Linux äquivalente Funktion \textit{sched\_yield} benutzt. Die Randbedingungen für die Linux-Experimente (also nicht nur für dieses hier sondern auch für die folgenden Experimente):
+\paragraph{Erzeugen der Tasks}
+In Linux muss man beim Erzeugen der Task in folgender Hinsicht aufpassen:\\Da Realzeit-Messungen gemacht werden sollen, wird für diese Thread-Erzeugung das Realzeit-Scheduling von Linux gebraucht. Die Prioritäten-Range liegt über den Prioritäten der normalen Prozesse und geht von 1 bis 99, wobei 99 die höchste Priorität ist. Diese Prioritäten können nur für eine Realzeit-Scheduling-Policy vergeben werden. Hier unterstützt Linux Round-Robin- und FIFO-Scheduling. Um eine faire CPU-Verteilung zu gewährleisten, wird in dem Experiment RR benutzt. Beim Starten des Programms wird deshalb das Scheduling für den Elternprozess verändert und die Priorität auf die maximal mögliche Echtzeit-Priorität gesetzt. Dann werden die eigentlichen Tasks erzeugt, die das Experiment ausführen. Diese haben eine niedrigere Priorität, als der Eltern-Prozess, um ihn nicht vorzeitig zu verdrängen. Wenn beide Tasks erzeugt sind, wird die Priorität es Eltern-Prozesses unter die der Kinderprozesse gesetzt. Diese sind damit am höchsten priorisiert und werden nicht länger durch den Eltern-Prozess blockiert. 
+
 \subsection{Preemption-Zeit}
 Die Preemption-Zeit ist die Zeit, die benötigt wird, um einen Task-Switch zu vollziehen, wenn ein niederpriorer Task durch einen Interrupt oder durch einen höherpriorisierten Task oder einen Interrupt unterbrochen wird. Das bedeutet, der Scheduler wird außerhalb des regulären Tick-Interrupts aufgerufen.
 
@@ -355,6 +361,7 @@ Die Message Passing Latency ist die Zeit, die ein Task braucht, um eine Message 
 \subsubsection{FreeRTOS}
 
 \subsubsection{Linux}	
+In Linux gibt es mehrere Möglichkeiten, um Queues zu erzeugen. Da die POSIX message queues nicht von dem System unterstützt werden, wird die die System V message queue API benutzt.
 	
 \section{Speicherzugriffe}
 	\begin{enumerate}		
