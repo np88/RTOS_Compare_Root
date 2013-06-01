@@ -28,6 +28,9 @@ the IRQ.
 	\item Terminate by jumping to the \textit{ret\_from\_intr} address.
 \end{enumerate}
 
+\subsection{RT Linux}
+Um Linux RT fähiger zu machen, werden IRQs anders behandelt als im normalen Linux. Im normalen Linux unterbrechen sie einfach den laufenden Betrieb des Betriebssystems. Mit dem RT-Patch werden die ISRs in eigene Prozesse mit Prioritäten umgewandelt, sodass RT-Prozesse eine höhere Priorität haben können als IRQs und damit weniger anfällig für Unterbrechungen sind. IRQs werden im RT-Patch mit der FIFO\_SCHED Policy geschedulet und haben eine Priorität von 50.
+\\\\In PREEMPT_RT, normal spinlocks (spinlock_t and rwlock_t) are preemptible, as are RCU read-side critical sections. Es gibt aber eine zusätzliche Art von Spin Locks, die das traditionelle Verhalten erlaubt.
 
 \subsection{FreeRTOS}
 	\begin{itemize}
