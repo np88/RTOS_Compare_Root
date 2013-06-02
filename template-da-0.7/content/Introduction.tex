@@ -1,12 +1,18 @@
 \chapter{Einleitung}
 \section{Realzeitbetriebssysteme}
-	\begin{itemize}
-		\item Was sind RTOS und was macht sie aus?
-		\item Warum verwendet man sie anstatt herkömmlicher Betriebssysteme oder dedizierter Hardware?
-		\item Verschiedene Arten von RTOS und ihre Vor-/Nachteile (Wofür eignen sich bestimmte Systeme besonders gut, grober Überblick über vorhandenes)
-		\item Beschreiben der Zielhardware/Randbedingungen
-		\item Auskristallisieren, warum in der Arbeit gerade Linux RT Patch und FreeRTOS verwendet werden (evtl noch andere, z.B. MicroCOS, Xenomai)	
-	\end{itemize}
+
+		
+\subsubsection{Was sind RTOS und was macht sie aus?}
+Im Allgemeinen ist ein Betriebssystem dafür verantwortlich, die Hardwareressourcen von einem System zu verwalten sowie für die Verwaltung von Benutzer- und Systemprozessen. Es gibt verschiedene Arten von Betriebssystemen. Im Alltag werden so genannte General Purpose OS verwendet, zum Beispiel Microsoft Windows oder MAC OS. Diese versuchen, die Ressourcen möglichst fair einzusetzen und die Antwortzeiten gegenüber dem Benutzer so gering wie möglich zu halten. In einem Realzeitbetriebssystem liegt der Fokus auf dem Garantieren von zeitlicher Determinierung von kritischen Anwendungen. Bestimmte Prozesse müssen in einer maximal festgelegten Zeit abgeschlossen sein, da das System sonst instabil werden könnte. Das ganze kann man an einem Beispiel greifbar machen:
+\\Bei einem General Purpose OS kann es mehrere Sekunden dauern, bis sich der Internet Browser geöffnet hat. Würde es beispielsweise in einem Auto mehrere Sekunden dauern, bis sich der Airbag geöffnet hat, kann ein Mensch bereits verletzt worden sein. Dieses ist eine zeitkritische Anwendungen, die eine deterministische Antwortzeit garantieren muss. Bei Echtzeit unterscheidet man zwischen harter und weicher Echtzeit. Wenn bei harter Echtzeit die Deadlines verletzt werden, dann führt das zu einem Versagen des Systems und hat Folgen wie das Verletzten von Menschenleben. Bei weicher Echtzeit haben Verletzungen der Deadlines gegebenfalls einen Einfluss auf die QOS, führen aber üblicherweise nicht zum Absturz des Systems oder bergen Gefahr für beteiligte Personen. 
+
+\subsubsection{Warum verwendet man sie anstatt herkömmlicher Betriebssysteme oder dedizierter Hardware?}
+\subsubsection{Verschiedene Arten von RTOS und ihre Vor-/Nachteile} 
+Wofür eignen sich bestimmte Systeme besonders gut, grober Überblick über vorhandenes
+
+\subsubsection{Beschreiben der Zielhardware/Randbedingungen}
+\subsubsection{Warum FreeRTOS und Linux}
+Auskristallisieren, warum in der Arbeit gerade Linux RT Patch und FreeRTOS verwendet werden (evtl noch andere, z.B. MicroCOS, Xenomai)	
 	
 \section{Welche Eigenschaften werden verglichen?}
 \section{Relevante Betriebssysteme}
@@ -16,6 +22,16 @@ Prozesse in Linux sind als doppelt verkettet Liste implementiert. Die Prozesse i
 \subsubsection{Scheduling Policy}
 The scheduler stores the records about the planned tasks in a red-black tree, using the spent processor time as a key. This allows it to pick efficiently the process that has used the least amount of time (it is stored in the leftmost node of the tree). The entry of the picked process is then removed from the tree, the spent execution time is updated and the entry is then returned to the tree where it normally takes some other location. The new leftmost node is then picked from the tree, repeating the iteration.\\\\
 If the task spends a lot of its time sleeping, then its spent time value is low and it automatically gets the priority boost when it finally needs it. Hence such tasks do not get less processor time than the tasks that are constantly running.
+\\\\CFS is an implementation of a well-studied, classic scheduling algorithm called weighted fair queuing.
+Summing up, CFS works like this: it runs a task a bit, and when the task
+schedules (or a scheduler tick happens) the task's CPU usage is "accounted
+for": the (small) time it just spent using the physical CPU is added to
+p->se.vruntime.  Once p->se.vruntime gets high enough so that another task
+becomes the "leftmost task" of the time-ordered rbtree it maintains (plus a
+small amount of "granularity" distance relative to the leftmost task so that we
+do not over-schedule tasks and trash the cache), then the new leftmost task is
+picked and the current task is preempted.
+\\\\CFS doesn't use priorities directly but instead uses them as a decay factor for the time a task is permitted to execute. Lower-priority tasks have higher factors of decay, where higher-priority tasks have lower factors of delay. This means that the time a task is permitted to execute dissipates more quickly for a lower-priority task than for a higher-priority task. That's an elegant solution to avoid maintaining run queues per priority. 
 
 \subsubsection{Interrupts}
 Regardless of the kind of circuit that caused the interrupt, all I/O interrupt handlers perform the
@@ -30,7 +46,7 @@ the IRQ.
 
 \subsection{RT Linux}
 Um Linux RT fähiger zu machen, werden IRQs anders behandelt als im normalen Linux. Im normalen Linux unterbrechen sie einfach den laufenden Betrieb des Betriebssystems. Mit dem RT-Patch werden die ISRs in eigene Prozesse mit Prioritäten umgewandelt, sodass RT-Prozesse eine höhere Priorität haben können als IRQs und damit weniger anfällig für Unterbrechungen sind. IRQs werden im RT-Patch mit der FIFO\_SCHED Policy geschedulet und haben eine Priorität von 50.
-\\\\In PREEMPT_RT, normal spinlocks (spinlock_t and rwlock_t) are preemptible, as are RCU read-side critical sections. Es gibt aber eine zusätzliche Art von Spin Locks, die das traditionelle Verhalten erlaubt.
+\\\\In PREEMPT\_RT, normal spinlocks (spinlock\_t and rwlock\_t) are preemptible, as are RCU read-side critical sections. Es gibt aber eine zusätzliche Art von Spin Locks, die das traditionelle Verhalten erlaubt.
 
 \subsection{FreeRTOS}
 	\begin{itemize}
