@@ -30,6 +30,19 @@ Vergleichskriterien für Betriebssysteme
 		\end{enumerate}			
 \end{enumerate}
 
+\subsection{Bootzeit}
+Die Bootzeit ist insofern ein Ausschlusskriterium für die Benutzung eines Betriebssystems, als dass es für manche Anwendungen nicht akzeptabel ist, mehr als einige Sekunden auf das Starten des Programms zu warten. Ein Beispiel hierfür ist das Automobil. Wenn man den Zündschlüssel umdreht und dann 15 Sekunden warten muss, bis das Auto angeht, ist das zu lang. Deswegen muss abgeschätzt werden, wie viel Bootzeit ein Betriebssystem in Anspruch nehmen darf und wie diese eventuell in einen akzeptablen Bereich gebracht werden kann.
+\\\\Für die aktuelle Hardware gibt es mehrere Bootoptionen:
+\begin{itemize}
+	\item Booten über JTag
+	\item Booten von der SD Karte
+	\item Booten aus dem QSPI Nor-Flash Speicher
+\end{itemize}
+
+\subsubsection{FreeRTOS}
+\subsubsection{Linux}
+Der Bootvorgang 
+
 \subsection{Latenzzeiten von Interrupts}
 Für die Latenzzeit von Interrupts soll ein Interrupt von einer externen Quelle ausgelöst werden und dann wird gemessen, wann die Interruptserviceroutine betreten wird. Konkret wird periodisch ein GPIO-Interrupt durch einen Signalgenerator in Hardware ausgelöst. Die GPIO wird über das EMIO-Interface angebunden. In der dazugehörigen ISR wird eine LED angeschaltet. Es wird die Zeit zwischen dem Setzen des Interruptsignals und aufblinken der LED gemessen. Von dieser Zeit muss abgezogen werden, wie lange das Anschalten der LED und die Zeitmessung an sich dauert. Grundsätzlich wird jede Messung 1024 Mal durchgeführt. Für die Zusatzmessungen sind die Durchschnittszeiten interessant. Für die Hauptmessung ist zusätzlich der Worst-Case-Fall zu beachten.
  
