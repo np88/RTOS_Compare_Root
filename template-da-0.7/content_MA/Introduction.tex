@@ -1,0 +1,33 @@
+\chapter{Introduction}
+Nowadays, electrical systems have grown so complex that they are usually managed by \acp{OS}. 
+An operating system is a software program which provides access to the underlying hardware. 
+Its purpose is to manage hardware resources - for example \ac{CPU} time, memory or \ac{I/O} access - as well as system and user processes efficiently. 
+Depending on the application there are different kinds of \acp{OS}. 
+In \textit{General Purpose \acp{OS}} like Windows, \ac{MAC} OS or Linux, the main goal is to maintain fairness between different users or processes. 
+Consequently, every user or process should get an equal time slice of the available \ac{CPU} time or other shared resources like \ac{RAM}. Because of convenience, \acp{OS} are also used in embedded systems. 
+In contrast to General Purpose \acp{OS}, operation systems for embedded devices often have to run under special conditions, e.g. limited memory size or low power consumption. 
+\\\\A special kind of embedded systems are \acp{RTOS} which are designed to meet specific deadlines. 
+The main property of an \ac{RTOS} is determinism (and not necessarily high-speed performance). 
+%Such \ac{RTOS} are mainly used for security applications. 
+Real-time systems are divided into three classes, depending of the consequence caused by missing a deadline:
+\begin{itemize}
+	\item Hard
+	\item Firm
+	\item Soft
+\end{itemize}
+In hard real-time systems, missing a deadline causes system failure and is not tolerable.  
+An example is the engine control system of a car which can be damaged or cause an accident because of delayed signals.
+Another example is the release of an airbag in a car. 
+It has to be triggered immediately when a crash happens, any latency could cause the loss of lives. 
+More applications can be found in medical systems or industry processing control.  
+
+In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
+
+In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
+These kind of systems are usually used for application with a continuous data flow like streaming applications.
+
+
+ 
+  
+
+        
