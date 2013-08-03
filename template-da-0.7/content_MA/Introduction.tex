@@ -5,6 +5,8 @@ Its purpose is to manage hardware resources - for example \ac{CPU} time, memory 
 Depending on the application there are different kinds of \acp{OS}. 
 In \textit{General Purpose \acp{OS}} like Windows, \ac{MAC} OS or Linux, the main goal is to maintain fairness between different users or processes. 
 Consequently, every user or process should get an equal time slice of the available \ac{CPU} time or other shared resources like \ac{RAM}. Because of convenience, \acp{OS} are also used in embedded systems. 
+
+\section{Real-Time Systems}
 In contrast to General Purpose \acp{OS}, operation systems for embedded devices often have to run under special conditions, e.g. limited memory size or low power consumption. 
 \\\\A special kind of embedded systems are \acp{RTOS} which are designed to meet specific deadlines. 
 The main property of an \ac{RTOS} is determinism (and not necessarily high-speed performance). 
@@ -20,11 +22,36 @@ An example is the engine control system of a car which can be damaged or cause a
 Another example is the release of an airbag in a car. 
 It has to be triggered immediately when a crash happens, any latency could cause the loss of lives. 
 More applications can be found in medical systems or industry processing control.  
-
 In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
-
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
-These kind of systems are usually used for application with a continuous data flow like streaming applications.
+These kind of systems are usually used for application with a continuous data flow like multimedia streaming applications or on-line reservation systems.
+\par
+The class of a system always depends on the application. 
+To meet the given requirements, the underlying hardware and - often - an \ac{OS} have to be chosen appropriately. 
+In embedded systems, Linux is widely used because it is free of charge, has a large community and therefore a high level of support. 
+Moreover, it is comfortable to use as it embeds features like a command terminal, flexible module integration and a large number of available hardware drivers. 
+Yet, resulting from its complexity, the downside of Linux is still the lack of real-time capability. 
+Although extensions like \textit{RTLinux}, \textit{\ac{RTAI}}, \textit{Xenomai}, the \textit{PREEMPT\_RT} patch and many commercial Linux distribution exist, reliability of the system is hard to proof. 
+To achieve hard real-time performance, usually light-weight \acp{OS} are used, for example \textit{$\mu$COS} or \textit{FreeRTOS}/\textit{OpenRTOS}. 
+They have very small memory footprint and no background services (deamons) which could unexpectedly disturb the execution of real-time tasks. 
+Therefore the execution time of tasks or the interrupt latency are highly predictable.
+The jitter (variance of latencies) is very low compared to a system like Linux. 
+The disadvantage of these systems is that every change in the underlying hardware requires a reconfiguration of the \ac{OS}.
+Furthermore, a high-level communication with the system is not provided and has to be implemented if needed.  
+Consequently, an \ac{OS} which can provide deterministic timing as well as the convenience of a more advanced system is desirable.  
+\par
+To make the right choice regarding an \ac{OS}, it is necessary to know how exactly the given systems differ in performance. 
+Obviously, a Linux-based system will have higher latencies and jitter. 
+Still, especially the Linux PREEMT\_RT patch (further: \textit{LinuxRT}) was improved a lot in the matter of predictability recently and is easy to apply to an existing Linux distribution. 
+Whenever possible, it would be chosen over a light-weight system by a developer. 
+To make this possible, some guidelines in the actual performance of the \acp{OS} are desirable. 
+How does LinuxRT perform compared to a light-weight \ac{OS}?
+When can LinuxRT be used and when is it inevitable to use a light-weight \ac{OS}?
+To answer these questions, LinuxRT has to be compared to another \ac{OS}. 
+In the past years, FreeRTOS 
+ 
+\section{Benchmarking of RTOS}
+
 
 
  
