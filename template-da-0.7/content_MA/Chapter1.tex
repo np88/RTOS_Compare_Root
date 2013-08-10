@@ -36,7 +36,7 @@ Tasks can switch from this state to the Ready state when the according event occ
 A task can be suspended by itself or by another task. 
 This task cannot wake up on an event but has to be explicitly unsuspended to reenter the Ready state.  
 
-\subsection{Timer Tick}\label{s_timer_tick}
+\subsection{Timer Tick}\label{ss_timer_tick}
 The timer tick invokes the scheduler and can be programmed in FreeRTOS as well as in Linux.
 The tick is triggered by a timer interrupt a definite number of times per second - usually 100 times. 
 If the tick period is too low, tasks may finish running a long time before the next tick occurs.
@@ -102,7 +102,7 @@ The most-left node is scheduled on a context switch.
 Further, the priority of an element can be influenced using the \textit{nice} command. 
 It puts a weight on the according node which will change the priority relative to the other nice values.
 
-\section{Intertask Communication and Synchronization}
+\section{Intertask Communication and Synchronization}\label{s_intertask_communication}
 In \acp{OS} usually not only one but many different tasks are active.
 These tasks need ways to communicate with each other.
 Moreover, race conditions on critical resources, e.g. concurrent memory access, needs to be prohibited.
@@ -206,17 +206,25 @@ Those drivers are available in Linux and can be manually included in FreeRTOS.
 They allow to lock specific cache pages for critical data or applications, but should be used carefully.
 Excessive use of page locking eventually has a negative impact on the overall system behavior.
 
-\subsection{Delays from other Tasks}
+\subsection{Delays Task Execution and Synchronization}
 The second source of delays lies in tasks which are currently executing. 
-The minimum time for a high priority task to run is the time which it takes the \ac{OS} to interrupt a low priority task and schedule the new one.
-This time is called preemption time. 
-Moreover, a critical section can also cause the task execution of a low priority task to be delayed.
-Such delays as well as delays from task synchronization (see next section) are \ac{CPU} bound delays compared to delays caused by interrupts.
-
-\subsection{Delays from Task Synchronization}
-
+There are several sources of latencies:
+\\The obvious one is the task switching time when a context switch occurs.
+This is not avoidable and happens either when the timer tick occurs (refer to \ref{ss_timer_tickt}) or when a task blocks, finishes or voluntarily releases the \ac{CPU}.
+Another latency related to scheduling is the preemption time.
+This is the time which it takes the \ac{OS} to interrupt a low priority task and schedule a high priority task.
+The interrupt can be caused by giving a semaphore, sending a message or waking up the task from an \ac{ISR}.
+\par
+Besides from scheduling, task synchronization causes latencies in a \ac{OS}.
+This process causes latencies which are dependent on the implementation and therefore specific for every \ac{OS}.
+Examples are semaphores, mutexes, message passing or signals. 
+When a mutex is released, other tasks may be unblocked.
+This means, that whenever this action happens, the \ac{OS} has to check whether tasks can be moved from the Blocked state to the Ready state.
+Moreover, if a task with higher priority was woken up, the current task is preempted and a context switch takes place.
+Dependent on the application and the right synchronization method, the overall latency in a system can be reduced.
+\par
+The delays described in this section are \ac{CPU} bound delays compared to delays caused by ac{I/O} interrupts.
  
-   
 \subsection{Boot Time}
 The boot time can be a relevant factor if the system need to start up very fast.
 When a car is started, the driver does not want to wait 15 seconds until the ignition runs.
