@@ -76,26 +76,31 @@ Therefore, a way of time measurement has to be found, which can be applied on bo
 \section{Related works}
 Performance evaluation has already been done on different platforms and with different \acp{OS}. 
 The first attempt to developing a real-time benchmark was by Kar and Porter in 1989 by introducing the \textit{Rhealstone Benchmark} \cite{kar:itrb} \cite{kar:artbp}. 
-This benchmark is based on six parameters the resulting value is calculated from: 
-\begin{itemize}
-	\item Interrupt latency
-	\item Task switching time
-	\item Preemption time
-	\item Semaphore shuffling time
-	\item Deadlock breaking time
-	\item Message passing latency
-\end{itemize}
+This benchmark is based on six parameters (for details refer to \ref{}) the resulting value is calculated from.
+%\begin{itemize}
+%	\item Interrupt latency
+%	\item Task switching time
+%	\item Preemption time
+%	\item Semaphore shuffling time
+%	\item Deadlock breaking time
+%	\item Message passing latency
+%\end{itemize}
 The Rhealstone Performance Number is a weighted mean of all parameters. They implemented the benchmark under iRMX.
 \par
 Another and more recent comparison of operating systems was performed for a set of \ac{OS} suitable for small microcontrollers in 2009 \cite{Anh:sapeortosfsm}. 
 In this paper, several \ac{RTOS} are introduced, but only four of them are chosen to be investigated in detail.
 The choice is based on available support, documentation, scheduling type and more. 
-For the \acp{RTOS} algorithms on task switching, message passing, semaphore passing and memory allocation are presented.  
-In \cite{gokhan:cstamfcoxamom}, memory footprint and context switching is compared between $\mu$COS and XilKernel \footnote{XilKernel \cite{xilinx:xilkernel} is an \ac{RTOS} developed by Xilinx.} on the softcore processor Microblaze.
-Three different \acp{OS} - Xenomai, LinuxRT and eCos \cite{ecos} - 
-
- 
-
+For the \acp{RTOS}, algorithms on how to compare task switching, message passing, semaphore passing and memory allocation are presented.  
+In \cite{gokhan:cstamfcoxamom}, memory footprint and context switching is compared between $\mu$COS and XilKernel\footnote{XilKernel \cite{xilinx:xilkernel} is an \ac{RTOS} developed by Xilinx.} on the softcore processor Microblaze.
+Three different \acp{OS} - Xenomai, LinuxRT and eCos \cite{ecos} - are compared in \cite{Marieska:opokbaertosbaa}.
+The performance metrics are similar to the Rhealstone benchmark.
+Depending on the application, eCos and LinuxRT perform better than Xenomai.
+The authors of \cite{cereia:peoaemulatrp} and \cite{betz:eeotlrpfrta} evaluate the real-time performance of LinuxRT compared to standard Linux.
+In both works, a sample program is run solely, with CPU and I/O load. 
+Whereas in \cite{cereia:peoaemulatrp} the focus is mainly on the effect of real-time priorities, in \cite{betz:eeotlrpfrta} different period lengths and multi-processor effects are also investigated. 
+The results show a significant reduction in jitter when using LinuxRT.
+\par
+[Related work on OS jitter]
 
 \section{Contribution}
 In this work, a guideline on the choice of an operation system for specific use cases is presented.
@@ -109,20 +114,8 @@ As there is a large interest in using more comfortable \ac{OS} like Linux, the g
 Moreover, the sources of OS jitter shall be detected and reduced as far as possible. 
 The optimum result is a LinuxRT configuration with comparable benchmark results as FreeRTOS. 
 
-
-
-
- 
-
-   
-   
- 
-
-
-
-
-
- 
-  
-
-        
+\par
+The remainder of the work is organized as follows. In chapter \ref{ch_background} a detailed background on the topic is provided. 
+Chapter \ref{ch_measurements} describes the performed measurements in detail. 
+Further, in Chapter \ref{ch_results} the results of the measurements are presented. 
+In the last Chapter \ref{ch_conclusion} the contribution of this work is summarized.

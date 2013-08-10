@@ -1,0 +1,245 @@
+\chapter{Background on Operating Systems}\label{ch_background}
+
+This chapter provides an deeper insight into the background of the topic. It gives details on \acp{RTOS} in general, on scheduling in FreeRTOS and LinuxRT, and the RT patch. 
+Moreover, the causes of \ac{OS} jitter are described, especially the timer interrupt. 
+Finally, the main design features of real-time programs are discussed and the benchmarking metrics for the two \ac{OS} are introduced. 
+\par
+\acp{OS} manage the hardware resources - \ac{CPU} time, \ac{I/O} and memory access  - for different tasks and process. 
+Dependent on its level of functionalities, \acp{OS} have different levels of complexity.
+While a system like FreeRTOS has a limited number of features, Linux offers a variety of services which run in the background. 
+
+\section{The Scheduler}\label{s_scheduler}
+Every task or process created by the kernel or a user, is managed by the operation system. 
+The scheduler manages the tasks and decides whether a task switch is performed. 
+The decision is based on the priority and the current state of the task. 
+
+\subsection{Task States}\label{ss_task_states}
+Dependent on events or resource availability, tasks can enter different states. 
+In the following, the state flow used in FreeRTOS \cite{freertos} is described. 
+The state flow in Linux is related, but extended by other states which are not of interest for the further work. 
+\par
+[Task state picture]
+
+\paragraph{Ready}
+When a task is schedulable, it is in the state \textit{Ready}. 
+A process enters this state when it is first created, has been unblocked by an \ac{ISR} or an other task or when resources it was waiting for become available.
+
+\paragraph{Running}
+Tasks in this state get access to the \ac{CPU}, they are currently being executed.
+This state can only be entered from tasks in the Ready state.
+
+\paragraph{Blocked}
+Tasks enter the \textit{Blocked} state when they are waiting on a queue or a semaphore or another event.
+Tasks can switch from this state to the Ready state when the according event occurs, e.g. another tasks releases the semaphore.
+
+\paragraph{Suspended}
+A task can be suspended by itself or by another task. 
+This task cannot wake up on an event but has to be explicitly unsuspended to reenter the Ready state.  
+
+\subsection{Timer Tick}\label{s_timer_tick}
+The timer tick invokes the scheduler and can be programmed in FreeRTOS as well as in Linux.
+The tick is triggered by a timer interrupt a definite number of times per second - usually 100 times. 
+If the tick period is too low, tasks may finish running a long time before the next tick occurs.
+Therefore, processor time might be wasted.
+On the other hand, if the tick period is too high, the \ac{OS} overhead on the system is too large.  
+The scheduling routine and an internal counter update are invoked in FreeRTOS in the timer \ac{ISR}.
+Further, the timer tick causes latency in the system performance called \textit{OS jitter}.
+ 
+[Picture for timer tick] 
+
+\subsection{Scheduling Policies}\label{ss_scheduling_policy} 
+The scheduler decides which task is allowed to enter the Ready state. 
+The decision is based on the scheduling policy of the \ac{OS}.
+There are mainly two different types of scheduling: \textit{Preemptive} and \textit{cooperative} scheduling.
+In cooperative scheduling, tasks cannot be interrupted, they have to release the processor voluntarily. 
+The scheduling policy is crucial for \acp{RTOS} because it determines the handling of real-time tasks.
+Obviously, real-time tasks usually have the highest priority and should not be preempted by tasks with lower priority.
+
+\subsubsection{Idle Task}
+The \textit{Idle Task} is scheduled when no other tasks are present in the Ready queue because the processor is not allowed to run out of work.
+It usually has the lowest possible priority.
+This task is often used to put the \ac{CPU} in a low-power mode (scaling down frequency or executing the \textit{halt} instruction). 
+Moreover, it can be used to perform background processes or as indicator for spare time  
+
+\subsubsection{Scheduling in FreeRTOS}
+Scheduling in FreeRTOS \cite{freertos} can be either cooperative or preemptive and is purely priority based.
+The maximum priority can be defined by the user. 
+The memory footprint grows with increasing priority number, so it is recommended to choose only as many priority levels as needed.
+The task with the highest priority which is in the Ready state will be scheduled. 
+Tasks can have the same priority if desired.
+Priorities can be changed in runtime.
+\par
+All tasks are managed in doubly linked lists dependent on their state. 
+The Ready state is implemented as a list array indexed by the priority level. 
+When the scheduler is invoked, it first updated the Ready lists and then schedules the next task.
+In case there are multiple tasks in one list, the \ac{RR} algorithm is used to pick the one.
+
+[Picture Ready Queue] 
+ 
+\subsubsection{Scheduling in Linux}\label{sss_scheduling_in_linux} 
+Scheduling in Linux \cite{love:lkd} \cite{jones:itlcfss} is more complex than in FreeRTOS.
+Three scheduling classes are used to determine which task will be selected: \textit{sched\_rt}, \textit{sched\_fair} and \textit{sched\_idletask}.
+Sched\_rt implements the scheduling of real-time tasks and has the highest priority. 
+General purpose tasks are using the sched\_fair class and the remaining class is used by the idle task.
+
+\paragraph{sched\_rt} 
+Linux real-time tasks are always scheduled prior to any other task. 
+The default priority levels range from 0 to 99 where 99 is the highest possible value.
+The maximum priority can be configured by the user. 
+The run queue is implemented comparable to the one of FreeRTOS. 
+In Linux, there are two different scheduling policies for real-time tasks: \ac{RR} (preemptive) and \ac{FIFO} (cooperative).
+
+\paragraph{sched\_fair}
+For the sake of completeness, the fair scheduling algorithm is briefly described in this section.
+Linux was originally developed as a General Purpose \ac{OS}, so its scheduling algorithm is optimized to treat all tasks as fair as possible. 
+The current scheduler is called \textit{\ac{CFS}} and was introduced in Linux kernel 2.6.23.
+It is implemented as a Red-Black tree, which is self-balancing (no path is more than twice as long as any other).
+An element of the tree can be accessed in in O(log n), where n is the total number of nodes in the tree.
+\par
+The prioritization of the \ac{CFS} is based on the time the tasks have already been executed. 
+The lesser the time compared to the other task, the higher the chance to get \ac{CPU} access.
+The most-left node is scheduled on a context switch.
+Further, the priority of an element can be influenced using the \textit{nice} command. 
+It puts a weight on the according node which will change the priority relative to the other nice values.
+
+\section{Task Synchronization}
+\subsection{Events}
+signals
+\subsection{Memory access}
+Example Bank ATM, semaphores
+Message passing
+
+
+\section{Interrupt Handling}\label{s_interrupt_handling}
+Interrupts signals provide an important method for the processor to communicate with peripheral devices.
+The devices range from mice and keyboards to Ethernet or harddrive controllers.
+The interrupt signal from the hardware device is connected to the interrupt controller of the processor. 
+This controller signals the processor that an \ac{IRQ} has arrived.
+Now, as the name suggests, the currently executing process is interrupted, the context saved and the corresponding \ac{ISR} is loaded to be executed.
+Because they disturb the execution flow of other processes, \acp{ISR} should be kept as short as possible.
+Typically, only urgent operations are performed in the \ac{ISR}. 
+For less critical work, e.g. copying data into a transmit buffer of a network device, an extra task is started which can be scheduled later.
+The minimal version of an \ac{ISR} should at least contain the acknowledge of the interrupt so the underlying hardware can continue its work.
+The time between an interrupt being triggered and the first instruction of the corresponding \ac{ISR} is called interrupt latency.
+\par
+Interrupts can occur any time and are serviced immediately.
+Consequently, any code currently running will be interrupted.
+Some sections in the kernel code have to be run atomically to prevent critical errors in the systems.
+Such sections are called critical sections.
+Interrupts are usually disabled on entering a critical section.
+Therefore, servicing the interrupt is postponed what causes a higher interrupt latency.
+Interrupts can be prioritized what causes high priority interrupts to disturb the execution of lower prioritized interrupts.
+This is called interrupt nesting.
+ 
+\subsection{Interrupts in FreeRTOS}
+FreeRTOS itself contains only one interrupt: The timer tick (s. \ref{s_timer_tick}.
+Other devices and interrupts may be installed on demand, but they are not handled by the OS. 
+It is only in charge of task managing and inter-task communication.
+For the application development, it means that an interrupt handler has to be written and registered in the \ac{GIC}.
+As all interrupt handling is up to the programmer, it is easy to keep track of the number of interrupts in the system.
+
+\subsection{Interrupts in Linux}
+The interrupts in Linux are integrated into the operation system.
+Each hardware device needs a driver to communicate with the \ac{OS}.
+This driver provides \textit{open()}, \textit{read()} or \textit{write()} functions to access the device. 
+It has to be registered before the device can be used.
+Drivers can be started at boot time or dynamically be loaded as modules during runtime.
+The interrupt handler is part of the driver and has to be registered in the kernel as well by calling the function \textit{irq\_request()} and on deregistration freed by calling \textit{irq\_free()}.
+When an interrupt occurs, the \textit{do\_IRQ()} kernel function occurs which takes care of all \acp{ISR}. 
+
+[Picture Linux Kernel development, p. 123]
+
+\section{Delays}
+Different delays caused by the underlying hardware or the \ac{OS} are crucial in real-time applications.
+There are mainly three kind of delays:
+\begin{enumerate}
+	\item Delays from interrupts
+	\item Delays from task execution and synchronization
+	\item Delays from cache misses
+\end{enumerate}
+Moreover, the boot time can be crucial in special real-time application.
+[note on uniprocessor systems]
+
+\subsection{Delays from Interrupts}
+The first kind of delays (for details refer to \ref{s_interrupt_handling}) can only be prevented by introducing critical sections. 
+However, this may cause higher interrupt latencies and is counterproductive in applications which rely on a fast interrupt response time.
+Critical sections are mainly found inside of the kernel. 
+As interrupts are caused by \ac{I/O} devices, the delays from interrupts will increase when the system heavily communicates with a large number of peripherals. 
+
+\subsection{Delays from Cache Misses}
+The last cause of delays is caching.
+On one hand, it increases the performance of an application significantly by reducing slow memory accesses. 
+On the other hand, the cache can be used by every process on the system.
+The pages used by the real-time application could be flushed from the cache which causes hardly predicable caches misses.
+Yet, software and special drivers can influence the cache behavior if provided by the hardware architecture.
+Those drivers are available in Linux and can be manually included in FreeRTOS.
+They allow to lock specific cache pages for critical data or applications, but should be used carefully.
+Excessive use of page locking eventually has a negative impact on the overall system behavior.
+
+\subsection{Delays from other Tasks}
+The second source of delays lies in tasks which are currently executing. 
+The minimum time for a high priority task to run is the time which it takes the \ac{OS} to interrupt a low priority task and schedule the new one.
+This time is called preemption time. 
+Moreover, a critical section can also cause the task execution of a low priority task to be delayed.
+Such delays as well as delays from task synchronization (see next section) are \ac{CPU} bound delays compared to delays caused by interrupts.
+
+\subsection{Delays from Task Synchronization}
+
+ 
+   
+\subsection{Boot Time}
+The boot time can be a relevant factor if the system need to start up very fast.
+When a car is started, the driver does not want to wait 15 seconds until the ignition runs.
+Obviously, the boot time depends on the memory print of the operation system and on the underlying hardware.
+But another important factor is the initialization of hardware structures, e.g \ac{FPGA} designs.
+Moreover, a file system may be needed for the \ac{OS} kernel to work properly which must be loaded besides the actual kernel. 
+A boot loader is necessary to start an application or an \ac{OS}.
+For simple programs or light-weight \ac{OS} like FreeRTOS usually an \ac{FSBL} is sufficient.
+Optionally it can load an \ac{FPGA} design as well.
+For more complex systems like Linux \cite{jones:itlbp}, the \ac{FSBL} is used to load a more sophisticated \ac{SSBL}.
+Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image into memory.
+After those steps, the kernel can be decompressed and finally boot.
+While booting, it initializes the file system with the previously loaded image, initializes peripheral devices and finally starts the user space application. 
+\par
+Ways to optimize this process will be discussed later (refer to section \ref{}).
+
+\section{Linux and RT Patch}
+As Linux is a highly complex operation system, it should be discussed in detail more closely.
+Especially the differences between standard Linux and LinuxRT \cite{rostedt:iotrtp} will be pointed out.
+The Linux RT patch aims to make the Linux kernel more preemptive and therefore, significant changes in the kernel structure were made.
+The most important ones are removing large critical sections, reducing interrupt latencies and implementing priority inheritance (refer to \ref{s_interrupt_handling} for more details).
+
+\subsection{Spin Locks}
+As discussed before, large critical sections reduce the responsibility of a system.
+On single \ac{CPU} systems, it is enough to disable interrupts in a critical section, but in multicore systems, concurrent access from multiple \acp{CPU} must be prevented as well.
+Therefore, so called spin locks were implemented. 
+When a spin lock is acquired by one task, another task which tries to take the same spin lock starts spinning in a busy loop.
+The purpose of this is to protect very short critical sections where a context switch takes more time than waiting for the other task to finish.
+Yet, spin locks were also used to protect large sections in the kernel and caused big delays.
+To solve this problem, spin locks were replaced by mutexes when possible which allow the preemption of critical sections.   
+
+\subsection{Threaded Interrupts}
+One other big factor to reduce latencies was the introduction of threaded interrupts in the RT patch.
+Originally, interrupt service requests were handled completely in interrupt context.
+This means that high priority tasks had to wait for low priority interrupts to complete, e.g. disk \ac{I/O}.
+A solution to this is moving the work from the interrupt context to an interruptible thread.
+Therefore, when an interrupt occurs, a working thread in started (or resumed) in the \ac{ISR}.
+As default, those threads have a real-time priority (refer to \ref{sss_scheduling_in_linux}) of 50 in the current implementation.
+This mechanism allows priority based regulation of the \ac{ISR} execution because priorities of real-time tasks can be changed dynamically. 
+Moreover, the delay caused by interrupts decreases significantly for high-priority real-time tasks.
+In case an \ac{IRQ} has to be serviced immediately, there is still the possibility to set the \textit{IRQ\_NODELAY} flag on initialization.
+As a result, the \ac{ISR} will not be threaded but proceeded in the original way. 
+
+\subsection{Priority Inheritance}\label{ss_priority_inheritance}
+A problem which may occur while synchronizing memory access for tasks with different priorities, is starving a high priority task due to unbounded priority inversion.
+This can happen in the following situation \cite{rostedt:iotrtp}:
+Task A to C have different priorities, where A has the lowest and C has the highest.
+Task A takes mutex M and then is preempted by task B.
+Task C attempts to access M as well but blocks as it is already taken.
+Now C is indirectly blocked by B an undefined amount of time, maybe forever.
+\par
+This situation can be resolved by priority inheritance.
+With priority inheritance, task A gets a priority boost when C tries to access the semaphore.
+Therefore, task B is preempted by A and A can leave the critical section.
+As soon as A releases mutex M, the priority level is set back to normal.
+Now C is woken up and can finish its work before B is scheduled again.
