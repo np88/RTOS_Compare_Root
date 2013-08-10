@@ -102,13 +102,43 @@ The most-left node is scheduled on a context switch.
 Further, the priority of an element can be influenced using the \textit{nice} command. 
 It puts a weight on the according node which will change the priority relative to the other nice values.
 
-\section{Task Synchronization}
-\subsection{Events}
-signals
-\subsection{Memory access}
-Example Bank ATM, semaphores
-Message passing
+\section{Intertask Communication and Synchronization}
+In \acp{OS} usually not only one but many different tasks are active.
+These tasks need ways to communicate with each other.
+Moreover, race conditions on critical resources, e.g. concurrent memory access, needs to be prohibited.
+The mechanisms introduced in the following are available for FreeRTOS as well as for Linux.
 
+\subsection{Events}
+In many cases tasks need to wait until another task completes execution.
+Instead of polling a resource (actively waiting and therefore wasting \ac{CPU} resources), tasks usually wait for an event to happen.
+Therefore, a task blocks or sleeps on a specific signal.
+When another task completes execution, it triggers the signal and wakes the task waiting on it.
+Such a signal can also be triggered by an \ac{ISR}
+
+\subsection{Memory access}
+Concurrent memory access of multiple tasks can have undesired results as illustrated in the following example:\\
+Person A and person B want to withdraw money (both 500 Euros) from a bank account via an ATM at the same time.
+Task A starts processing the request of person A.
+It reads the currently saved value X from memory and subtracts 500 Euros.
+At this point it may run out of time and task B is scheduled.
+Task B also reads the currently stored value X from memory (which has not yet been updated) and subtracts 500 Euros.
+Like A before, task B is interrupted at this point and task A is scheduled.
+A writes back the new value X and finishes execution.
+Then, B also writes back its value X.
+Obviously, the value of X - 500 Euros is wrong, it should be X - 1000 Euros. 
+\par
+To prevent such inconsistencies, the memory has to be locked by the task until the correct value has been written back.
+So called \textit{mutexes} can be used for this purpose.
+When a mutex (short for mutual exclusion) is taken by a task, every other task which tries to access this mutex will be blocked.
+By releasing the mutex, the waiting tasks are unblocked.
+Mutexes are a special form of semaphores.
+Semaphores allow a definite number of tasks to access a particular resource, for a mutex it is only one.
+
+\subsection{Message Passing}
+Besides controlling the execution flow of other tasks using the mentioned features, tasks can also pass messages between each other to exchange information. 
+Usually, one task blocks on a message queue until another task puts a message in this queue.
+That event wakes up the blocking task and it retrieves the message.
+This mechanism is a mix of signaling event and synchronizing shared memory access.
 
 \section{Interrupt Handling}\label{s_interrupt_handling}
 Interrupts signals provide an important method for the processor to communicate with peripheral devices.
