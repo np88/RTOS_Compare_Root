@@ -33,12 +33,33 @@ The operation systems under test are FreeRTOS and LinuxRT.
 Both need to be configured such that the implemented interrupt generator can be utilized.
 
 \subsubsection{FreeRTOS}
-As already meantioned, interrupt management does not effect the kernel in FreeRTOS.
+As already mentioned, interrupt management does not effect the kernel in FreeRTOS.
 Therefore, the \ac{OS} itself does not need to be configured.
-Still, the hardware needs to be initialized appropiately on system startup (refer to \ref{ss_interrupts_in_freertos}). 
+Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}). 
+Moreover, FreeRTOS needs an \ac{FSBL} which can be created by the \ac{SDK}.
+The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4.
 
+[Picture of FreeRTOS Booting Flow]
 \subsubsection{LinuxRT}
+Xilinx provides their own distributions of embedded Linux which can be compiled for many different platforms. 
+The starting point in this work is Linux version 3.6 with the corresponding RT patch.
+Setting up LinuxRT is composed of many steps compared to FreeRTOS:
+\begin{enumerate}
+	\item Configuring and building U-Boot (\ac{SSBL})
+	\item Configuring and building Linux-Image (wrapped with U-Boot header):
+		\begin{enumerate}
+			\item Build driver for the new hardware device
+			\item Configure kernel
+			\item Apply RT Patch
+		\end{enumerate}
+	\item Creating a device tree blob\footnote{A device tree is a data structure which describes the underlying hardware. A device tree is passed to the \ac{OS} at boot time, so it can initialize the hardware dynamically.\cite{device_tree}}
+	\item Building a \ac{FSBL}
+	\item Creating a boot image from the files produced in the previous steps
+	\item Configuring and building a file system
+\end{enumerate}
 
+[Picture of Linux Booting Flow/Design Flow]
+  
 
 
 \section{Boot time}
