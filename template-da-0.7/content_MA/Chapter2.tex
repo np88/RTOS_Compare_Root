@@ -4,7 +4,7 @@ First, the conditions under which the experiments have taken place are described
 This includes hardware platform, time measuring technique and setup of the operation systems under test.
 After that every measurement is described in detail beginning with the boot time.
 
-\section{Test Environment}
+\section{Test Environment and tools}
 This section contains a description of the test environment - the hardware platform, the development tools and the configuration of the used \acp{OS}.
 \subsection{Hardware Platform}
 The underlying hardware platform is a Xilinx ZC702 Evaluation Board \cite{xilinx:zc702_ev_board} with an Zynq-7000 XC7Z020 \cite{xilinx:zynq7000}.
@@ -19,12 +19,25 @@ Those pins can be configured to connect either \acp{GPIO}, Ethernet, \ac{SPI} an
 The \ac{PL} and the \ac{PS} can be connected using the \ac{EMIO} pins.
 Moreover, the \ac{EMIO} pins can be used to extend the number of connected peripherals.
 \par
-When a tool is developed utilizing the Zynq platform, most likely both \ac{PS} and \ac{PL} will be included.
-Therefore, an interrupt generator was implemented in the FPGA design.
+When a tool for the Zynq platform is developed, most likely both \ac{PS} and \ac{PL} will be included.
+Therefore, an interrupt generator was implemented in the  \ac{FPGA} design to utilize the \ac{PL}.
+It is connected as a \ac{GPIO}.
+\par
+%\subsection{Development Tools}
+The Xilinx Design Suite version 14.4 was used to create the test environment and the tests.
+The \ac{FPGA} part was designed and synthesized in Xilinx \ac{ISE}.
+The software was developed using Xilinx \ac{SDK}.
 
-\subsection{Development Tools}
+\subsection{\ac{OS} Configuration}
+The operation systems under test are FreeRTOS and LinuxRT.
+Both need to be configured such that the implemented interrupt generator can be utilized.
 
+\subsubsection{FreeRTOS}
+As already meantioned, interrupt management does not effect the kernel in FreeRTOS.
+Therefore, the \ac{OS} itself does not need to be configured.
+Still, the hardware needs to be initialized appropiately on system startup (refer to \ref{ss_interrupts_in_freertos}). 
 
+\subsubsection{LinuxRT}
 
 
 

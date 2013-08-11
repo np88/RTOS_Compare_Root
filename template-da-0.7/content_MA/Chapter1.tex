@@ -161,14 +161,14 @@ Therefore, servicing the interrupt is postponed what causes a higher interrupt l
 Interrupts can be prioritized what causes high priority interrupts to disturb the execution of lower prioritized interrupts.
 This is called interrupt nesting.
  
-\subsection{Interrupts in FreeRTOS}
+\subsection{Interrupts in FreeRTOS}\label{ss_interrupts_in_freertos}
 FreeRTOS itself contains only one interrupt: The timer tick (s. \ref{s_timer_tick}.
 Other devices and interrupts may be installed on demand, but they are not handled by the OS. 
 It is only in charge of task managing and inter-task communication.
 For the application development, it means that an interrupt handler has to be written and registered in the \ac{GIC}.
 As all interrupt handling is up to the programmer, it is easy to keep track of the number of interrupts in the system.
 
-\subsection{Interrupts in Linux}
+\subsection{Interrupts in Linux}\label{ss_interrupts_in_linux}
 The interrupts in Linux are integrated into the operation system.
 Each hardware device needs a driver to communicate with the \ac{OS}.
 This driver provides \textit{open()}, \textit{read()} or \textit{write()} functions to access the device. 
