@@ -5,10 +5,27 @@ This includes hardware platform, time measuring technique and setup of the opera
 After that every measurement is described in detail beginning with the boot time.
 
 \section{Test Environment}
-This section contains a description of the test environment.
-The underlying hardware platform is a Xilinx ZC702 Evaluation Board with an Zynq-7000 XC7Z020 (for details refer to \cite{xilinx:zc702_ev_board }).
+This section contains a description of the test environment - the hardware platform, the development tools and the configuration of the used \acp{OS}.
+\subsection{Hardware Platform}
+The underlying hardware platform is a Xilinx ZC702 Evaluation Board \cite{xilinx:zc702_ev_board} with an Zynq-7000 XC7Z020 \cite{xilinx:zynq7000}.
 The XC7Z020 chip integrates a \ac{PS} and a \ac{PL} on a single die.
- 
+Two ARM Cortex-A9 MPCore application processors running at 666 MHz are located in the \ac{PS}.
+Both cores inherit a 32 KB instruction and a 32 KB data level 1 cache.
+Moreover, they share a 512 KB level 2 cache and 256 K SRAM.
+The \ac{PL} is an Artix-7 from the Xilinx's 7 series FPGA technology and can be used to implement custom hardware designs.
+\par
+The \ac{PS} uses so called \ac{MIO} pins to connect to peripheral devices.
+Those pins can be configured to connect either \acp{GPIO}, Ethernet, \ac{SPI} and others.
+The \ac{PL} and the \ac{PS} can be connected using the \ac{EMIO} pins.
+Moreover, the \ac{EMIO} pins can be used to extend the number of connected peripherals.
+\par
+When a tool is developed utilizing the Zynq platform, most likely both \ac{PS} and \ac{PL} will be included.
+Therefore, an interrupt generator was implemented in the FPGA design.
+
+\subsection{Development Tools}
+
+
+
 
 
 \section{Boot time}

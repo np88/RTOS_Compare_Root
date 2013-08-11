@@ -228,8 +228,8 @@ The delays described in this section are \ac{CPU} bound delays compared to delay
 \subsection{Boot Time}
 The boot time can be a relevant factor if the system need to start up very fast.
 When a car is started, the driver does not want to wait 15 seconds until the ignition runs.
-Obviously, the boot time depends on the memory print of the operation system and on the underlying hardware.
-But another important factor is the initialization of hardware structures, e.g \ac{FPGA} designs.
+Obviously, the boot time depends on the memory print of the operation system and on the medium from which the \ac{OS} is booted.
+Another important factor is the initialization of hardware structures, e.g \ac{FPGA} designs.
 Moreover, a file system may be needed for the \ac{OS} kernel to work properly which must be loaded besides the actual kernel. 
 A boot loader is necessary to start an application or an \ac{OS}.
 For simple programs or light-weight \ac{OS} like FreeRTOS usually an \ac{FSBL} is sufficient.
