@@ -162,7 +162,7 @@ Interrupts can be prioritized what causes high priority interrupts to disturb th
 This is called interrupt nesting.
  
 \subsection{Interrupts in FreeRTOS}\label{ss_interrupts_in_freertos}
-FreeRTOS itself contains only one interrupt: The timer tick (s. \ref{s_timer_tick}.
+FreeRTOS itself contains only one interrupt: The timer tick (s. \ref{ss_timer_tick}.
 Other devices and interrupts may be installed on demand, but they are not handled by the OS. 
 It is only in charge of task managing and inter-task communication.
 For the application development, it means that an interrupt handler has to be written and registered in the \ac{GIC}.
@@ -225,7 +225,7 @@ Dependent on the application and the right synchronization method, the overall l
 \par
 The delays described in this section are \ac{CPU} bound delays compared to delays caused by ac{I/O} interrupts.
  
-\subsection{Boot Time}
+\subsection{Boot Time}\{ss_boot_time}
 The boot time can be a relevant factor if the system need to start up very fast.
 When a car is started, the driver does not want to wait 15 seconds until the ignition runs.
 Obviously, the boot time depends on the memory print of the operation system and on the medium from which the \ac{OS} is booted.
@@ -239,7 +239,7 @@ Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image in
 After those steps, the kernel can be decompressed and finally boot.
 While booting, it initializes the file system with the previously loaded image, initializes peripheral devices and finally starts the user space application. 
 \par
-Ways to optimize this process will be discussed later (refer to section \ref{}).
+Ways to optimize this process will be discussed later (refer to section \ref{s_boot_time}).
 
 \section{Linux and RT Patch}
 As Linux is a highly complex operation system, it should be discussed in detail more closely.

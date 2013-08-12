@@ -13,6 +13,7 @@ Two ARM Cortex-A9 MPCore application processors running at 666 MHz are located i
 Both cores inherit a 32 KB instruction and a 32 KB data level 1 cache.
 Moreover, they share a 512 KB level 2 cache and 256 K SRAM.
 The \ac{PL} is an Artix-7 from the Xilinx's 7 series FPGA technology and can be used to implement custom hardware designs.
+Further, the evaluation board provides 128 Mb of \ac{QSPI} flash memory.
 \par
 The \ac{PS} uses so called \ac{MIO} pins to connect to peripheral devices.
 Those pins can be configured to connect either \acp{GPIO}, Ethernet, \ac{SPI} and others.
@@ -37,12 +38,14 @@ As already mentioned, interrupt management does not effect the kernel in FreeRTO
 Therefore, the \ac{OS} itself does not need to be configured.
 Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}). 
 Moreover, FreeRTOS needs an \ac{FSBL} which can be created by the \ac{SDK}.
+The \ac{FSBL} and the FreeRTOS application must be combined to a boot image.
 The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4.
 
-[Picture of FreeRTOS Booting Flow]
 \subsubsection{LinuxRT}
 Xilinx provides their own distributions of embedded Linux which can be compiled for many different platforms. 
 The starting point in this work is Linux version 3.6 with the corresponding RT patch.
+
+\paragraph{Overview Linux Development process}
 Setting up LinuxRT is composed of many steps compared to FreeRTOS:
 \begin{enumerate}
 	\item Configuring and building U-Boot (\ac{SSBL})
@@ -58,11 +61,70 @@ Setting up LinuxRT is composed of many steps compared to FreeRTOS:
 	\item Configuring and building a file system
 \end{enumerate}
 
-[Picture of Linux Booting Flow/Design Flow]
-  
+[Picture of Linux Design Flow]
+\paragraph{Configuring Linux}
+The goal of the configuration is to create a minimal version of Linux.
+This means to eliminate unnecessary drivers and kernel tools (e.g. tracing tools) from the system. 
+Driver initialization has a negative impact on the boot time.
+Moreover, unnecessary drivers can cause a larger memory print of the system and delays during runtime. 
+As the detailed process of driver elimination is not of interest at this point, only the most important steps will be pointed out:
+\\The \ac{OS} under test is based on a real system which will be used by Siemens in later projects.
+Therefore, only the drivers needed in this system will be kept in the kernel:
+The most important ones are \ac{SPI}, Ethernet and \ac{UART} driver.
+All unnecessary drivers for \ac{USB} devices, blue ray or CD player and more were removed.
+Further, there are options which allow kernel tracing (e.g. ftrace) which were disabled when running the experiments.  
+The final configuration reduces the kernel size from [??] MB to 1,9 MB. 
 
+\subsection{Time measurement}
+The time measurement should be as accurate and fast as possible.
+High measuring overheads could falsify the results, so software timers should be avoided. 
+One elegant way is to access the \ac{CPU} cycle counter register of the ARM Cortex-A9 processor using inline-assembly code [Reference to the ARM Cortex A9 Architecture Manual].
+This code is compiled into four assembly instructions when copying data into an array.
+The advantages of this method are not only a low overhead but also the \ac{OS} independence of the assembly code.
+Hence this method can be used for both FreeRTOS and LinuxRT.
+However, the \ac{CPU} has to keep running at the same frequency during the whole process otherwise the results will be falsified. 
 
-\section{Boot time}
+\section{Boot time}\label{s_boot_time}
+The boot time is the time from powering on the hardware until the first (user) task is run. 
+On the ZC702 Evaluation platform, this time can be measured by utilizing user \acp{LED} on the board.  
+The default state of those LEDs is on, so by turning them off in the first executed task, the exact power up time of the system can be measured.  
+As already mentioned\cite{ss_boot_time}, the boot time depends on the complexity of the operation system and the hardware. 
+Furthermore, the evaluation board provides three different ways of booting an \ac{OS}:
+\begin{enumerate}
+	\item Via \ac{JTag}
+	\item From \ac{SD} card
+	\item From \ac{QSPI} flash
+\end{enumerate}
+The boot from \ac{QSPI} flash is the fastest, hence it will be used in the following experiments.
+The following flow graph illustrates very well the differences between the boot process in FreeRTOS and LinuxRT.
+
+[Picture Comparison Boot Flow Linux and FreeRTOS]
+
+\subsection{Booting in FreeRTOS}
+The booting process of FreeRTOS is shown in the flow graph, all steps are executed.
+There is barely room for optimization in the first two steps of the booting process. 
+However, the last two steps are dependent on the size of the bitstream and the size of the application respectively. 
+
+\subsection{Booting in Linux}
+Obviously, the Linux booting process is more complex than the FreeRTOS one. 
+There are three bottlenecks in this process:
+\begin{itemize}
+	\item Loading the Image from \ac{QSPI} to \ac{RAM}
+	\item Loading the file system from \ac{QSPI} to \ac{RAM}
+	\item Configuring the \ac{FPGA}
+\end{itemize}
+The default Linux configuration provided by Xilinx does not include an \ac{FPGA} bitstream and is run from \ac{SD} card.
+This takes about 15 seconds.
+The transfer of the Linux image and the file system to \ac{RAM} takes about 12 seconds. 
+Besides, by adding a bitstream, this time increases by another 15 seconds.   
+\par
+The very first step to decrease this time has already been done by compressing the Linux kernel.
+The next step is to move the bitstream inside of the RAM image. 
+In Linux, the \ac{PL} can be configures from the \ac{OS} by simply writing the bitstream to the file corresponding to the \ac{FPGA}. 
+This decreases the \ac{FPGA} configuration to a range of milliseconds. 
+Finally, the last step is to change the default file system to a file system that does not need to be loaded by the \ac{SSBL}.
+A good option is to create a \textit{\ac{UBIFS}} file system which is based on \ac{UBI}, .
+
 \section{Interrupt Latency}
 \section{Preemption Time}
 \section{Semaphore Shuffling Time}
