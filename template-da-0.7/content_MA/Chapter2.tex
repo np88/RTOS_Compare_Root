@@ -22,7 +22,7 @@ Moreover, the \ac{EMIO} pins can be used to extend the number of connected perip
 \par
 When a tool for the Zynq platform is developed, most likely both \ac{PS} and \ac{PL} will be included.
 Therefore, an interrupt generator was implemented in the  \ac{FPGA} design to utilize the \ac{PL}.
-It is connected as a \ac{GPIO}.
+It is connected as \ac{GPIO} device.
 \par
 %\subsection{Development Tools}
 The Xilinx Design Suite version 14.4 was used to create the test environment and the tests.
@@ -88,7 +88,7 @@ However, the \ac{CPU} has to keep running at the same frequency during the whole
 The boot time is the time from powering on the hardware until the first (user) task is run. 
 On the ZC702 Evaluation platform, this time can be measured by utilizing user \acp{LED} on the board.  
 The default state of those LEDs is on, so by turning them off in the first executed task, the exact power up time of the system can be measured.  
-As already mentioned\cite{ss_boot_time}, the boot time depends on the complexity of the operation system and the hardware. 
+As already mentioned (see \ref{ss_boot_time}), the boot time depends on the complexity of the operation system and the hardware. 
 Furthermore, the evaluation board provides three different ways of booting an \ac{OS}:
 \begin{enumerate}
 	\item Via \ac{JTag}
@@ -110,7 +110,7 @@ Obviously, the Linux booting process is more complex than the FreeRTOS one.
 There are three bottlenecks in this process:
 \begin{itemize}
 	\item Loading the Image from \ac{QSPI} to \ac{RAM}
-	\item Loading the file system from \ac{QSPI} to \ac{RAM}
+	\item Loading the file system from \ac{QSPI} NOR flash to \ac{RAM}
 	\item Configuring the \ac{FPGA}
 \end{itemize}
 The default Linux configuration provided by Xilinx does not include an \ac{FPGA} bitstream and is run from \ac{SD} card.
@@ -123,10 +123,100 @@ The next step is to move the bitstream inside of the RAM image.
 In Linux, the \ac{PL} can be configures from the \ac{OS} by simply writing the bitstream to the file corresponding to the \ac{FPGA}. 
 This decreases the \ac{FPGA} configuration to a range of milliseconds. 
 Finally, the last step is to change the default file system to a file system that does not need to be loaded by the \ac{SSBL}.
-A good option is to create a \textit{\ac{UBIFS}} file system which is based on \ac{UBI}, .
+A good option is to create a \textit{\ac{UBIFS}} flash file system \cite{ubifs}.
+\ac{UBIFS} is based on \ac{UBI} which itself works on \ac{MTD} devices \cite{mtd}.
+\ac{MTD} is an abstraction layer for raw flash devices (no block devices!) in Linux.
+On top of that, the volume management system \ac{UBI} takes care of mapping logical erase blocks to physical ones.  
+On one hand, \ac{UBIFS} has the advantage of fast mounting speed which is not dependent on the flash size.
+On the other hand, \ac{UBI} initialization depends on the flash size, so the partition size should be kept as low as possible.
+In the current configuration the initialization of the flash image takes about 3 seconds.
+Nonetheless, an experimental new \ac{UBI} feature called \textit{fastmap} is available from Linux kernel 3.7, which allows the attachment of a \ac{UBI} device in almost constant time \cite{ubi}.
+One more advantage is, that \ac{UBIFS} allows to store changes in the file system.
+This is not possible when using a ram disk image.
+\par
+\ac{UBIFS} needs to be enabled in the kernel. 
+The initialization is completely removed from the boot loader, it is done completely on kernel start-up.
+
+\section{Task Switching Time} 
+The task switching time is the time it takes for a task to start after an other task has finished or yielded the processor.
+An important note is, that the task switching time is not preemption time.
+The processor is given away voluntarily.
+Both \acp{OS} implement a yield function which allows the calling task to invoke the scheduler.
+This can be used in the experiment.
+\par
+Two tasks of the same priority are set up, their composition is the same. 
+Both perform a for-loop with the number of executions.
+The first instruction in the loop is the recording of the start time.
+Then a yield is performed what causes a context switch. 
+The first instruction of the newly scheduled task is the recording of the end time.
+Obviously, the first start time is recorded twice because the two tasks are equal.
+Hence, the start time of the last test run is not valid.
+When the for-loop is executed 50000 times in each tasks, 100000 context switches are performed in total.
+An advantage of this method is that all data is collected without overhead which has to be subtracted afterwards.
+\par
+After the last measurement, an evaluation task is started.
+It prints the results to console (via \ac{UART}) so they can be recorded. 
+
+[Picture Execution Flow]
+
 
 \section{Interrupt Latency}
+Interrupt latency is defined as the time which passes from triggering an interrupt until the first instruction of the interrupt service routine. 
+For this  experiment, the assumption is made that devices in real application are often connected as \ac{GPIO}.
+Therefore, the mentioned interrupt generator will be utilized.
+It has a 5ms period of which the positive pulse is 5 us and the remaining time is negative.
+The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see figure [...]).
+Therefore, the time in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
+The detailed execution flow is described in the following:
+\begin{enumerate}
+	\item Start of measurement: Interrupt is generated by \ac{FPGA}.
+	\item Interrupt is handled by \ac{GIC}.
+	\item \ac{CPU} executes \ac{ISR} (depending on implementation)
+	\item Stop of measurement: \ac{LED} is turned on by the \ac{ISR}
+\end{enumerate}
+The only difference between the two operation systems is step number three. 
+To calculate the exact interrupt latency, the time it takes to turn on the \ac{LED} has to be subtracted.
+Consequently, this requires a further experiment:\\
+The \ac{LED} will be toggled in a for-loop.
+As the hardware needs some time to proceed the request, another for-loop is executed inside.
+The time for the for-loop can be measured individually and be subtracted from the execution time.
+
+[Picture interrupt flow]
+
+\subsubsection{Interrupt Measurement FreeRTOS}
+As described before (see \ref{ss_interrupts_in_freertos}), executing the \ac{ISR} is absolutely independent from the \ac{OS}.
+There are only two interrupts which need to be considered here: The timer interrupt (highest priority) and the \ac{GPIO} interrupt.
+Consequently, the execution time is expected to be constant except in the cases where the \ac{GPIO} interrupt is preempted by the timer tick.
+
+\subsubsection{Interrupt Measurement LinuxRT}
+There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
+Dependent on the application, there is the possibility to implement the \ac{ISR} as a threaded interrupt (default in RT) or to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
+Both alternatives shall be implemented.
+It is expected that the non-threaded handling is more predictive.
+ 
 \section{Preemption Time}
-\section{Semaphore Shuffling Time}
+\section{Semaphore Shuffle Time}
 \section{Message Passing Time}
+The message passing time is the time which is takes a task to receive a message sent by another task.
+Two tasks with equal priorities can be used for the test.
+The first task tries to read from a task queue, it is blocked until a message arrives.
+Then the second task is scheduled, sends a message via the message queue and yields immediately. [what kind of message?] 
+Consequently, the first task is unblocked and retrieves the message sent.
+Now that the queue is empty, the test run can be repeated.
+The starting time is measured before a message is sent via the queue by the second task, the ending time after the first task receives the message.
+[Picture with exeecution flow ]
+
 \section{Deadlock Breaking Time}
+The deadlock breaking time is the time which it takes for the \ac{OS} to resolve priority inversion caused by low priority tasks holding a resource needed by a high-priority task. 
+The experiment is set up similar to the given example for priority inheritance (for details refer to \ref{ss_priority_inheritance}) and repeated 100000 times: 
+Task A with the lowest priority starts executing.
+A takes a mutex and starts a second task B with higher priority than itself.
+B preempts the first task and starts task C with the highest priority. 
+C tries to take the same mutex as the first task and is blocked.
+Consequently, the priority of the A is raised, it can finish execution (in the test scenario there is no work to be done), release the mutex and unblock C.
+The starting time is measured before C takes the mutex, the ending time after C returns from the Blocked state.
+To repeat the test, the original state of the tasks has to be restored.
+Therefore, C cancels task B, so it will not preempt A and suspends itself.
+Now A will be scheduled and the test can run again.
+
+[Picture with execution flow]

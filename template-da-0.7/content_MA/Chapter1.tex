@@ -225,7 +225,7 @@ Dependent on the application and the right synchronization method, the overall l
 \par
 The delays described in this section are \ac{CPU} bound delays compared to delays caused by ac{I/O} interrupts.
  
-\subsection{Boot Time}\{ss_boot_time}
+\subsection{Boot Time}\label{ss_boot_time}
 The boot time can be a relevant factor if the system need to start up very fast.
 When a car is started, the driver does not want to wait 15 seconds until the ignition runs.
 Obviously, the boot time depends on the memory print of the operation system and on the medium from which the \ac{OS} is booted.
@@ -256,7 +256,7 @@ The purpose of this is to protect very short critical sections where a context s
 Yet, spin locks were also used to protect large sections in the kernel and caused big delays.
 To solve this problem, spin locks were replaced by mutexes when possible which allow the preemption of critical sections.   
 
-\subsection{Threaded Interrupts}
+\subsection{Threaded Interrupts}\label{ss_threaded_interrupts}
 One other big factor to reduce latencies was the introduction of threaded interrupts in the RT patch.
 Originally, interrupt service requests were handled completely in interrupt context.
 This means that high priority tasks had to wait for low priority interrupts to complete, e.g. disk \ac{I/O}.
