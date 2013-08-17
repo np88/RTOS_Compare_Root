@@ -79,11 +79,15 @@ Instead of polling a resource (actively waiting and therefore wasting \ac{CPU} r
 Therefore, a task blocks or sleeps on a specific signal.
 When another task completes execution, it triggers the signal and wakes the task waiting on it.
 Such a signal can also be triggered by an \ac{ISR}.
-\par
-A special kind of event is when multiple tasks have to be synchronized at one special point in the execution flow.
 
+\subsection{Barriers}\label{ss_barriers}
+Sometimes, multiple tasks have to be synchronized at one specific point in the execution flow.
+Therefore, all tasks have to wait until the others have finished.
+An example is the separation of matrix operations across multiple threads in a multicore system. 
+Another example is an application which depends on different data sets which are collected by multiple threads.
+Before the tasks can continue their work all data has to be collected, hence they are forced to wait at a specific point in time.
 
-\subsection{Memory access}
+\subsection{Memory access}\label{ss_memory_access}
 Concurrent memory access of multiple tasks can have undesired results as illustrated in the following example:\\
 Person A and person B want to withdraw money (both 500 Euros) from a bank account via an ATM at the same time.
 Task A starts processing the request of person A.
@@ -115,18 +119,17 @@ With priority inheritance, task A gets a priority boost when C tries to access t
 Therefore, task B is preempted by A and A can leave the critical section.
 As soon as A releases mutex M, the priority level is set back to normal.
 Now C is woken up and can finish its work before B is scheduled again.
-\par
-Priority inheritance is available in FreeRTOS as well as Linux.
 
 \subsection{Message Passing}
 Besides controlling the execution flow of other tasks using the mentioned features, tasks can also pass messages between each other to exchange information. 
 Usually, one task blocks on a message queue until another task puts a message in this queue.
 That event wakes up the blocking task and it retrieves the message.
 This mechanism is a mix of signaling event and synchronizing shared memory access.
+It is available in Linux as well as in FreeRTOS.
 
 \section{Interrupt Handling}\label{s_interrupt_handling}
 Interrupts signals provide an important method for the processor to communicate with peripheral devices.
-The devices range from mice and keyboards to Ethernet or harddrive controllers.
+The devices range from mice and keyboards to Ethernet or hard drive controllers.
 The interrupt signal from the hardware device is connected to the interrupt controller of the processor. 
 This controller signals the processor that an \ac{IRQ} has arrived.
 Now, as the name suggests, the currently executing process is interrupted, the context saved and the corresponding \ac{ISR} is loaded to be executed.
@@ -147,18 +150,25 @@ This is called interrupt nesting.
  
 \section{Hardware Delays and \ac{OS} jitter}
 Different delays caused by the underlying hardware or the \ac{OS} are crucial in real-time applications.
-The term \textit{delay} refers to 
-There are mainly three kind of delays:
+In this work, the term \textit{delay} refers to unexpected events which extend the execution time of a real-time task.
+In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
+There are mainly three kind of delays and one kind of latency:
 \begin{enumerate}
+	\item Delays from the Operation System
 	\item Delays from interrupts
-	\item Delays from task execution and synchronization
 	\item Delays from cache misses
+	\item Latencies from task execution and synchronization
 \end{enumerate}
 Moreover, the boot time can be crucial in special real-time application.
 [note on uniprocessor systems]
 
+\subsection{Delays from the Operation System}
+The first kind of delay which is inevitable in a running system with an \ac{OS} is the delay caused by the system itself.
+The most significant (and predictable) delay is caused by the timer tick.
+More delays can be produced by background deamons and other system services. 
+
 \subsection{Delays from Interrupts}
-The first kind of delays (for details refer to \ref{s_interrupt_handling}) can only be prevented by introducing critical sections. 
+The second kind of delays (for details refer to \ref{s_interrupt_handling}) can only be prevented by introducing critical sections. 
 However, this may cause higher interrupt latencies and is counterproductive in applications which rely on a fast interrupt response time.
 Critical sections are mainly found inside of the kernel. 
 As interrupts are caused by \ac{I/O} devices, the delays from interrupts will increase when the system heavily communicates with a large number of peripherals. 
@@ -173,9 +183,10 @@ Those drivers are available in Linux and can be manually included in FreeRTOS.
 They allow to lock specific cache pages for critical data or applications, but should be used carefully.
 Excessive use of page locking eventually has a negative impact on the overall system behavior.
 
-\subsection{Delays Task Execution and Synchronization}
-The second source of delays lies in tasks which are currently executing. 
-There are several sources of latencies:
+\subsection{Latencies from Task Execution and Synchronization}
+The last point is more correctly defined as latency, not as delay.
+It specifies the time which is caused by using several synchronization methods of the \ac{OS}. 
+This time is predictable:
 \\The obvious one is the task switching time when a context switch occurs.
 This is not avoidable and happens either when the timer tick occurs (refer to \ref{ss_timer_tick}) or when a task blocks, finishes or voluntarily releases the \ac{CPU}.
 Another latency related to scheduling is the preemption time.
@@ -190,7 +201,7 @@ This means, that whenever this action happens, the \ac{OS} has to check whether 
 Moreover, if a task with higher priority was woken up, the current task is preempted and a context switch takes place.
 Dependent on the application and the right synchronization method, the overall latency in a system can be reduced.
 \par
-The delays described in this section are \ac{CPU} bound delays compared to delays caused by ac{I/O} interrupts.
+The delays described in this section are \ac{CPU} bound delays compared to delays caused by \ac{I/O} interrupts.
  
 \subsection{Boot Time}\label{ss_boot_time}
 The boot time can be a relevant factor if the system need to start up very fast.
@@ -234,9 +245,31 @@ It is only in charge of task managing and inter-task communication.
 For the application development, it means that an interrupt handler has to be written and registered in the \ac{GIC}.
 As all interrupt handling is up to the programmer, it is easy to keep track of the number of interrupts in the system.
 
-\subsection{Synchronization features in FreeRTOS}
+\subsection{Synchronization Features in FreeRTOS}
 In this section a short overview of the FreeRTOS \ac{API} is given.
+Most \ac{API} functions are implemented for the usage in tasks as well as in \acp{ISR}.
+\ac{ISR} functions have the suffix \textit{FromISR}.
 
+\subsubsection{Tasks and Co-routines}
+Every FreeRTOS application is structured as a set of tasks and/or co-routines.
+Each task is provided with its own stack where the current processor context is saved on a task switch.
+Tasks are fully prioritized, support full preemption and are not restricted in usage.
+Co-routines, on the other hand, share a stack within the same application. 
+This reduces their amount of \ac{RAM} needed but requires special considerations and restrictions in implementation (for more details refer to \cite{freertos_coroutines_tasks}).
+
+\subsubsection{Semaphores}
+FreeRTOS supports three kind of semaphores:
+\begin{itemize}
+	\item Binary Semaphores
+	\item Mutexes
+	\item Counting Semaphores
+\end{itemize}
+All semaphores support priority inheritance.
+The implementation is based on message queues (see \ref{ss_freertos_message_queues}).
+Mutexes and counting semaphores correspond to the memory access synchronization tools mentioned above (see \ref{ss_memory_access}).
+These semaphores need to be given back once taken.
+Binary semaphores are used as signals for event synchronization.
+In contrary to counting semaphores and mutexes, binary semaphores are taken by the task which is waiting for an event and given by the signaling task. 
 
 \section{LinuxRT}
 This section described the Linux \ac{OS} in more detail.
@@ -277,8 +310,32 @@ It has to be registered before the device can be used.
 Drivers can be started at boot time or dynamically be loaded as modules during runtime.
 The interrupt handler is part of the driver and has to be registered in the kernel as well by calling the function \textit{irq\_request()} and on deregistration freed by calling \textit{irq\_free()}.
 When an interrupt occurs, the \textit{do\_IRQ()} kernel function occurs which takes care of all \acp{ISR}. 
+Interrupt handler cannot be implemented by a user.
+Application run in user mode have to use read, write or \ac{I/O} control functions to access the specific device.
 
 [Picture Linux Kernel development, p. 123]
+
+\subsection{Synchronization Features in Linux}
+Linux provides multiple \acp{API} with a variety of task synchronization features. 
+\ac{POSIX} compliant features are most common because of their compatibility across many platforms.
+\subsubsection{Processes and Pthreads}
+A program which runs in Linux is called a process. 
+Each process has an own process ID and maintains its own stack. 
+The usual way to create multi-tasking systems in Linux is by using so called \textit{pthreads}.
+pthreads are light-weight tasks which have their own stack but share the parent's virtual memory and environment.
+They can be prioritized and scheduled individually. 
+\subsubsection{Semaphores}
+In Linux, there are similar kind of semaphores compared to FreeRTOS.
+The \ac{POSIX} \ac{API} provides access to counting semaphores which are referred to simply as semaphores.
+Further, mutexes can be used on their own and in combination with condition variables.
+Condition variables provide a way to notify a specific thread when a special event has occurred. 
+On initialization, attributes can be passed to semaphores and mutexes.
+The attribute determines for example whether a mutex supports priority inheritance or not.
+\subsubsection{Barriers}
+Barriers are a very convenient and powerful way of synchronizing threads. 
+The \ac{API} provides conventional barriers as described above (see \ref{ss_barriers}) and the \textit{join} function.
+The difference between the two is that the barrier synchronizes multiple running threads but the join function allows one thread to wait for the termination of other threads.
+Only one thread can call the join function for another thread, the result of multiple calls is undefined.
 
 \subsection{RT patch vs. standard kernel}
 The Linux RT patch aims to make the Linux kernel more preemptive and therefore, significant changes in the kernel structure were made.
@@ -303,4 +360,13 @@ As default, those threads have a real-time priority (refer to \ref{ss_scheduling
 This mechanism allows priority based regulation of the \ac{ISR} execution because priorities of real-time tasks can be changed dynamically. 
 Moreover, the delay caused by interrupts decreases significantly for high-priority real-time tasks.
 In case an \ac{IRQ} has to be serviced immediately, there is still the possibility to set the \textit{IRQ\_NODELAY} flag on initialization.
-As a result, the \ac{ISR} will not be threaded but proceeded in the original way. 
+As a result, the \ac{ISR} will not be threaded but proceeded in the original way.
+
+\section{Quantifying an Operation System}
+There are many different parameters to quantify \acp{RTOS}.
+Some important ones besides real-time capability are freedom of charge, memory footprint, available drivers, licensing, \ac{API} richness and support \cite{Anh:sapeortosfsm}.   
+Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates to use in future projects.
+\par
+To determine which one of the two is suitable which kind of real-time applications, a set of tests has to be defined and performed.
+Consequently, the parameters which have an influence on the execution time have to be determined and analyzed.
+  
