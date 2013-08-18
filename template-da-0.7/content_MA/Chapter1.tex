@@ -43,11 +43,14 @@ Its frequency can be programmed in FreeRTOS as well as in Linux.
 The tick is triggered by a timer interrupt a definite number of times per second - the standard on both systems is 100 times. 
 If the tick period is too low, tasks may finish running a long time before the next tick occurs.
 Therefore, processor time might be wasted.
-On the other hand, if the tick period is too high, the \ac{OS} overhead on the system grows. 
+On the other hand, if the tick period is too high, the \ac{OS} overhead on the system grows.
+There are no instructions on how to determine the optimum tick period, this is dependent on the applications running on that system. 
 Programmers can influence the scheduling on a running system by calling the \textit{yield} function which invokes the scheduler.
 Moreover, the timer \ac{ISR} is usually used to update the internal system time. 
 As the timer tick is implemented in an \ac{ISR}, it causes latency in the system by interrupting the currently executing code. 
-Jitter in tasks caused by the operation system is called \textit{OS jitter}.
+Some \acp{OS} provide a configuration called \textit{Tickless kernel}.
+It disables the timer interrupt at all when there is no task runnable because rescheduling is not necessary.
+%Jitter in tasks caused by the operation system is called \textit{OS jitter}.
  
 [Picture for timer tick] 
 
@@ -79,6 +82,7 @@ Instead of polling a resource (actively waiting and therefore wasting \ac{CPU} r
 Therefore, a task blocks or sleeps on a specific signal.
 When another task completes execution, it triggers the signal and wakes the task waiting on it.
 Such a signal can also be triggered by an \ac{ISR}.
+This kind of synchronization can also be realized using semaphores (see \ref{ss_memory_access}).
 
 \subsection{Barriers}\label{ss_barriers}
 Sometimes, multiple tasks have to be synchronized at one specific point in the execution flow.
@@ -148,7 +152,7 @@ Therefore, servicing the interrupt is postponed what causes a higher interrupt l
 Interrupts can be prioritized what causes high priority interrupts to disturb the execution of lower prioritized interrupts.
 This is called interrupt nesting.
  
-\section{Hardware Delays and \ac{OS} jitter}
+\section{Hardware Delays and \ac{OS} jitter}\label{s_hardware_delays_and_os_jitter}
 Different delays caused by the underlying hardware or the \ac{OS} are crucial in real-time applications.
 In this work, the term \textit{delay} refers to unexpected events which extend the execution time of a real-time task.
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
@@ -213,9 +217,9 @@ A boot loader is necessary to start an application or an \ac{OS}.
 For simple programs or light-weight \ac{OS} like FreeRTOS usually an \ac{FSBL} is sufficient.
 Optionally it can load an \ac{FPGA} design as well.
 For more complex systems like Linux \cite{jones:itlbp}, the \ac{FSBL} is used to load a more sophisticated \ac{SSBL}.
-Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image into memory.
+Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image and a hardware initialization file into memory (device tree).
 After those steps, the kernel can be decompressed and finally boot.
-While booting, it initializes the file system with the previously loaded image, initializes peripheral devices and finally starts the user space application. 
+While booting, it initializes the file system with the previously loaded image as well as peripheral devices and finally starts the user space application. 
 \par
 Ways to optimize this process will be discussed later (refer to section \ref{s_boot_time}).
 
@@ -362,11 +366,62 @@ Moreover, the delay caused by interrupts decreases significantly for high-priori
 In case an \ac{IRQ} has to be serviced immediately, there is still the possibility to set the \textit{IRQ\_NODELAY} flag on initialization.
 As a result, the \ac{ISR} will not be threaded but proceeded in the original way.
 
-\section{Quantifying an Operation System}
+\section{Mathematical Quantification of Operation Systems}
 There are many different parameters to quantify \acp{RTOS}.
 Some important ones besides real-time capability are freedom of charge, memory footprint, available drivers, licensing, \ac{API} richness and support \cite{Anh:sapeortosfsm}.   
 Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates to use in future projects.
-\par
 To determine which one of the two is suitable which kind of real-time applications, a set of tests has to be defined and performed.
 Consequently, the parameters which have an influence on the execution time have to be determined and analyzed.
+In the following, the boot time and the real-time task or application run time are described mathematically.
+
+\subsection{Boot Time} 
+The boot time $ t_{boot} $ can be calculated straight forward from the already discussed parts of the boot flow (refer to \ref{ss_boot_time}):
+\begin{itemize}
+	\item Time to load the \ac{FSBL} $ t_{fsbl} $
+	\item Time to program the \ac{FPGA} $ t_{fpga} $
+	\item Time to load the \ac{OS} $ t_{osload} $
+	\item Time to load the \ac{SSBL}$ t_{ssbl} $ 
+	\item Time to load device tree $t_tree $
+	\item Time to load the file system $ t_{filesys}$
+	\item Time to boot the \ac{OS} $ t_{boot} $
+\end{itemize} 
+As already discussed, the complexity of the boot process is dependent on the \ac{OS}.
+For Linux, the boot time consists of all steps listed above whereas FreeRTOS only needs the first three steps. 
   
+\subsection{Applications and Real-Time Tasks}
+The execution time of a task is referred to as latency.
+It depends mainly on the executed application code, the underlying hardware and the latency caused by calls to synchronizing mechanisms of the \ac{OS}. 
+For real-time tasks, latency should be as deterministic as possible.
+Unexpected delays, mainly from interrupts, cause latency to vary.
+This variation is called jitter and, logically, should be as low as possible. 
+\par
+Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, the execution time of a specific real-time task or application\footnote{In the following, the term application also refers to one run of a critical real-time task.} can be described by the following factors:
+\begin{enumerate}
+	\item Deterministic part $ t_{det} = t_{app} + t_{os} + t_{isr} $: 		
+		\begin{enumerate}
+			\item Execution time for application code $ t_{app} $ 
+			\item Execution time for \ac{OS} related features where $ n_{os} $ is the number of \ac{OS} 
+						related features and $ x_{os}^{i} $ is the number of times this feature was used in the application 
+						$ t_{os} = \sum\limits_{i=1}^{n_{os}} {x_i * t_{os}^{i}} $
+				\item Execution time for \acp{ISR} belonging to the application $ n_{isr} $ is the number of 
+						\acp{ISR} executed during the application and $ x_{isr}^{i} $ is the number of times this interrupt
+						occurs during the application
+						$ t_{isr} = \sum\limits_{i=1}^{n_{isr}} {x_i * t_{isr}^{i}} $						
+		\end{enumerate}	
+  \item Not deterministic part $ t_{non-det} = t_{tick} + t_{int} + t_{cache} + t_{deam} $:	
+		\begin{enumerate}
+			\item Delay caused by timer tick $ t_{tick} $
+			\item Delay caused by other interrupts where $ n_{int} $ is the number of interrupts available in the system 
+						$ t_{int} = \sum\limits_{i=1}^{n_{int}} {t_{int}^{i}} $
+			\item Delay caused by cache misses where $ n_{cache} $ is the number of cache misses 
+						$ t_{cache} =  \sum\limits_{i=1}^{n_{cache}} {t_{cache}^{i}}$
+			\item Delay caused by \ac{OS} deamon processes where $ n_{deam} $ is the number of deamon processes 
+						$ t_{deam} = \sum\limits_{i=1}^{n_{deam}} {t_{deam}^{i}} $
+		\end{enumerate}	
+\end{enumerate}
+ 
+$ t_{non-det} $ is also dependent on the probability of the single delays.
+As only the worst case execution time is of interest for further consideration, the formula stated above can be used for the calculation of $ t_{non-det} $ without modification.     
+
+%\subsubsection{Practical Interpretation}
+%To compare the two \acp{OS} and determine whether it is suitable for a specific application, the parameter described in the previous section have to be determined.

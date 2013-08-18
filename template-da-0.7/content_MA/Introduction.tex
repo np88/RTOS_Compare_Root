@@ -13,10 +13,10 @@ In contrast to General Purpose \acp{OS}, operation systems for embedded devices 
 A special kind of embedded systems are \acp{RTOS} which are designed to meet specific deadlines. 
 The main property of an \ac{RTOS} is determinism (and not necessarily high-speed performance). 
 %Such \ac{RTOS} are mainly used for security applications. 
-Real-time systems are divided into three classes, depending of the consequence caused by missing a deadline:
+Real-time systems are divided into two main classes, depending of the consequence caused by missing a deadline:
 \begin{itemize}
 	\item Hard
-	\item Firm
+	%\item Firm
 	\item Soft
 \end{itemize}
 In hard real-time systems, missing a deadline causes system failure and is not tolerable.  
@@ -24,9 +24,10 @@ An example is the engine control system of a car which can be damaged or cause a
 Another example is the release of an airbag in a car. 
 It has to be triggered immediately when a crash happens, any delay could cause the loss of lives. 
 More applications can be found in medical systems or industry processing control.  
-In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
+%In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
 These kind of systems are usually used for application with a continuous data flow like multimedia streaming applications or on-line reservation systems.
+Missing of one data packet in these application may cause noise in a video conference but no lives would be harmed.
 \par
 The class of a system always depends on the application. 
 To meet the given requirements, the underlying hardware and - often - an \ac{OS} have to be chosen appropriately. 
