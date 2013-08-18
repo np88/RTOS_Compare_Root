@@ -475,3 +475,14 @@ Whenever other interrupts are added to the system, they are not considered jitte
 In LinuxRT, the number of interrupts depends on the drivers loaded. 
 Yet, there is still the possibility to remove unnecessary drivers and control the inputs of the system to avoid as much jitter as possible.
 
+\paragraph{Cache Misses}
+Cache misses can partly be controlled by careful application design.
+The less memory an applications uses, the less is the probability of a cache miss.
+Moreover, Linux provides a driver to lock specific memory pages in \ac{RAM}.
+This function was specifically designed to be used to support deterministic behavior in real-time applications.
+Nevertheless, the programmer is in charge of using this function correctly.
+
+\paragraph{Deamons}
+Deamons are background processes which may not only cause jitter but also slow down the boot process. 
+They do not exist in FreeRTOS.
+Unnecessary deamons in Linux can be detected and removed from the system.
