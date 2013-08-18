@@ -275,6 +275,11 @@ These semaphores need to be given back once taken.
 Binary semaphores are used as signals for event synchronization.
 In contrary to counting semaphores and mutexes, binary semaphores are taken by the task which is waiting for an event and given by the signaling task. 
 
+\subsection{Booting in FreeRTOS}
+The booting process of FreeRTOS consists of booting the \ac{ROM} file, loading and running the \ac{FSBL}, optionally loading the bitstream and finally loading and running the application (compare to figure \ref{}).
+There is barely room for optimization in the first two steps of the booting process. 
+However, the last two steps are dependent on the size of the bitstream and the size of the application respectively.
+
 \section{LinuxRT}
 This section described the Linux \ac{OS} in more detail.
 The focus is on the scheduling algorithm, interrupt handling and synchronization features.
@@ -341,6 +346,15 @@ The \ac{API} provides conventional barriers as described above (see \ref{ss_barr
 The difference between the two is that the barrier synchronizes multiple running threads but the join function allows one thread to wait for the termination of other threads.
 Only one thread can call the join function for another thread, the result of multiple calls is undefined.
 
+\subsection{Booting in Linux}
+Obviously, the Linux booting process is more complex than the FreeRTOS one (see figure \ref{s_boot_time}). 
+Linux uses not only an \ac{FSBL} but also a \ac{SSBL}.
+Moreover, Linux needs a file system to run properly and a device tree.
+The device tree has to be loaded during booting as well and provides information on hardware initialization.
+If an \ac{FPGA} design is included in the system, this has to be loaded as well.
+\par
+All these factors have an impact on the boot time and there are different configuration alternatives for example to initialize the \ac{FPGA} or to load the file systems (see \ref{} for more details). 
+
 \subsection{RT patch vs. standard kernel}
 The Linux RT patch aims to make the Linux kernel more preemptive and therefore, significant changes in the kernel structure were made.
 The most important ones are removing large critical sections, reducing interrupt latencies and implementing priority inheritance (refer to \ref{s_interrupt_handling} for more details).
@@ -377,6 +391,7 @@ In the following, the boot time and the real-time task or application run time a
 \subsection{Boot Time} 
 The boot time $ t_{boot} $ can be calculated straight forward from the already discussed parts of the boot flow (refer to \ref{ss_boot_time}):
 \begin{itemize}
+	\item Time to boot \ac{ROM}
 	\item Time to load the \ac{FSBL} $ t_{fsbl} $
 	\item Time to program the \ac{FPGA} $ t_{fpga} $
 	\item Time to load the \ac{OS} $ t_{osload} $
@@ -403,12 +418,12 @@ Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, th
 			\item Execution time for \ac{OS} related features where $ n_{os} $ is the number of \ac{OS} 
 						related features and $ x_{os}^{i} $ is the number of times this feature was used in the application 
 						$ t_{os} = \sum\limits_{i=1}^{n_{os}} {x_i * t_{os}^{i}} $
-				\item Execution time for \acp{ISR} belonging to the application $ n_{isr} $ is the number of 
+			\item Execution time for \acp{ISR} belonging to the application $ n_{isr} $ is the number of 
 						\acp{ISR} executed during the application and $ x_{isr}^{i} $ is the number of times this interrupt
 						occurs during the application
 						$ t_{isr} = \sum\limits_{i=1}^{n_{isr}} {x_i * t_{isr}^{i}} $						
 		\end{enumerate}	
-  \item Not deterministic part $ t_{non-det} = t_{tick} + t_{int} + t_{cache} + t_{deam} $:	
+  \item Not deterministic part, jitter $ t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{deam} $:	
 		\begin{enumerate}
 			\item Delay caused by timer tick $ t_{tick} $
 			\item Delay caused by other interrupts where $ n_{int} $ is the number of interrupts available in the system 
@@ -423,5 +438,26 @@ Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, th
 $ t_{non-det} $ is also dependent on the probability of the single delays.
 As only the worst case execution time is of interest for further consideration, the formula stated above can be used for the calculation of $ t_{non-det} $ without modification.     
 
-%\subsubsection{Practical Interpretation}
-%To compare the two \acp{OS} and determine whether it is suitable for a specific application, the parameter described in the previous section have to be determined.
+\section{Benchmark Preparation}
+To compare the two \acp{OS} and determine whether it is suitable for a specific application, the parameter described in the previous section have to be determined.
+Only features available in both \acp{OS} will be considered.
+The goal is to determine worst case times for all of the single parameters.
+The needed benchmarks for the deterministic and non-deterministic part will be briefly discussed in the following:
+\subsection{Rhealstone Benchmark for deterministic Application Latency}\label{ss_rhealstone_benchmark_for_deterministic_application_latency}
+The application code is not available at the time where the times are measured, so $ t_{app} $ has to be estimated. As the two \ac{OS} are running on the same hardware platform, $ t_{app} $ is equal for both \acp{OS}.
+\par
+For the latencies related to the \ac{OS} and the interrupt latency the Rhealstone benchmark can be utilized. 
+As already mentioned, it was introduced by Kar and Porter in 1989 \cite{kar:artbp} and was further modified and published by Kar in 1990 \cite{kar:itrb}.
+The purpose of the Rhealstone benchmark was to find a metric for real-time systems which is comparable to the Dhrystone \cite{weicker:dasspb} and Whetstone \cite{wichmann:asb} benchmarks.
+This benchmark is a weighted mean of the following six parameters:
+\begin{itemize}
+	\item Interrupt latency
+	\item Task switching time
+	\item Preemption time
+	\item Semaphore shuffling time
+	\item Deadlock breaking time
+	\item Message passing latency
+\end{itemize}
+Details on the single parameters in detail are given in the next chapter (see \ref{ch_measurements}).
+
+\subsection{Jitter}

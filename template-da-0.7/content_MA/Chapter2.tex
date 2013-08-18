@@ -98,21 +98,17 @@ Furthermore, the evaluation board provides three different ways of booting an \a
 The boot from \ac{QSPI} flash is the fastest, hence it will be used in the following experiments.
 The following flow graph illustrates very well the differences between the boot process in FreeRTOS and LinuxRT.
 
-[Picture Comparison Boot Flow Linux and FreeRTOS]
-
-\subsection{Booting in FreeRTOS}
-The booting process of FreeRTOS is shown in the flow graph, all steps are executed.
-There is barely room for optimization in the first two steps of the booting process. 
-However, the last two steps are dependent on the size of the bitstream and the size of the application respectively. 
+[Picture Comparison Boot Flow Linux and FreeRTOS] 
 
 \subsection{Booting in Linux}
-Obviously, the Linux booting process is more complex than the FreeRTOS one. 
+
 There are three bottlenecks in this process:
 \begin{itemize}
 	\item Loading the Image from \ac{QSPI} to \ac{RAM}
 	\item Loading the file system from \ac{QSPI} NOR flash to \ac{RAM}
 	\item Configuring the \ac{FPGA}
 \end{itemize}
+
 The default Linux configuration provided by Xilinx does not include an \ac{FPGA} bitstream and is run from \ac{SD} card.
 This takes about 15 seconds.
 The transfer of the Linux image and the file system to \ac{RAM} takes about 12 seconds. 
@@ -183,12 +179,12 @@ The time for the for-loop can be measured individually and be subtracted from th
 
 [Picture interrupt flow]
 
-\subsubsection{Interrupt Measurement FreeRTOS}
+\subsection{Interrupt Measurement FreeRTOS}
 As described before (see \ref{ss_interrupts_in_freertos}), executing the \ac{ISR} is absolutely independent from the \ac{OS}.
 There are only two interrupts which need to be considered here: The timer interrupt (highest priority) and the \ac{GPIO} interrupt.
 Consequently, the execution time is expected to be constant except in the cases where the \ac{GPIO} interrupt is preempted by the timer tick.
 
-\subsubsection{Interrupt Measurement LinuxRT}
+\subsection{Interrupt Measurement LinuxRT}
 There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
 Dependent on the application, there is the possibility to implement the \ac{ISR} as a threaded interrupt (default in RT) or to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
 Both alternatives shall be implemented.
