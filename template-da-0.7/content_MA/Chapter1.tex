@@ -435,8 +435,8 @@ Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, th
 		\end{enumerate}	
 \end{enumerate}
  
-$ t_{non-det} $ is also dependent on the probability of the single delays.
-As only the worst case execution time is of interest for further consideration, the formula stated above can be used for the calculation of $ t_{non-det} $ without modification.     
+$ t_{jitter} $ is also dependent on the probability of the single delays.
+As only the worst case execution time is of interest for further consideration, the formula stated above can be used for the calculation of $ t_{jitter} $ without modification.     
 
 \section{Benchmark Preparation}
 To compare the two \acp{OS} and determine whether it is suitable for a specific application, the parameter described in the previous section have to be determined.
@@ -461,3 +461,17 @@ This benchmark is a weighted mean of the following six parameters:
 Details on the single parameters in detail are given in the next chapter (see \ref{ch_measurements}).
 
 \subsection{Jitter}
+The jitter $ t_{jitter} $ should be as low as possible. 
+Therefore, all causes of delays are briefly examined whether they can possibly be eliminated.
+
+\paragraph{Timer Tick} 
+The timer tick occurs at a predefined frequency and cannot be eliminated without radical changes to the kernel.
+One benefit is that this delay is deterministic and can be included into the application design. 
+
+\paragraph{Interrupts}
+Interrupts usually occur infrequently and hence cause undefined delays. 
+In FreeRTOS, the only interrupt available in the system is the timer tick.
+Whenever other interrupts are added to the system, they are not considered jitter.
+In LinuxRT, the number of interrupts depends on the drivers loaded. 
+Yet, there is still the possibility to remove unnecessary drivers and control the inputs of the system to avoid as much jitter as possible.
+
