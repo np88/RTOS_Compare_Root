@@ -317,12 +317,17 @@ Each hardware device needs a driver to communicate with the \ac{OS}.
 This driver provides \textit{open()}, \textit{read()} or \textit{write()} functions to access the device. 
 It has to be registered before the device can be used.
 Drivers can be started at boot time or dynamically be loaded as modules during runtime.
-The interrupt handler is part of the driver and has to be registered in the kernel as well by calling the function \textit{irq\_request()} and on deregistration freed by calling \textit{irq\_free()}.
-When an interrupt occurs, the \textit{do\_IRQ()} kernel function occurs which takes care of all \acp{ISR}. 
-Interrupt handler cannot be implemented by a user.
+The interrupt handler is part of the driver and has to be registered in the kernel by calling the function \textit{irq\_request()} and deregistered by calling \textit{irq\_free()}.
+When an interrupt occurs (compare figure \ref{fig_irq_path_linux}), the \textit{do\_IRQ()} kernel function occurs which takes care of all \acp{ISR}. 
+Interrupt handler cannot be implemented by a user application.
 Application run in user mode have to use read, write or \ac{I/O} control functions to access the specific device.
 
-[Picture Linux Kernel development, p. 123]
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.33]{inputs/pictures_ch1/irq_path_linux}
+	\end{center}
+	\caption[Path of an interrupt from hardware through the kernel]{Path of an interrupt from hardware through the kernel \cite{love:lkd}} \label{fig_irq_path_linux}
+\end{figure}
 
 \subsection{Synchronization Features in Linux}
 Linux provides multiple \acp{API} with a variety of task synchronization features. 
@@ -417,11 +422,11 @@ Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, th
 			\item Execution time for application code $ t_{app} $ 
 			\item Execution time for \ac{OS} related features where $ n_{os} $ is the number of \ac{OS} 
 						related features and $ x_{os}^{i} $ is the number of times this feature was used in the application 
-						$ t_{os} = \sum\limits_{i=1}^{n_{os}} {x_i * t_{os}^{i}} $
+						$ t_{os} = \sum\limits_{i=1}^{n_{os}} {x_{os}^{i} * t_{os}^{i}} $
 			\item Execution time for \acp{ISR} belonging to the application $ n_{isr} $ is the number of 
 						\acp{ISR} executed during the application and $ x_{isr}^{i} $ is the number of times this interrupt
 						occurs during the application
-						$ t_{isr} = \sum\limits_{i=1}^{n_{isr}} {x_i * t_{isr}^{i}} $						
+						$ t_{isr} = \sum\limits_{i=1}^{n_{isr}} {x_{isr}^{i} * t_{isr}^{i}} $						
 		\end{enumerate}	
   \item Not deterministic part, jitter $ t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{deam} $:	
 		\begin{enumerate}
@@ -430,8 +435,9 @@ Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, th
 						$ t_{int} = \sum\limits_{i=1}^{n_{int}} {t_{int}^{i}} $
 			\item Delay caused by cache misses where $ n_{cache} $ is the number of cache misses 
 						$ t_{cache} =  \sum\limits_{i=1}^{n_{cache}} {t_{cache}^{i}}$
-			\item Delay caused by \ac{OS} deamon processes where $ n_{deam} $ is the number of deamon processes 
-						$ t_{deam} = \sum\limits_{i=1}^{n_{deam}} {t_{deam}^{i}} $
+			\item Delay caused by \ac{OS} deamon processes where $ n_{deam} $ is the number of deamon processes and
+						$ x_{deam}^{i} $ is the number of times this deamon is run during application execution
+						$ t_{deam} = \sum\limits_{i=1}^{n_{deam}} {x_{deam}^{i} * t_{deam}^{i}} $
 		\end{enumerate}	
 \end{enumerate}
  
@@ -459,9 +465,11 @@ This benchmark is a weighted mean of the following six parameters:
 	\item Message passing latency
 \end{itemize}
 Details on the single parameters in detail are given in the next chapter (see \ref{ch_measurements}).
+In contrast to Kar's procedure, the absolute values are used 
 
 \subsection{Jitter}
 The jitter $ t_{jitter} $ should be as low as possible. 
+This requires careful consideration while configuring the underlying \ac{OS} and designing real-time applications.
 Therefore, all causes of delays are briefly examined whether they can possibly be eliminated.
 
 \paragraph{Timer Tick} 

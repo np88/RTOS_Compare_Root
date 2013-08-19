@@ -36,14 +36,14 @@ Both need to be configured such that the implemented interrupt generator can be 
 \subsubsection{FreeRTOS}
 As already mentioned, interrupt management does not effect the kernel in FreeRTOS.
 Therefore, the \ac{OS} itself does not need to be configured.
-Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}). 
+Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}) and an \ac{ISR} needs to be implemented. 
 Moreover, FreeRTOS needs an \ac{FSBL} which can be created by the \ac{SDK}.
 The \ac{FSBL} and the FreeRTOS application must be combined to a boot image.
 The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4.
 
 \subsubsection{LinuxRT}
 Xilinx provides their own distributions of embedded Linux which can be compiled for many different platforms. 
-The starting point in this work is Linux version 3.6 with the corresponding RT patch.
+The starting point in this work is the Xilinx Linux version 3.6 with the corresponding RT patch.
 
 \paragraph{Overview Linux Development process}
 Setting up LinuxRT is composed of many steps compared to FreeRTOS:
@@ -64,26 +64,44 @@ Setting up LinuxRT is composed of many steps compared to FreeRTOS:
 [Picture of Linux Design Flow]
 \paragraph{Configuring Linux}
 The goal of the configuration is to create a minimal version of Linux.
-This means to eliminate unnecessary drivers and kernel tools (e.g. tracing tools) from the system. 
+This means to eliminate kernel tools (e.g. tracing tools) and unnecessary drivers from the system. 
 Driver initialization has a negative impact on the boot time.
-Moreover, unnecessary drivers can cause a larger memory print of the system and delays during runtime. 
+Moreover, drivers can cause a larger memory print of the system and delays during runtime. 
 As the detailed process of driver elimination is not of interest at this point, only the most important steps will be pointed out:
 \\The \ac{OS} under test is based on a real system which will be used by Siemens in later projects.
 Therefore, only the drivers needed in this system will be kept in the kernel:
 The most important ones are \ac{SPI}, Ethernet and \ac{UART} driver.
-All unnecessary drivers for \ac{USB} devices, blue ray or CD player and more were removed.
+All other drivers for \ac{USB} devices, blue ray or CD player and more were removed.
 Further, there are options which allow kernel tracing (e.g. ftrace) which were disabled when running the experiments.  
-The final configuration reduces the kernel size from [??] MB to 1,9 MB. 
+The final configuration reduces the kernel size from 2,8[?] MB to 1,9 MB. 
 
 \subsection{Time measurement}
 The time measurement should be as accurate and fast as possible.
 High measuring overheads could falsify the results, so software timers should be avoided. 
 One elegant way is to access the \ac{CPU} cycle counter register of the ARM Cortex-A9 processor using inline-assembly code [Reference to the ARM Cortex A9 Architecture Manual].
 This code is compiled into four assembly instructions when copying data into an array.
-The advantages of this method are not only a low overhead but also the \ac{OS} independence of the assembly code.
+The advantages of this method is not only low overhead but also the \ac{OS} independence of the assembly code.
 Hence this method can be used for both FreeRTOS and LinuxRT.
-However, the \ac{CPU} has to keep running at the same frequency during the whole process otherwise the results will be falsified. 
+However, the \ac{CPU} has to keep running at the same frequency during the whole process otherwise the results will be falsified.
 
+\subsection{Application Design}
+This section provides a short overview over the general application design and execution.
+To prevent interruption by other tasks, the real-time tasks must have the highest priority in the system.
+Usually, 100000 measurements are collected per operation system per test.
+If this is not valid in special cases, it will be mentioned in the benchmark description.
+ 
+\subsubsection{FreeRTOS}
+Generally, there are no other tasks in FreeRTOS than the ones created for the test.
+Consequently, the real-time tasks have the highest priority in the system anyway.
+
+\subsubsection{LinuxRT}
+In Linux, multi-tasking applications are realized using pthreads.
+The development of an application should be kept as simple as possible, therefore all applications will be implemented in user space.
+All real-time thread in Linux get the highest possible priority using the preemptive \ac{RR} \ac{RT} scheduling class.
+As the parent process and its child threads are scheduled individually, the parent has to have a higher priority than the children while creating the child threads.
+If not, it will be interrupted by the first thread with higher priority and hence cannot invoke the other ones.
+When all threads have been started, the priority of the parent is simply decreased below the one of the lowest real-time thread.
+ 
 \section{Boot time}\label{s_boot_time}
 The boot time is the time from powering on the hardware until the first (user) task is run. 
 On the ZC702 Evaluation platform, this time can be measured by utilizing user \acp{LED} on the board.  
@@ -97,11 +115,12 @@ Furthermore, the evaluation board provides three different ways of booting an \a
 \end{enumerate}
 The boot from \ac{QSPI} flash is the fastest, hence it will be used in the following experiments.
 The following flow graph illustrates very well the differences between the boot process in FreeRTOS and LinuxRT.
+Whereas there is no time optimization needed for FreeRTOS because the complete boot takes only 1,1 seconds, there are multiple optimization possibilities for LinuxRT. 
 
 [Picture Comparison Boot Flow Linux and FreeRTOS] 
 
-\subsection{Booting in Linux}
-
+\paragraph{Booting in Linux}
+The booting process in Linux is shown in figure \ref{}.
 There are three bottlenecks in this process:
 \begin{itemize}
 	\item Loading the Image from \ac{QSPI} to \ac{RAM}
@@ -131,38 +150,16 @@ One more advantage is, that \ac{UBIFS} allows to store changes in the file syste
 This is not possible when using a ram disk image.
 \par
 \ac{UBIFS} needs to be enabled in the kernel. 
-The initialization is completely removed from the boot loader, it is done completely on kernel start-up.
-
-\section{Task Switching Time} 
-The task switching time is the time it takes for a task to start after an other task has finished or yielded the processor.
-An important note is, that the task switching time is not preemption time.
-The processor is given away voluntarily.
-Both \acp{OS} implement a yield function which allows the calling task to invoke the scheduler.
-This can be used in the experiment.
-\par
-Two tasks of the same priority are set up, their composition is the same. 
-Both perform a for-loop with the number of executions.
-The first instruction in the loop is the recording of the start time.
-Then a yield is performed what causes a context switch. 
-The first instruction of the newly scheduled task is the recording of the end time.
-Obviously, the first start time is recorded twice because the two tasks are equal.
-Hence, the start time of the last test run is not valid.
-When the for-loop is executed 50000 times in each tasks, 100000 context switches are performed in total.
-An advantage of this method is that all data is collected without overhead which has to be subtracted afterwards.
-\par
-After the last measurement, an evaluation task is started.
-It prints the results to console (via \ac{UART}) so they can be recorded. 
-
-[Picture Execution Flow]
+The initialization is completely removed from the boot loader, it is done on kernel start-up.
 
 
 \section{Interrupt Latency}
 Interrupt latency is defined as the time which passes from triggering an interrupt until the first instruction of the interrupt service routine. 
 For this  experiment, the assumption is made that devices in real application are often connected as \ac{GPIO}.
-Therefore, the mentioned interrupt generator will be utilized.
+Therefore, the described interrupt generator will be utilized.
 It has a 5ms period of which the positive pulse is 5 us and the remaining time is negative.
 The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see figure [...]).
-Therefore, the time in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
+The time in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
 The detailed execution flow is described in the following:
 \begin{enumerate}
 	\item Start of measurement: Interrupt is generated by \ac{FPGA}.
@@ -187,11 +184,77 @@ Consequently, the execution time is expected to be constant except in the cases 
 \subsection{Interrupt Measurement LinuxRT}
 There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
 Dependent on the application, there is the possibility to implement the \ac{ISR} as a threaded interrupt (default in RT) or to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
-Both alternatives shall be implemented.
+Both alternatives will be implemented.
 It is expected that the non-threaded handling is more predictive.
+
+
+\section{Task Switching Time} 
+The task switching time is the time it takes for a task to start after an other task has finished or yielded the processor.
+It is important to point out, that the task switching time is not preemption time because the processor is given away voluntarily.
+Both \acp{OS} implement a yield function which allows the calling task to invoke the scheduler.
+It can be used in the experiment.
+\par
+Two tasks of the same priority are set up, their composition is the same. 
+Both perform a for-loop with the number of executions.
+The first instruction in the loop is the recording of the start time.
+Then a yield is performed what causes a context switch. 
+The first instruction of the newly scheduled task is the recording of the end time.
+Obviously, the first start time is recorded twice because the two tasks are equal.
+Hence, the start time of the last test run is not valid.
+When the for-loop is executed 50000 times in each task, 100000 context switches are performed in total.
+An advantage of this method is that all data is collected without any overhead which has to be subtracted afterwards.
+
+[Picture Execution Flow]
  
 \section{Preemption Time}
+The preemption time is the time which it takes to interrupt a task and schedule another task of higher priority.
+This can happen when a task with a high priority is woken up by an other task or \ac{ISR} triggering a signal or releasing a mutex.
+In this experiment, there is one low priority task A and a high priority task B.
+B starts first and blocks on a signal event.
+A is running in a permanent loop and reading the current \ac{CPU} cycle counter register.
+At some point in time, an \ac{IRQ} occurs and the task is interrupted.
+From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context switch happens.
+When B is activated, it measures the ending time and yields.
+This reactivates A and the test starts over.
+[diagram]
+
 \section{Semaphore Shuffle Time}
+The semaphore shuffle time defined by Kar is used to measure the overhead caused by using semaphores to ensure mutual exclusion.
+More precisely, it is the time between a task B being blocked on a semaphore which is taken by task A and and the unblock when the semaphore is released.  
+Based on the tests, mutexes are used to implement mutual exclusion.
+Besides, it is possible, that a task protects a critical section by mutexes, but is not interrupted by another task.
+This case has to be considered as well.
+Further, signaling is a widely used feature to synchronize events, therefore it has to be included in the benchmark as well.  
+Consequently, the semaphore shuffling results in three different tests.
+
+\paragraph{Semaphore Shuffling Time by Kar}
+In the first benchmark, two task are passing a mutex from one to the other.
+Task A starts by taking the the mutex and yields.
+Then the time measurement is started, task B tries to take the same mutex and is blocked.
+Now A is rescheduled, releases the semaphore and yields again.
+Task B is unblocked, the time is stopped and B releases the semaphore.
+By yielding the processor, task A is scheduled and the test starts over.
+\par 
+[diagram]
+
+\paragraph{Semaphore in a single Task}
+This benchmark is very easy to implement.
+A task requires a semaphore and releases it immediately after.
+The time it takes to perform these executions is measured.
+Then the test starts over.
+\par 
+[diagram]
+
+\paragraph{Event Signaling}
+This benchmark measures the time it takes a task to wake up on a signal event.
+Task A blocks on a signal.
+After that, task B is scheduled, triggers the signal and yields the processor. 
+The trigger causes task A to wake up.
+The starting point of the measurement is before task B triggers the signal and the ending point after the awakaning of A.
+This sequence is repeated.
+\par 
+[diagram] 
+
 \section{Message Passing Time}
 The message passing time is the time which is takes a task to receive a message sent by another task.
 Two tasks with equal priorities can be used for the test.
