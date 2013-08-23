@@ -143,10 +143,10 @@ Interrupts signals provide an important method for the processor to communicate 
 The devices range from mice and keyboards to Ethernet or hard drive controllers.
 The interrupt signal from a hardware device is connected to the interrupt controller of the processor. 
 This controller signals the processor that an \ac{IRQ} has arrived.
-Now, as the name suggests, the currently executing process is interrupted, the context saved and the corresponding \ac{ISR} is loaded to be executed.
-Because they disturb the execution flow of other processes, \acp{ISR} should be kept as short as possible.
-Typically, only urgent operations are performed in the \ac{ISR}. 
-For less critical work, e.g. copying data into a transmit buffer of a network device, an extra task is started which can be scheduled later.
+Now, as the name suggests, the currently executing process is interrupted, the context saved and the corresponding \ac{ISR} loaded to be executed.
+Because they disturb the execution of other processes, \acp{ISR} should be kept as short as possible.
+Typically, only urgent operations are performed in an \ac{ISR}. 
+For less critical work, e.g. copying data into the buffer of a network device, an extra task is started which can be scheduled later.
 The minimal version of an \ac{ISR} should at least contain the acknowledge of the interrupt so the underlying hardware can continue its work.
 The time between an interrupt being triggered and the first instruction of the corresponding \ac{ISR} is called interrupt latency.
 \par
@@ -156,14 +156,14 @@ Some sections in the kernel code have to be run atomically to prevent critical e
 Such sections are called critical sections.
 Interrupts are usually disabled on entering a critical section.
 Therefore, servicing the interrupt is postponed what causes a higher interrupt latency.
-Interrupts can be prioritized what causes high priority interrupts to disturb the execution of lower prioritized interrupts.
-This is called interrupt nesting.
+Interrupts can be prioritized what enables interrupt nesting.
+This causes high priority interrupts to disturb the execution of lower prioritized interrupts.
  
 \section{Hardware Delays and \ac{OS} jitter}\label{s_hardware_delays_and_os_jitter}
 Different delays caused by the underlying hardware or the \ac{OS} are crucial in real-time applications.
 In this work, the term \textit{delay} refers to unexpected events which extend the execution time of a real-time task.
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
-There are mainly three kind of delays and one kind of latency:
+There are mainly four kind of delays and one kind of latency:
 \begin{enumerate}
 	\item Delays from the Operation System
 	\item Delays from interrupts
@@ -174,7 +174,7 @@ Moreover, the boot time can be crucial in special real-time application.
 [note on uniprocessor systems]
 
 \subsection{Delays from the Operation System}
-The first kind of delay which is inevitable in a running system with an \ac{OS} is the delay caused by the system itself.
+The obvious kind of delay which is inevitable when using an \ac{OS} is the delay caused by the \ac{OS} itself.
 The most significant (and predictable) delay is caused by the timer tick.
 More delays can be produced by background daemons and other system services. 
 
@@ -182,47 +182,53 @@ More delays can be produced by background daemons and other system services.
 The second kind of delays (for details refer to \ref{s_interrupt_handling}) can only be prevented by introducing critical sections. 
 However, this may cause higher interrupt latencies and is counterproductive in applications which rely on a fast interrupt response time.
 Critical sections are mainly found inside of the kernel. 
-As interrupts are caused by \ac{I/O} devices, the delays from interrupts will increase when the system heavily communicates with a large number of peripherals. 
+As interrupts are mainly caused by \ac{I/O} devices, the delays from interrupts will increase when the system heavily communicates with a large number of peripherals. 
 
 \subsection{Delays from Cache Misses}
 The last cause of delays is caching.
-On one hand, it increases the performance of an application significantly by reducing slow memory accesses. 
-On the other hand, the cache can be used by every process on the system.
-The pages used by the real-time application could be flushed from the cache which causes hardly predicable caches misses.
-Yet, software and special drivers can influence the cache behavior if provided by the hardware architecture.
-Those drivers are available in Linux and can be manually included in FreeRTOS.
-They allow to lock specific cache pages for critical data or applications, but should be used carefully.
-Excessive use of page locking eventually has a negative impact on the overall system behavior.
+Caches are fast buffers which allow faster data access to data currently cached.
+They are often built up hierarchical (level 1, level 2, ...) and divided into data and instruction caches.
+A typical set up are separate level 1 data and instruction caches for each \ac{CPU} and a shared level 2 cache for both data and instructions for all \ac{CPUS}.
+On one hand, it caches increase the performance of an application significantly by reducing slower memory accesses to the \ac{RAM}. 
+On the other hand, the cache is used by every process on the system.
+This can cause data currently needed by a real-time application not to be present in the cache, a cache miss occurs.
+The reload of the data to the cache causes a delay.
+
+%The pages used by the real-time application could be flushed from the cache which causes hardly predicable caches misses.
+%Yet, software and special drivers can influence the cache behavior if provided by the hardware architecture.
+%Those drivers are available in Linux and can be manually included in FreeRTOS.
+%They allow to lock specific cache pages for critical data or applications, but should be used carefully.
+%Excessive use of page locking eventually has a negative impact on the overall system behavior.
 
 \subsection{Latencies from Task Execution and Synchronization}
-The last point is more correctly defined as latency, not as delay.
-It specifies the time which is caused by using several synchronization methods of the \ac{OS}. 
+The last aspect is more correctly defined as latency, not as delay.
+It specifies the time which is caused by using several synchronization methods provided by the \ac{OS}. 
+These latencies are implementation specific.
 This time is predictable:
 \\The obvious one is the task switching time when a context switch occurs.
-This is not avoidable and happens either when the timer tick occurs (refer to \ref{ss_timer_tick}) or when a task blocks, finishes or voluntarily releases the \ac{CPU}.
+This is not avoidable and happens either when the timer tick occurs (refer to \ref{ss_timer_tick}), a task blocks, finishes or voluntarily releases the \ac{CPU}.
 Another latency related to scheduling is the preemption time.
 This is the time which it takes the \ac{OS} to interrupt a low priority task and schedule a high priority task.
-The interrupt can be caused by giving a semaphore, sending a message or waking up the task from an \ac{ISR}.
+The rescheduling can be caused by giving a semaphore, sending a message or waking up the task from an \ac{ISR}.
 \par
-Besides from scheduling, task synchronization causes latencies in a \ac{OS}.
-This process causes latencies which are dependent on the implementation and therefore specific for every \ac{OS}.
+Besides, task synchronization causes latencies in a \ac{OS}.
 Examples are semaphores, mutexes, message passing or signals. 
 When a mutex is released, other tasks may be unblocked.
 This means, that whenever this action happens, the \ac{OS} has to check whether tasks can be moved from the Blocked state to the Ready state.
-Moreover, if a task with higher priority was woken up, the current task is preempted and a context switch takes place.
-Dependent on the application and the right synchronization method, the overall latency in a system can be reduced.
+If a task with higher priority has been woken up, the current task is preempted and a context switch takes place.
+Dependent on the application and the right synchronization mechanism, the overall system latency can be reduced.
 \par
 The delays described in this section are \ac{CPU} bound delays compared to delays caused by \ac{I/O} interrupts.
  
 \subsection{Boot Time}\label{ss_boot_time}
-The boot time can be a relevant factor if the system need to start up very fast.
-When a car is started, the driver does not want to wait 15 seconds until the ignition runs.
-Obviously, the boot time depends on the memory print of the operation system and on the medium from which the \ac{OS} is booted.
+The boot time can be a relevant factor for the choice of a specific \ac{OS} if the system needs to start up very fast.
+When a car is started, the driver does not want to wait 15 seconds until the ignition starts running.
+Obviously, the boot time depends on the memory print of the operation system and on the medium from which the \ac{OS} is loaded.
 Another important factor is the initialization of hardware structures, e.g \ac{FPGA} designs.
 Moreover, a file system may be needed for the \ac{OS} kernel to work properly which must be loaded besides the actual kernel. 
 A boot loader is necessary to start an application or an \ac{OS}.
-For simple programs or light-weight \ac{OS} like FreeRTOS usually an \ac{FSBL} is sufficient.
-Optionally it can load an \ac{FPGA} design as well.
+For simple programs or light-weight \ac{OS} like FreeRTOS a \ac{FSBL} is usually sufficient.
+This can as well optionally load an \ac{FPGA} design.
 For more complex systems like Linux \cite{jones:itlbp}, the \ac{FSBL} is used to load a more sophisticated \ac{SSBL}.
 Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image and a hardware initialization file into memory (device tree).
 After those steps, the kernel can be decompressed and finally boot.
