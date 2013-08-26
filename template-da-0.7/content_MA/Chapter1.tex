@@ -194,12 +194,6 @@ On the other hand, the cache is used by every process on the system.
 This can cause data currently needed by a real-time application not to be present in the cache, a cache miss occurs.
 The reload of the data to the cache causes a delay.
 
-%The pages used by the real-time application could be flushed from the cache which causes hardly predicable caches misses.
-%Yet, software and special drivers can influence the cache behavior if provided by the hardware architecture.
-%Those drivers are available in Linux and can be manually included in FreeRTOS.
-%They allow to lock specific cache pages for critical data or applications, but should be used carefully.
-%Excessive use of page locking eventually has a negative impact on the overall system behavior.
-
 \subsection{Latencies from Task Execution and Synchronization}
 The last aspect is more correctly defined as latency, not as delay.
 It specifies the time which is caused by using several synchronization methods provided by the \ac{OS}. 
@@ -295,8 +289,19 @@ However, the last two steps are dependent on the size of the bitstream and the s
 
 \section{LinuxRT}
 This section described the Linux \ac{OS} in more detail.
-The focus is on the scheduling algorithm, interrupt handling and synchronization features.
+The focus is on memory management, the scheduling algorithm, interrupt handling and synchronization features.
 Moreover, the differences between the standard Linux Kernel and the RT patch.
+
+\subsection{Memory Management}
+Linux uses a file system to store user programs and system data. 
+This file system is usually larger than the available \ac{RAM}, therefore it is provided on an other medium.
+The medium can be either located on a removable flash disk like an \ac{SD} card, a \ac{QSPI} flash or another medium.
+Because it provides much faster data access, the \ac{RAM} is much more expensive and usually smaller than the other medium. 
+For faster data access, program data stored in the file system is loaded from hard disk into \ac{RAM} on run time.
+Because of efficiency considerations, the data blocks are managed in pages of consequent data.
+The pages used by the real-time application could be flushed from the \ac{RAM} which causes hardly predicable reloading of pages.
+Yet, there is the possibility to to lock specific pages for critical data or applications in \ac{RAM}.
+This application should be used carefully because it might increase the run time of one application but decrease the over-all system performance.   
 
 \subsection{Scheduling in Linux}\label{ss_scheduling_in_linux} 
 Scheduling in Linux \cite{love:lkd} \cite{jones:itlcfss} is more complex than in FreeRTOS.
