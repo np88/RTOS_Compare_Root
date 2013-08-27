@@ -60,7 +60,7 @@ Setting up LinuxRT is composed of many steps compared to FreeRTOS:
 		\end{enumerate}
 	\item Creating a device tree blob\footnote{A device tree is a data structure which describes the underlying hardware. A device tree is passed to the \ac{OS} at boot time, so it can initialize the hardware dynamically.\cite{device_tree}}
 	\item Building a \ac{FSBL}
-	\item Creating a boot image from the files produced in the previous steps
+	\item Creating a boot image (\textit{zlib} compressed) from the files produced in the previous steps 
 	\item Configuring and building a file system
 \end{enumerate}
 
@@ -146,13 +146,15 @@ There are three bottlenecks in this process:
 
 The default Linux configuration provided by Xilinx does not include an \ac{FPGA} bitstream and is run from \ac{SD} card.
 This takes 15 seconds in total.
-The transfer of the Linux image and the file system takes about 12 seconds. 
-Besides, by adding a bitstream (copying it to the \ac{SD} card), this time increases by another 15 seconds.   
+Whereas $t_{boot}$ is only 3 seconds and $t_{fpga}$ is 0, the other times sum up to 12 seconds, which is mostly due to the transfer of the Linux image and the file system . 
+Besides, by adding a bitstream (copying it to the \ac{SD} card), this time increases by another $ t_{fpga} $ of 15 seconds.   
 \par
 The very first step to decrease this time has already been done by compressing the Linux kernel (see \ref{sss_linuxrt}).
-The next step is to move the bitstream inside of the \ac{RAM} image. 
-In Linux, the \ac{PL} can be configures from the \ac{OS} by simply writing the bitstream to the file corresponding to the \ac{FPGA}. 
-This decreases the \ac{FPGA} configuration to a range of milliseconds. 
+The next step is to move the bitstream inside of the boot image.
+This has to be done not only to speed up the booting process but also because of the limited \ac{QSPI} size of 128 kB.
+By moving the bitstream into the boot image, it is compressed as well. 
+In Linux, the \ac{PL} can be configured from the \ac{OS} by simply writing the bitstream to the device file corresponding to the \ac{FPGA}. 
+This decreases $t_{fpga}$ to a range of milliseconds. 
 Finally, the last step is to change the default file system to a file system that does not need to be loaded by the \ac{SSBL}.
 A good option is to create a \textit{\ac{UBIFS}} flash file system \cite{ubifs}.
 \ac{UBIFS} is based on \ac{UBI} which itself works on \ac{MTD} devices \cite{mtd}.
@@ -160,21 +162,20 @@ A good option is to create a \textit{\ac{UBIFS}} flash file system \cite{ubifs}.
 On top of that, the volume management system \ac{UBI} takes care of mapping logical erase blocks to physical ones.  
 On one hand, \ac{UBIFS} has the advantage of fast mounting speed which is not dependent on the flash size.
 On the other hand, \ac{UBI} initialization depends on the flash size, so the partition size should be kept as low as possible.
-In the current configuration the initialization of the flash image takes about 3 seconds.
+In the current configuration the initialization time of the file system $t_{filesys}$ takes 3 seconds and is part of $t_{osload}$.
 Nonetheless, an experimental new \ac{UBI} feature called \textit{fastmap} is available from Linux kernel 3.7, which allows the attachment of a \ac{UBI} device in almost constant time \cite{ubi}.
-One more advantage is, that \ac{UBIFS} allows to store changes in the file system.
-This is not possible when using a ram disk image.
+Another advantage is, that \ac{UBIFS} allows changes to the file system to be stored at power-off.
+This is not possible when using a standard ram disk image.
 \par
-\ac{UBIFS} needs to be enabled in the kernel. 
 The initialization is completely removed from the boot loader, it is done on kernel start-up.
-
+A disadvantage of this method is that \ac{UBIFS} needs a reconfiguration of the kernel. 
 
 \section{Interrupt Latency}
 Interrupt latency is defined as the time which passes from triggering an interrupt until the first instruction of the interrupt service routine. 
 For this  experiment, the assumption is made that devices in real application are often connected as \ac{GPIO}.
 Therefore, the described interrupt generator will be utilized.
 It has a 5ms period of which the positive pulse is 5 us and the remaining time is negative.
-The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see figure [...]).
+The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see figure \ref{}).
 The time in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
 The detailed execution flow is described in the following:
 \begin{enumerate}
