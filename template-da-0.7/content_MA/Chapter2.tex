@@ -120,9 +120,7 @@ Further, the evaluation board provides three different ways of booting an \ac{OS
 \end{enumerate}
 The boot from \ac{QSPI} flash is the fastest and the one most likely used in later projects.
 Hence it will be used in the following experiments as well.
-The following flow graph illustrates the differences between the boot process in FreeRTOS and LinuxRT.
-
-[Picture Comparison Boot Flow Linux and FreeRTOS] 
+The flow graphs illustrate the differences between the boot process in FreeRTOS (fig. \ref{fig_boot_freertos}) and LinuxRT (fig. \ref{fig_boot_linux_xilinx} and fig. \ref{fig_boot_linux_custom}).
 
 \subsection{Booting in FreeRTOS}
 The booting process is already described in the previous chapter (see \ref{ss_booting_in_freertos}).
@@ -132,11 +130,36 @@ $t_{boot}^{free} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} $
 \par
 Whereas there is no time optimization needed for FreeRTOS because the complete boot takes only 1,1 seconds, there are multiple optimization possibilities for LinuxRT. 
 
-\subsection{Booting in Linux}
-The booting process in Linux is shown in figure \ref{}, it can be quantified as follows:
+\begin{figure}[htb]
+		\begin{center}
+			\includegraphics[scale=0.7]{inputs/pictures_ch2/boot_freertos}
+			\caption[FreeRTOS boot]{FreeRTOS Boot \cite{xilinx:zbff}} \label{fig_boot_freertos}
+		\end{center}
+\end{figure} 
+
+\subsection{Booting in Linux}\label{ss_booting_in_linux}
+The booting process in Linux is shown in figure \ref{fig_boot_linux_xilinx}, it can be quantified as follows:
 \par
 $t_{boot}^{Linux} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} +  t_{ssbl} + t_{tree} + t_{filesys} + t_{boot}$
-\par
+
+\begin{figure}[htb]
+	\begin{center}
+	\begin{minipage}[bth]{6,8cm}
+		\begin{center}
+			\includegraphics[scale=0.7]{inputs/pictures_ch2/boot_linux_xilinx}
+			\caption[Xilinx Standard Boot]{Xilinx Standard Boot \cite{xilinx:zbff}}
+		\end{center}	
+	\end{minipage}\label{fig_boot_linux_xilinx}
+	\hspace{0,5cm}
+	\begin{minipage}[bth]{6,8cm}
+		\begin{center}
+			\includegraphics[scale=0.7]{inputs/pictures_ch2/boot_linux_custom}
+			\caption[Xilinx Standard Boot]{Xilinx Custom Boot \cite{xilinx:zbff}} 
+		\end{center}
+	\end{minipage}\label{fig_boot_linux_custom}
+	\end{center}
+\end{figure}
+
 There are three bottlenecks in this process:
 \begin{itemize}
 	\item Loading the Image from \ac{QSPI} to \ac{RAM}

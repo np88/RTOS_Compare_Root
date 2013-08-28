@@ -16,11 +16,15 @@ The decision is based on the priority and the current state of the task.
 
 \subsection{Task States}\label{ss_task_states}
 Dependent on events or resource availability, tasks can enter different states. 
-In the following, the state flow used in FreeRTOS \cite{freertos} is described. 
+In the following, the state flow (fig. \ref{fig_taskstates}) used in FreeRTOS \cite{freertos} is described. 
 The state flow in Linux is related, but extended by other states which are not of interest for further consideration. 
-\par
 
-[Task state picture]
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.8]{inputs/pictures_ch1/taskstates}
+	\end{center}
+	\caption[Task State Transitions in FreeRTOS]{Task State Transitions in FreeRTOS with API Calls \cite{freertos}} \label{fig_taskstates}
+\end{figure}
 
 \paragraph{Ready}
 When a task is schedulable, it is in the \textit{Ready} state  
@@ -42,7 +46,6 @@ This task cannot wake up on an event but has to be explicitly unsuspended to ree
 The timer tick invokes the scheduler.
 Its frequency can be programmed in FreeRTOS as well as in Linux.
 The tick is triggered by a timer interrupt a definite number of times per second - the standard on both systems is 100 times. 
-On one hand, if the tick period is too low, tasks may finish running a long time before the next tick occurs.
 Therefore, processor time might be wasted.
 On the other hand, the \ac{OS} overhead in the system grows if the tick period is too high.
 There are no instructions on how to determine the optimum tick period, this is dependent on the specific applications running on that system. 
@@ -50,12 +53,23 @@ Programmers can influence the scheduling by calling the \textit{yield} function 
 Moreover, the timer \ac{ISR} is usually used to update the internal system time. 
 When no high resolution timer is available, the granularity of the system time depends on the tick.
 As the timer tick is implemented in an \ac{ISR}, it causes latency in the system by interrupting the currently executing code. 
-Some \acp{OS} provide a configuration called \textit{Tickless kernel}.
+Some \acp{OS} provide a configuration called \textit{Tickless kernel} (see fig. \ref{fig_tick}).
 It disables the timer interrupt at all when there is no task runnable because rescheduling is not necessary.
 %Jitter in tasks caused by the operation system is called \textit{OS jitter}.
- 
-[Picture for timer tick] 
 
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.48]{inputs/pictures_ch1/tick}
+		\caption[Standard and tickless kernel]{Standard tick (left), tickless kernel (right) \cite{barry:ftssp}} \label{fig_tick}
+	\end{center}
+\end{figure}
+
+\subsection{Idle Task}
+The \textit{Idle Task} is scheduled when no other tasks are present in the Ready queue because the processor is not allowed to run out of work.
+It usually has the lowest possible priority.
+This task is often used to put the \ac{CPU} in a low-power mode, e.g. scaling down frequency or executing the \textit{halt} instruction. 
+Moreover, it can be used to perform background processes or as indicator for capacity utilization.  
+  
 \subsection{Scheduling Policies}\label{ss_scheduling_policy} 
 The scheduler decides which task will run next (is allowed to enter the Ready state). 
 The decision is based on the scheduling policy of the \ac{OS}.
@@ -67,12 +81,6 @@ The scheduling policy is crucial for \acp{RTOS} because it determines the handli
 Obviously, real-time tasks usually have the highest priority and should not be preempted by tasks with lower priority.
 For details on scheduling in Linux and FreeRTOS refer to the corresponding sections (\ref{ss_scheduling_in_linux}) and \ref{ss_scheduling_in_freertos}.
 
-\subsection{Idle Task}
-The \textit{Idle Task} is scheduled when no other tasks are present in the Ready queue because the processor is not allowed to run out of work.
-It usually has the lowest possible priority.
-This task is often used to put the \ac{CPU} in a low-power mode, e.g. scaling down frequency or executing the \textit{halt} instruction. 
-Moreover, it can be used to perform background processes or as indicator for capacity utilization.  
- 
 \section{Intertask Communication and Synchronization}\label{s_intertask_communication}
 In \acp{OS} usually not only one but many different tasks are active.
 These tasks need ways to be synchronized with each other.
@@ -95,11 +103,28 @@ Before the tasks can continue their work, all data has to be available.
 Such synchronization points are called barriers.
 
 \subsection{Memory access}\label{ss_memory_access}
-Concurrent memory access of multiple tasks can have undesired results as illustrated in the following example:\\
+Concurrent memory access of multiple tasks can have undesired results as illustrated in the following example(see table \ref{tab_example_concurrent_memory_access}) :\\
 Person A and person B want to withdraw money from the same bank account (both 500 Euros) from a bank account via ATM at the same time.
-\par
-[Picture of concurrent memory access]
-\par
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline
+				Task A 							& Task B 							& Memory  \\
+				\hline 
+				-- 									& -- 									& X 			\\
+			  get X 							& -- 									& X				\\
+			  increment X by 500 	& --									& X				\\
+			  --									& get X								& X				\\
+		 		--		 							& increment X by 500	& X				\\
+			  write back X			 	& --									& X	+ 500	\\
+			  --									& write back X				& X + 500	\\				   
+			\hline
+		\end{tabular}
+	\caption{Example for concurrent memory access}
+	\label{tab_example_concurrent_memory_access}
+\end{table}
+
 Task A starts processing the request of person A.
 It reads the currently saved value X from memory and subtracts 500 Euros.
 At this point, it may run out of time, so task B is scheduled.
@@ -162,16 +187,24 @@ This causes high priority interrupts to disturb the execution of lower prioritiz
 \section{Hardware Delays and \ac{OS} jitter}\label{s_hardware_delays_and_os_jitter}
 Different delays caused by the underlying hardware or the \ac{OS} are crucial in real-time applications.
 In this work, the term \textit{delay} refers to unexpected events which extend the execution time of a real-time task.
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.8]{inputs/pictures_ch1/delay}
+	\end{center}
+	\caption[Delay in task caused by interrupt]{Delay in task caused by interrupt} \label{fig_delay}
+\end{figure}
+
+
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
 There are mainly three kind of delays and one kind of latency:
 \begin{enumerate}
 	\item Delays from the Operation System
-	\item Delays from interrupts
+	\item Delays from interrupts (fig. \ref{fig_delay})
 	\item Delays from cache misses
 	\item Latencies from task execution and synchronization
 \end{enumerate}
 Moreover, the boot time can be crucial in special real-time application.
-[note on uniprocessor systems]
 
 \subsection{Delays from the Operation System}
 The obvious kind of delay which is inevitable when using an \ac{OS} is the delay caused by the \ac{OS} itself.
@@ -234,6 +267,7 @@ Ways to optimize this process will be discussed later (refer to section \ref{s_b
 \section{FreeRTOS}
 This section described the FreeRTOS in more detail.
 The focus is on the scheduling algorithm, interrupt handling and synchronization features.
+
 \subsection{Scheduling in FreeRTOS}\label{ss_scheduling_in_freertos}
 Scheduling in FreeRTOS \cite{freertos} can be either cooperative or preemptive and is purely priority based.
 The maximum priority can be defined by the user. 
@@ -242,12 +276,17 @@ The task with the highest priority which is in the Ready state will be scheduled
 Tasks can have the same priority if desired.
 Priorities can be changed in runtime.
 \par
-All tasks are managed in doubly linked lists dependent on their state. 
+All tasks are managed in doubly linked lists dependent on their state (see fig. \ref{fig_freertos_ready_queue}). 
 The Ready state is implemented as a list array indexed by the priority level. 
 When the scheduler is invoked, it first updated the Ready lists and then schedules the next task.
 In case there are multiple tasks in one list, the \ac{RR} algorithm is used to pick the one.
-\par
-[Picture Ready Queue] 
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.8]{inputs/pictures_ch1/freertos_ready_queue}
+	\end{center}
+	\caption[FreeRTOS Ready queue]{FreeRTOS Ready queue\cite{dev:taoosa}} \label{fig_freertos_ready_queue}
+\end{figure}
 
 \subsection{Interrupts in FreeRTOS}\label{ss_interrupts_in_freertos}
 FreeRTOS itself contains only one interrupt: The timer tick (s. \ref{ss_timer_tick}.
@@ -276,14 +315,14 @@ FreeRTOS supports three kind of semaphores:
 	\item Counting Semaphores
 \end{itemize}
 All semaphores support priority inheritance.
-The implementation is based on message queues (see \ref{ss_freertos_message_queues}).
+The implementation is based on message queues.
 Mutexes and counting semaphores correspond to the memory access synchronization tools mentioned above (see \ref{ss_memory_access}).
 These semaphores need to be given back once taken.
 Binary semaphores are used as signals for event synchronization.
 In contrary to counting semaphores and mutexes, binary semaphores are taken by the task which is waiting for an event and given by the signaling task. 
 
 \subsection{Booting in FreeRTOS}\label{ss_booting_in_freertos}
-The booting process of FreeRTOS consists of booting the \ac{ROM} file, loading and running the \ac{FSBL}, optionally loading the bitstream and finally loading and running the application (compare to figure \ref{}).
+The booting process of FreeRTOS consists of booting the \ac{ROM} file, loading and running the \ac{FSBL}, optionally loading the bitstream and finally loading and running the application (compare to figure \ref{fig_boot_freertos}).
 There is barely room for optimization in the first two steps of the booting process. 
 However, the last two steps are dependent on the size of the bitstream and the size of the application respectively.
 
@@ -344,7 +383,7 @@ Application run in user mode have to use read, write or \ac{I/O} control functio
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=0.33]{inputs/pictures_ch1/irq_path_linux}
+		\includegraphics[scale=0.3]{inputs/pictures_ch1/irq_path_linux}
 	\end{center}
 	\caption[Path of an interrupt from hardware through the kernel]{Path of an interrupt from hardware through the kernel \cite{love:lkd}} \label{fig_irq_path_linux}
 \end{figure}
@@ -378,7 +417,7 @@ Moreover, Linux needs a file system to run properly and a device tree.
 The device tree has to be loaded during booting as well and provides information on hardware initialization.
 If an \ac{FPGA} design is included in the system, this has to be loaded as well.
 \par
-All these factors have an impact on the boot time and there are different configuration alternatives for example to initialize the \ac{FPGA} or to load the file systems (see \ref{} for more details). 
+All these factors have an impact on the boot time and there are different configuration alternatives for example to initialize the \ac{FPGA} or to load the file systems (see \ref{ss_booting_in_linux} for more details). 
 
 \subsection{RT patch vs. standard kernel}
 The Linux RT patch aims to make the Linux kernel more preemptive and therefore, significant changes in the kernel structure were made.
