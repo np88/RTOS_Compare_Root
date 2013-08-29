@@ -8,14 +8,21 @@ The results will be discussed in a separate chapter.
 \section{Test Environment and tools}
 This section contains a description of the test environment - the hardware platform, the development tools and the configuration of the used \acp{OS}.
 \subsection{Hardware Platform}
-The underlying hardware platform is a Xilinx ZC702 Evaluation Board \cite{xilinx:zc702_ev_board} with an Zynq-7000 XC7Z020 \cite{xilinx:zynq7000}.
+The underlying hardware platform is a Xilinx ZC702 Evaluation Board \cite{xilinx:zc702_ev_board} with an Zynq-7000 XC7Z020 \cite{xilinx:zynq7000} (see figure \ref{fig_zynq_block_diagram}).
 The XC7Z020 chip integrates a \ac{PS} and a \ac{PL} on a single die.
 Two ARM Cortex-A9 MPCore application processors running at 666 MHz are located in the \ac{PS}.
 Both cores inherit a 32 kB instruction and a 32 KB data level 1 cache.
 Moreover, they share a 512 kB level 2 cache and ?? kB SRAM.
 The \ac{PL} is an Artix-7 from the Xilinx's 7 series \ac{FPGA} technology and can be used to implement custom hardware designs.
 Further, the evaluation board provides 128 Mb of \ac{QSPI} flash memory.
-\par
+
+\begin{figure}[htb]
+		\begin{center}
+			\includegraphics[scale=0.9]{inputs/pictures_ch2/zynq_block_diagram}
+			\caption[Zynq-7000 AP SoC Block Diagram]{Zynq-7000 AP SoC Block Diagram \cite{xilinx:zc702_ev_board}} \label{fig_zynq_block_diagram}
+		\end{center}
+\end{figure} 
+
 The \ac{PS} uses so called \ac{MIO} pins to connect to peripheral devices to the processor.
 Those pins can be configured to connect either \acp{GPIO}, Ethernet, \ac{SPI} and others.
 Moreover, the \ac{EMIO} pins can be used to extend the number of connected peripherals.
@@ -24,7 +31,7 @@ When the Zynq platform is used in future projects, most likely both \ac{PS} and 
 This chip is especially useful to combine a powerful \ac{CPU} and own hardware designs.
 Therefore, an interrupt generator was implemented in the \ac{PL} part to utilize the \ac{PL}.
 It is connected as \ac{GPIO} device.
-\par
+
 \subsection{Development Tools}
 The Xilinx Design Suite version 14.4 was used to create the test environment and the tests.
 The \ac{FPGA} part was designed and synthesized in Xilinx \ac{ISE}.
@@ -49,7 +56,7 @@ The starting point in this thesis is the Xilinx Linux version 3.6 with the corre
 This was the most recent version available at the beginning of this work.
 
 \paragraph{Overview Linux Development process}
-Setting up LinuxRT is composed of many steps compared to FreeRTOS:
+Setting up LinuxRT is composed of many steps compared to FreeRTOS (see fig. \ref{fig_xilinx_tool_flow}):
 \begin{enumerate}
 	\item Configuring and building U-Boot (\ac{SSBL})
 	\item Configuring and building Linux-Image (wrapped with U-Boot header):
@@ -64,7 +71,13 @@ Setting up LinuxRT is composed of many steps compared to FreeRTOS:
 	\item Configuring and building a file system
 \end{enumerate}
 
-[Picture of Linux Design Flow]
+\begin{figure}[htb]
+		\begin{center}
+			\includegraphics[scale=0.9]{inputs/pictures_ch2/xilinx_tool_flow}
+			\caption[Development process of a Linux boot image]{Development process of a Linux boot image \cite{xilinx:gt}} \label{fig_xilinx_tool_flow}
+		\end{center}
+\end{figure} 
+
 \paragraph{Configuring Linux}
 The goal of the configuration is to create a minimal version of Linux.
 This means to eliminate kernel tools (e.g. tracing tools) and unnecessary drivers from the system. 
@@ -162,8 +175,8 @@ $t_{boot}^{Linux} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} +  t_{ssbl} + t_
 
 There are three bottlenecks in this process:
 \begin{itemize}
-	\item Loading the Image from \ac{QSPI} to \ac{RAM}
-	\item Loading the file system from \ac{QSPI} NOR flash to \ac{RAM}
+	\item Loading the Image from \ac{QSPI}
+	\item Loading the file system from \ac{QSPI} NOR flash
 	\item Configuring the \ac{FPGA}
 \end{itemize}
 
@@ -191,30 +204,51 @@ Another advantage is, that \ac{UBIFS} allows changes to the file system to be st
 This is not possible when using a standard ram disk image.
 \par
 The initialization is completely removed from the boot loader, it is done on kernel start-up.
-A disadvantage of this method is that \ac{UBIFS} needs a reconfiguration of the kernel. 
+A disadvantage of this method is that \ac{UBIFS} needs a reconfiguration of the kernel.
+The new boot process is shown in figure \ref{fig_boot_linux_custom}. 
 
 \section{Interrupt Latency}
 Interrupt latency is defined as the time which passes from triggering an interrupt until the first instruction of the interrupt service routine. 
 For this  experiment, the assumption is made that devices in real application are often connected as \ac{GPIO}.
 Therefore, the described interrupt generator will be utilized.
 It has a 5ms period of which the positive pulse is 5 us and the remaining time is negative.
-The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see figure \ref{}).
+The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see table \ref{tab_interrupt_latency}).
 The time in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
 The detailed execution flow is described in the following:
-\begin{enumerate}
-	\item Start of measurement: Interrupt is generated by \ac{FPGA}.
-	\item Interrupt is handled by \ac{GIC}.
-	\item \ac{CPU} executes \ac{ISR} (depending on implementation)
-	\item Stop of measurement: \ac{LED} is turned on by the \ac{ISR}
-\end{enumerate}
-The only difference between the two operation systems is step number three. 
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline
+				FreeRTOS 																					& Linux							& Time measurement  \\
+				\hline 
+				\multicolumn{2}{ |c| }
+					{Interrupt is generated by \ac{FPGA}}					 	& Start 	\\
+			  \multicolumn{2}{ |c| }
+			  	{Interrupt is handled by \ac{GIC}}							&					\\
+			  \multicolumn{2}{ |c| }
+			  	{Interrupt handling by invoking the processor}	&					\\		
+			  \multicolumn{2}{ |c| }{ }	& \\	  	
+			  \hline
+			  																									& Calling do\_IRQ() function											&		\\
+			  Calling registered \ac{ISR}												& Checking whether an interrupt handler exists 	& 	\\
+			  																									& If yes, perform \ac{ISR}											& 	\\
+		 		\hline
+		 		\multicolumn{2}{ |c| }{ }	& \\	
+		 		\multicolumn{2}{ |c| }{Turn on \ac{LED}}					& Stop	\\
+		 		\multicolumn{2}{ |c| }{Return}										&			 	\\	   
+			\hline
+		\end{tabular}
+	\caption{Interrupt latency in FreeRTOS and Linux}
+	\label{tab_interrupt_latency}
+\end{table}
+
+The only difference between the two operation systems is the handling of the \ac{IRQ} as the other . 
 To calculate the exact interrupt latency, the time it takes to turn on the \ac{LED} has to be subtracted.
 Consequently, this requires a further experiment:\\
 The \ac{LED} will be toggled in a for-loop.
 As the hardware needs some time to proceed the request, another for-loop is executed inside.
 The time for the for-loop can be measured individually and be subtracted from the execution time.
-
-[Picture interrupt flow]
 
 \subsection{Interrupt Measurement FreeRTOS}
 As described before (see \ref{ss_interrupts_in_freertos}), executing the \ac{ISR} is absolutely independent from the \ac{OS}.
@@ -225,7 +259,7 @@ Consequently, the execution time is expected to be constant except in the cases 
 There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
 Dependent on the application, there is the possibility to implement the \ac{ISR} as a threaded interrupt (default in RT) or to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
 Both alternatives will be implemented.
-It is expected that the non-threaded handling is more predictive.
+It is expected that the non-threaded handling is faster and more predictive.
 
 
 \section{Task Switching Time} 
@@ -237,14 +271,30 @@ It can be used in the experiment.
 Two tasks of the same priority are set up, their composition is the same. 
 Both perform a for-loop with the number of executions.
 The first instruction in the loop is the recording of the start time.
-Then a yield is performed what causes a context switch. 
+Then a yield is performed what causes a context switch (see table \ref{tab_task_switching}). 
 The first instruction of the newly scheduled task is the recording of the end time.
 Obviously, the first start time is recorded twice because the two tasks are equal.
 Hence, the start time of the last test run is not valid.
 When the for-loop is executed 50000 times in each task, 100000 context switches are performed in total.
 An advantage of this method is that all data is collected without any overhead which has to be subtracted afterwards.
 
-[Picture Execution Flow]
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|}
+			\hline
+				Task 1							& Task 2						\\
+				\hline 
+			  Start time					& --								\\
+			  Yield								& --								\\
+			  --									& Stop time					\\ 
+			  --									& Start time				\\
+			  --									& Yield							\\
+			  Stop time						& --								\\ 			  
+			\hline
+		\end{tabular}
+	\caption{Task Switching Algorithm}
+	\label{tab_task_switching}
+\end{table}
  
 \section{Preemption Time}
 The preemption time is the time which it takes to interrupt a task and schedule another task of higher priority.
@@ -255,15 +305,31 @@ A is running in a permanent loop and reading the current \ac{CPU} cycle counter 
 At some point in time, an \ac{IRQ} occurs and the task is interrupted.
 From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context switch happens.
 When B is activated, it measures the ending time and yields.
-This reactivates A and the test starts over.
-[diagram]
+This reactivates A and the test starts over (compare table \ref{tab_preemption}).
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline
+				Task 1 (low priority)& Task 2 (high priority)	& \ac{ISR}				\\
+				\hline 
+				--									 & Block on event					& --							\\
+			  Loop: Start time		 & --											& --							\\
+			  --									 & --											& Stop task 1			\\
+			  --									 & --							 				& Wake up task 2	\\
+			  --									 & Stop time							& --							\\	  
+			\hline
+		\end{tabular}
+	\caption{Algorithm preemption from \ac{ISR}}
+	\label{tab_preemption}
+\end{table}
 
 \section{Semaphore Shuffle Time}
 The semaphore shuffle time defined by Kar is used to measure the overhead caused by using semaphores to ensure mutual exclusion.
 More precisely, it is the time between a task B being blocked on a semaphore which is taken by task A and and the unblock when the semaphore is released.  
-Based on the tests, mutexes are used to implement mutual exclusion.
 Besides, it is possible, that a task protects a critical section by mutexes, but is not interrupted by another task.
 This case has to be considered as well.
+Based on the above test cases, mutexes are used to implement mutual exclusion.
 Further, signaling is a widely used feature to synchronize events, therefore it has to be included in the benchmark as well.  
 Consequently, the semaphore shuffling results in three different tests.
 
@@ -273,27 +339,80 @@ Task A starts by taking the the mutex and yields.
 Then the time measurement is started, task B tries to take the same mutex and is blocked.
 Now A is rescheduled, releases the semaphore and yields again.
 Task B is unblocked, the time is stopped and B releases the semaphore.
-By yielding the processor, task A is scheduled and the test starts over.
-\par 
-[diagram]
+By yielding the processor, task A is scheduled and the test starts over (compare table \ref{tab_sem_kar}).
+
+\begin{table}[htbp]
+\begin{minipage}[t]{0.45\textwidth}
+	\begin{center}
+		\begin{tabular}{|l|l|}
+			\hline
+				Task 1							& Task 2						\\
+				\hline 
+			  Take mutex					& --								\\
+			  Yield								& --								\\
+			  --									& Start time				\\ 
+			  --									& Block at mutex		\\
+			  Release mutex				& --								\\
+			  Yield								& --								\\
+			  --									& Stop time					\\ 
+			  --									& Release mutex			\\
+			  --									& Yield							\\			  
+			\hline
+		\end{tabular}
+	\caption{Semaphore Shuffling Time proposed by Kar}
+	\label{tab_sem_kar}
+	\end{center}
+	\end{minipage} \hfill 
+	\begin{minipage}[t]{0.45\textwidth}
+	\begin{center}
+		\begin{tabular}{|l|}
+			\hline
+				Task 							\\
+				\hline 
+				Start time				\\ 
+			  Take mutex				\\
+				Release mutex			\\						 
+			  Stop time					\\ 			  
+			\hline
+		\end{tabular}
+	\caption{Semaphore in one single task}
+	\label{tab_sem_single}
+	\end{center}
+	\end{minipage}
+\end{table}
 
 \paragraph{Semaphore in a single Task}
 This benchmark is very easy to implement.
 A task requires a semaphore and releases it immediately after.
 The time it takes to perform these executions is measured.
-Then the test starts over.
-\par 
-[diagram]
+Then the test starts over (compare table \ref{tab_sem_single}).
+
 
 \paragraph{Event Signaling}
 This benchmark measures the time it takes a task to wake up on a signal event.
 Task A blocks on a signal.
 After that, task B is scheduled, triggers the signal and yields the processor. 
 The trigger causes task A to wake up.
-The starting point of the measurement is before task B triggers the signal and the ending point after the awakaning of A.
-This sequence is repeated.
-\par 
-[diagram] 
+The starting point of the measurement is before task B triggers the signal and the ending point after the waking up of A.
+This sequence is repeated (see table \ref{tab_binary_semaphore}).
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline
+				Task 1 							 	 & Task 2 										\\
+				\hline 
+				--									   & Block on signal						\\
+			  Start time		 				 & --													\\
+			  Trigger signal				 & --													\\
+			  Yield								 	 & --													\\
+			  --									   & Wake up										\\
+			  --									 	 & Stop time									\\	  
+			\hline
+		\end{tabular}
+	\caption{Algorithm to measure wake up time on binary semaphore}
+	\label{tab_binary_semaphore}
+\end{table}
 
 \section{Message Passing Time}
 The message passing time is the time which is takes a task to receive a message sent by another task.
@@ -302,11 +421,28 @@ The first task tries to read from a task queue, it is blocked until a message ar
 Then the second task is scheduled, sends a message via the message queue and yields immediately. [what kind of message?] 
 Consequently, the first task is unblocked and retrieves the message sent.
 Now that the queue is empty, the test run can be repeated.
-The starting time is measured before a message is sent via the queue by the second task, the ending time after the first task receives the message.
-[Picture with execution flow]
+The starting time is measured before a message is sent via the queue by the second task, the ending time after the first task receives the message (see table \ref{tab_message_passing}).
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline
+				Task 1 							 & Task 2 								\\
+				\hline 
+				--									 & Block on message queue	\\
+			  Start time		 			 & --											\\
+			  Put message to queue & --											\\
+			  Yield								 & --											\\
+			  --									 & Wake up								\\
+			  --									 & Stop time							\\	  
+			\hline
+		\end{tabular}
+	\caption{Message passing algorithm}
+	\label{tab_message_passing}
+\end{table}
 
 \section{Deadlock Breaking Time}
-The deadlock breaking time is the time which it takes for the \ac{OS} to resolve priority inversion caused by low priority tasks holding a resource needed by a high-priority task. 
+The deadlock breaking time is the time which it takes for the \ac{OS} to resolve priority inversion caused by low priority tasks holding a resource needed by a high-priority task (see table \ref{tab_deadlock}). 
 The experiment is set up similar to the given example for priority inheritance (for details refer to \ref{ss_priority_inheritance}) and repeated 100000 times: 
 Task A with the lowest priority starts executing.
 A takes a mutex and starts a second task B with higher priority than itself.
@@ -318,4 +454,31 @@ To repeat the test, the original state of the tasks has to be restored.
 Therefore, C cancels task B, so it will not preempt A and suspends itself.
 Now A will be scheduled and the test can run again.
 
-[Picture with execution flow]
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|}
+			\hline
+				Task 1 (low priority)						& Task 2 (medium priority)	&  Task 3 (high priority)	\\
+				\hline 
+				--															& Block on event						& --									\\
+			  --															& --												& Block on event			\\
+			  Take Semaphore 									& --												& --									\\
+			  Unblock task  2									& --							 					& --									\\
+			  Yield														& --												& --									\\
+			  --															&	Unblock task 3						& --									\\
+			  --															& Yield											& --									\\
+			  --															&	--												& Start time					\\  
+			  --															&	--												& Block on Semaphore	\\  	
+			  --															& Do work while 3 blocked		& --									\\	
+			  Unblocked by priority raise			&	--												& --									\\
+			  Give back semaphore							&	--												& --									\\	
+			  Yield														& --	  										& --									\\
+			  --															&	--												& Stop time						\\
+			  --															&	--												& Yield								\\
+			\hline
+		\end{tabular}
+	\caption{Deadlock breaking time}
+	\label{tab_deadlock}
+\end{table}
+
+\section{Test program}
