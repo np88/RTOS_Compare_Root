@@ -285,11 +285,11 @@ In case there are multiple tasks in one list, the \ac{RR} algorithm is used to p
 	\begin{center}
 		\includegraphics[scale=0.8]{inputs/pictures_ch1/freertos_ready_queue}
 	\end{center}
-	\caption[FreeRTOS Ready queue]{FreeRTOS Ready queue\cite{dev:taoosa}} \label{fig_freertos_ready_queue}
+	\caption[FreeRTOS Ready queue]{FreeRTOS Ready queue} \label{fig_freertos_ready_queue}
 \end{figure}
 
 \subsection{Interrupts in FreeRTOS}\label{ss_interrupts_in_freertos}
-FreeRTOS itself contains only one interrupt: The timer tick (s. \ref{ss_timer_tick}.
+FreeRTOS itself contains only one interrupt: The timer tick (refer to section \ref{ss_timer_tick}.
 Other devices and interrupts may be installed on demand, but they are not handled by the OS. 
 It is only in charge of task managing and inter-task communication.
 For the application development, it means that an interrupt handler has to be written and registered in the \ac{GIC}.
@@ -316,7 +316,7 @@ FreeRTOS supports three kind of semaphores:
 \end{itemize}
 All semaphores support priority inheritance.
 The implementation is based on message queues.
-Mutexes and counting semaphores correspond to the memory access synchronization tools mentioned above (see \ref{ss_memory_access}).
+Mutexes and counting semaphores correspond to the memory access synchronization tools mentioned above (see section \ref{ss_memory_access}). 
 These semaphores need to be given back once taken.
 Binary semaphores are used as signals for event synchronization.
 In contrary to counting semaphores and mutexes, binary semaphores are taken by the task which is waiting for an event and given by the signaling task. 
@@ -348,7 +348,14 @@ This feature should be used carefully because it might increase the run time of 
 Scheduling in Linux \cite{love:lkd} \cite{jones:itlcfss} is more complex than in FreeRTOS.
 Three scheduling classes are used to determine which task will be selected: \textit{sched\_rt}, \textit{sched\_fair} and \textit{sched\_idletask}.
 Sched\_rt implements the scheduling of real-time tasks and has the highest priority. 
-General purpose tasks are using the sched\_fair class and the remaining class is used by the idle task.
+General purpose tasks are using the sched\_fair class and the remaining class is used by the idle task (see fig. \ref{fig_linux_scheduling_classes}).
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=1]{inputs/pictures_ch1/linux_scheduling_classes}
+	\end{center}
+	\caption[Linux scheduling classes]{Linux scheduling classes \cite{jones:itlcfss}} \label{fig_linux_scheduling_classes}
+\end{figure}
 
 \subsubsection{sched\_rt} 
 Linux real-time tasks are always scheduled prior to any other task. 
@@ -361,9 +368,16 @@ In Linux, there are two different scheduling policies for real-time tasks: \ac{R
 For the sake of completeness, the fair scheduling algorithm is briefly described in this section.
 Linux was originally developed as a General Purpose \ac{OS}, so its scheduling algorithm is optimized to treat all tasks as fair as possible. 
 The current scheduler is called \textit{\ac{CFS}} and was introduced in Linux kernel 2.6.23.
-It is implemented as a Red-Black tree, which is self-balancing (no path is more than twice as long as any other).
+It is implemented as a Red-Black tree (see fig. \ref{fig_linux_red_black_tree}), which is self-balancing (no path is more than twice as long as any other).
 An element of the tree can be accessed in in O(log n), where n is the total number of nodes in the tree.
-\par
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=1]{inputs/pictures_ch1/linux_red_black_tree}
+	\end{center}
+	\caption[Example of an red black tree]{Example of an red black tree \cite{jones:itlcfss}} \label{fig_linux_red_black_tree}
+\end{figure}
+
 The prioritization of the \ac{CFS} is based on the time the tasks have already been executed. 
 The lesser the time compared to the other task, the higher the chance to get \ac{CPU} access.
 The most-left node is scheduled on a context switch.
@@ -559,3 +573,5 @@ Nevertheless, the programmer is in charge of using this function correctly.
 Daemons are background processes which may not only cause jitter but also slow down the boot process. 
 They do not exist in FreeRTOS.
 Unnecessary daemons in Linux can be detected and removed from the system.
+
+\subsubsection{Test Application}
