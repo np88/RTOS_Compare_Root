@@ -492,7 +492,11 @@ This variation is called jitter and, logically, should be as low as possible.
 \par
 Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, the execution time of a specific real-time task or application\footnote{In the following, the term application also refers to one run of a critical real-time task.} can be described by the following factors:
 \begin{enumerate}
-	\item Deterministic part $ t_{det} = t_{app} + t_{sync} + t_{isr} $: 		
+	\item Deterministic part 
+	\begin{equation}
+			t_{det} = t_{app} + t_{sync} + t_{isr}
+		\label{eq_det_app}
+	\end{equation}  		
 		\begin{enumerate}
 			\item Execution time for application code $ t_{app} $ 
 			\item Execution time for \ac{OS} related features where $ n_{os} $ is the number of \ac{OS} 
@@ -503,7 +507,11 @@ Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, th
 						occurs during the application
 						$ t_{isr} = \sum\limits_{i=1}^{n_{isr}} {x_{isr}^{i} * t_{isr}^{i}} $						
 		\end{enumerate}	
-  \item Not deterministic part, jitter $ t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{swap} + t_{daem} $:	
+  \item Indeterministic part, jitter 
+  \begin{equation}
+   t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{swap} + t_{daem} 		
+   \label{eq_indet_app}
+	\end{equation}
 		\begin{enumerate}
 			\item Delay caused by timer tick $ t_{tick} $
 			\item Delay caused by other interrupts where $ n_{int} $ is the number of interrupts available in the system 
@@ -518,7 +526,11 @@ Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, th
 \end{enumerate}
  
 $ t_{jitter} $ is also dependent on the probability of the single delays.
-As only the worst case execution time is of interest for further consideration, the formula stated above can be used for the calculation of $ t_{jitter} $ without modification.     
+As only the worst case execution time is of interest for further consideration, the formula stated above can be used for the calculation of $ t_{jitter} $ without modification.    
+Logically, both FreeRTOS and Linux have different sources of delays. 
+For FreeRTOS $ t_{daem} $, $ t_{swap} $ and $ t_{int} $ are zero. 
+The programmer does not need to worry about any unexpected events caused by this parts of the operation system.
+On the contrary, in Linux all of these delays have to be considered or eliminated carefully.
 
 \section{Benchmark Preparation}
 To compare the two \acp{OS} and to decide which is suitable for a specific application, the parameters described in the previous section have to be determined.
@@ -574,4 +586,4 @@ Daemons are background processes which may not only cause jitter but also slow d
 They do not exist in FreeRTOS.
 Unnecessary daemons in Linux can be detected and removed from the system.
 
-\subsubsection{Test Application}
+\subsection{Test Application}

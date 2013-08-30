@@ -137,10 +137,10 @@ The flow graphs illustrate the differences between the boot process in FreeRTOS 
 
 \subsection{Booting in FreeRTOS}
 The booting process is already described in the previous chapter (see \ref{ss_booting_in_freertos}).
-Based on the formula derived in section \ref{ss_boot_time}, the FreeRTOS boot time can be quantified as follows:
-\par
-$t_{boot}^{free} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} $
-\par
+Based on the information in section \ref{ss_boot_time}, the FreeRTOS boot time can be derived as follows:
+	\begin{equation}
+		t_{boot}^{free} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} \label{eq_t_boot_free} 
+	\end{equation}
 Whereas there is no time optimization needed for FreeRTOS because the complete boot takes only 1,1 seconds, there are multiple optimization possibilities for LinuxRT. 
 
 \begin{figure}[htb]
@@ -151,9 +151,11 @@ Whereas there is no time optimization needed for FreeRTOS because the complete b
 \end{figure} 
 
 \subsection{Booting in Linux}\label{ss_booting_in_linux}
-The booting process in Linux is shown in figure \ref{fig_boot_linux_xilinx}, it can be quantified as follows:
-\par
-$t_{boot}^{Linux} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} +  t_{ssbl} + t_{tree} + t_{filesys} + t_{boot}$
+The booting process in Linux is shown in figure \ref{fig_boot_linux_xilinx}, it can be derived as follows:
+\begin{equation}
+t_{boot}^{Linux} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} +  t_{ssbl} + t_{tree} + t_{filesys} + t_{boot}
+\label{eq_t_boot_linux} 
+\end{equation}
 
 \begin{figure}[htb]
 	\begin{center}
@@ -182,7 +184,7 @@ There are three bottlenecks in this process:
 
 The default Linux configuration provided by Xilinx does not include an \ac{FPGA} bitstream and is run from \ac{SD} card.
 This takes 15 seconds in total.
-Whereas $t_{boot}$ is only 3 seconds and $t_{fpga}$ is 0, the other times sum up to 12 seconds, which is mostly due to the transfer of the Linux image and the file system . 
+Whereas $t_{boot}$ is only 3 seconds and $t_{fpga}$ is 0, the other delays sum up to 12 seconds, which is mostly due to the transfer of the Linux image and the file system . 
 Besides, by adding a bitstream (copying it to the \ac{SD} card), this time increases by another $ t_{fpga} $ of 15 seconds.   
 \par
 The very first step to decrease this time has already been done by compressing the Linux kernel (see \ref{sss_linuxrt}).

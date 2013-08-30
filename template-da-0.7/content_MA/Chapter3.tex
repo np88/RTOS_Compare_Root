@@ -1,1 +1,31 @@
 \chapter{Results}\label{ch_results}
+In this chapter, the results from the previously described experiments are presented.
+Moreover, the indeterministic aspects of the are further investigated for both operation systems. 
+
+\section{Boot Time}
+This section mainly shows the possible decrease of the boot time in Linux as there was no need to further improve the start up time of FreeRTOS.
+
+\subsection{Boot Time of FreeRTOS}
+The boot time of FreeRTOS has been quantified by formula \ref{eq_t_boot_free}.
+As mentioned before, there is no need to optimize the FreeRTOS boot time, so the final $ t_{boot}^{free} $ is 1,1 s.
+
+\subsection{Boot Time of Linux}
+The boot time in Linux $ t_{boot}^{linux} $ was 27 seconds when using the initial boot configuration from Xilinx (see \ref{ss_booting_in_linux}). 
+The new custom configuration was applied step by step to see the effects on the system:
+
+\begin{enumerate}
+	\item By changing the file system from \ac{RAM} disk to \ac{UBIFS}, $t_{filesys}$ becomes part of $t_{osload}$ and decreases to ?? s
+	\item By further moving the \ac{FPGA} configuration from the \ac{FSBL} to the file system, the total boot time decreases to ?? s 
+	\item Finally, the booting is moved from \ac{SD} card to \ac{QSPI} what decreases the boot time to ?? s.
+	\item Optionally, the \ac{UBIFS} can be mounted read-only. This further decreases the boot time by 2 seconds, because some start-up checks are skipped in this mode. 
+\end{enumerate}
+
+The result of this experiment is a boot time which was decreased by 72 \% in read-write mode and by 80 \% in read-only mode.
+
+\section{Interrupt Latency}
+\section{Task Switching Time}
+\section{Preemption Time}
+\section{Semaphore Shuffle Time}
+\section{Message Passing Time}
+\section{Deadlock Breaking Time}
+\section{Test Program}
