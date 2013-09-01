@@ -36,6 +36,8 @@ It is connected as \ac{GPIO} device.
 The Xilinx Design Suite version 14.4 was used to create the test environment and the tests.
 The \ac{FPGA} part was designed and synthesized in Xilinx \ac{ISE}.
 The software was developed using Xilinx \ac{SDK}.
+Both systems run on one \ac{CPU} because there is no official FreeRTOS version available which supports multiple processors.
+As both systems shall be as equal as possible, Linux was also configured to run on one core only.
 
 \subsection{\ac{OS} Configuration}
 The operation systems under test are FreeRTOS and LinuxRT.
@@ -110,6 +112,7 @@ If this is not valid for a special case, it will be mentioned in the benchmark d
 \subsubsection{FreeRTOS}
 Generally, there are no other tasks in FreeRTOS than the ones created for the test.
 Consequently, the real-time tasks have the highest priority in the system anyway.
+For all system calls, the FreeRTOS \ac{API} is used. 
 
 \subsubsection{LinuxRT}
 In Linux, multi-tasking applications are realized using pthreads.
@@ -118,6 +121,11 @@ All real-time thread in Linux get the highest possible priority using the preemp
 As the parent process and its child threads are scheduled individually, the parent has to have a higher priority than the children while creating the child threads.
 If not, it will be interrupted by the first thread with higher priority and hence cannot invoke the other ones.
 When all threads have been started, the priority of the parent is simply decreased below the one of the lowest real-time thread.
+\par
+For thread synchronization, the \ac{POSIX} \ac{API} is used whenever possible as this is the commonly used \ac{API} for Linux systems.
+It can be used for all experiments except for the message passing experiment, because this implementation is not supported by the platform.
+Instead, the message queue provided by the \textit{System V} \ac{IPC} is used.
+System V (read: \textit{System five}) \cite{tlip:svd} is a Unix \ac{OS} version from 1983 and its \ac{API} is still provided by modern Linux distributions.
  
 \section{Boot time}\label{s_boot_time}
 The boot time is the time from powering on the hardware until the first (user) task is run. 

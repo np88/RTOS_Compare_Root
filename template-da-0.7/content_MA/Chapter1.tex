@@ -197,7 +197,7 @@ In this work, the term \textit{delay} refers to unexpected events which extend t
 
 
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
-There are mainly three kind of delays and one kind of latency:
+There are mainly four kind of delays and one kind of latency:
 \begin{enumerate}
 	\item Delays from the Operation System
 	\item Delays from interrupts (fig. \ref{fig_delay})
@@ -214,7 +214,8 @@ More delays can be produced by background daemons and other system services.
 \subsection{Delays from Interrupts}
 The second kind of delays (for details refer to \ref{s_interrupt_handling}) can only be prevented by introducing critical sections. 
 However, this may cause higher interrupt latencies and is counterproductive in applications which rely on a fast interrupt response time.
-Critical sections are mainly found inside of the kernel. 
+Critical sections are found inside of the kernel.
+If interrupts should be disabled in user mode, this is only possible by calling a device driver routine which implements the disabling and enabling of interrupts.  
 As interrupts are mainly caused by \ac{I/O} devices, the delays from interrupts will increase when the system heavily communicates with a large number of peripherals. 
 
 \subsection{Delays from Cache Misses}
@@ -226,6 +227,7 @@ On one hand, it caches increase the performance of an application significantly 
 On the other hand, the cache is used by every process on the system.
 This can cause data currently needed by a real-time application not to be present in the cache, a cache miss occurs.
 The reload of the data to the cache causes a delay.
+The delay is hardware dependent. 
 
 \subsection{Latencies from Task Execution and Synchronization}
 The last aspect is more correctly defined as latency, not as delay.
@@ -262,7 +264,6 @@ After those steps, the kernel can be decompressed and finally boot.
 While booting, it initializes the file system with the previously loaded image as well as peripheral devices and finally starts the user space application. 
 \par
 Ways to optimize this process will be discussed later (refer to section \ref{s_boot_time}).
-
 
 \section{FreeRTOS}
 This section described the FreeRTOS in more detail.
