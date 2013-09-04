@@ -135,7 +135,7 @@ By turning them off in the first executed task, the exact power up time of the s
 As already mentioned (see \ref{ss_boot_time}), the boot time depends on the complexity of the operation system and the hardware. 
 Further, the evaluation board provides three different ways of booting an \ac{OS}:
 \begin{enumerate}
-	\item Via \ac{JTag}
+	\item Via \ac{JTAG}
 	\item From \ac{SD} card
 	\item From \ac{QSPI} flash
 \end{enumerate}
@@ -253,24 +253,42 @@ The detailed execution flow is described in the following:
 	\label{tab_interrupt_latency}
 \end{table}
 
-The only difference between the two operation systems is the handling of the \ac{IRQ} as the other . 
-To calculate the exact interrupt latency, the time it takes to turn on the \ac{LED} has to be subtracted.
-Consequently, this requires a further experiment:\\
-The \ac{LED} will be toggled in a for-loop.
-As the hardware needs some time to proceed the request, another for-loop is executed inside.
-The time for the for-loop can be measured individually and be subtracted from the execution time.
+The only difference between the two operation systems is the handling of the \ac{IRQ}.
+Table \ref{tab_interrupt_latency} shows how much time is spent when the actions are performed in the \ac{ISR} directly. 
+Yet, there is often the case that a thread is resumed from within the \ac{ISR}.
+This case should be considered as well.
+In table \ref{tab_interrupt_latency}, the entry \textit{Continuing user task} has to be added.
+The overhead for starting a separate task from an \ac{ISR} can be calculated from these two experiments.  
+%To calculate the exact interrupt latency, the time it takes to turn on the \ac{LED} has to be subtracted.
+%Consequently, this requires a further experiment:\\
+%The \ac{LED} will be toggled in a for-loop.
+%As the hardware needs some time to proceed the request, another for-loop is executed inside.
+%The time for the for-loop can be measured individually and be subtracted from the execution time.
 
 \subsection{Interrupt Measurement FreeRTOS}
 As described before (see \ref{ss_interrupts_in_freertos}), executing the \ac{ISR} is absolutely independent from the \ac{OS}.
 There are only two interrupts which need to be considered here: The timer interrupt (highest priority) and the \ac{GPIO} interrupt.
 Consequently, the execution time is expected to be constant except in the cases where the \ac{GPIO} interrupt is preempted by the timer tick.
+For FreeRTOS, no experiments under load conditions are necessary because the system itself is designed to fit a special application.
+It is not designed to be exposed to unexpected conditions. 
 
 \subsection{Interrupt Measurement LinuxRT}
 There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
 Dependent on the application, there is the possibility to implement the \ac{ISR} as a threaded interrupt (default in RT) or to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
 Both alternatives will be implemented.
 It is expected that the non-threaded handling is faster and more predictive.
-
+As this method of interrupt handling is the standard on the mainline kernel, the mainline kernel will be used to test the non-threaded interrupts.
+\par
+Further, it is part of the test to see how stable the Linux RT system works under load conditions.
+Load conditions can be either \ac{CPU} bound or hardware bound. 
+\ac{CPU} bound conditions are for example many working threads running concurrently on the system.
+This can be simulated running the \textit{Stress} \cite{stress} program.
+Stress is a program which can run a definite number of working threads on a system that produce for example \ac{CPU} and/or \ac{I/O} load.
+To put the system under \ac{I/O} load, the Ethernet connection can be used.
+Ethernet is a good choice because it will be most likely used in real applications.
+The load can be created by constantly transferring data to the system under test.
+This can be done for example by using the \ac{SSH} protocol \cite{tlip:tsspa}.
+To prevent the system from being overload by one huge file, a small file is sent over and over again. 
 
 \section{Task Switching Time} 
 The task switching time is the time it takes for a task to start after an other task has finished or yielded the processor.
@@ -330,7 +348,7 @@ This reactivates A and the test starts over (compare table \ref{tab_preemption})
 			  --									 & Stop time							& --							\\	  
 			\hline
 		\end{tabular}
-	\caption{Algorithm preemption from \ac{ISR}}
+	\caption{Preemption from ISR}
 	\label{tab_preemption}
 \end{table}
 
@@ -491,4 +509,4 @@ Now A will be scheduled and the test can run again.
 	\label{tab_deadlock}
 \end{table}
 
-\section{Test program}
+%\section{Test program}

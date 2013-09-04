@@ -170,10 +170,12 @@ The interrupt signal from a hardware device is connected to the interrupt contro
 This controller signals the processor that an \ac{IRQ} has arrived.
 Now, as the name suggests, the currently executing process is interrupted, the context saved and the corresponding \ac{ISR} loaded to be executed.
 Because they disturb the execution of other processes, \acp{ISR} should be kept as short as possible.
-Typically, only urgent operations are performed in an \ac{ISR}. 
-For less critical work, e.g. copying data into the buffer of a network device, an extra task is started which can be scheduled later.
 The minimal version of an \ac{ISR} should at least contain the acknowledge of the interrupt so the underlying hardware can continue its work.
 The time between an interrupt being triggered and the first instruction of the corresponding \ac{ISR} is called interrupt latency.
+Typically, only urgent operations are performed in an \ac{ISR}. 
+For less critical work, e.g. handling incoming data from a network device, an extra routine is started which can be run later.
+This mechanism is referred to as division of the interrupt management in two halves: A \textit{top half} (\ac{ISR}) and a \textit{bottom half} (deferred work).
+The implementation of the bottom half is dependent on the operation system. 
 \par
 Interrupts can occur any time and are serviced immediately.
 Consequently, any code currently running will be interrupted.
@@ -403,6 +405,19 @@ Application run in user mode have to use read, write or \ac{I/O} control functio
 	\caption[Path of an interrupt from hardware through the kernel]{Path of an interrupt from hardware through the kernel \cite{love:lkd}} \label{fig_irq_path_linux}
 \end{figure}
 
+Further, it is typical in Linux to defer non-critical work from the \ac{ISR} to a bottom half.
+There are multiple types of bottom halves in Linux, the most important are \textit{softirqs} and \textit{Tasklets} \cite{love:lkd}.
+Softirqs are statically registered in the kernel during compile time and are only interruptible by \acp{IRQ}.
+Their number is limited by the \ac{OS}.
+In standard Linux they are invoked when the system is returning from a hardware interrupt, in the \textit{ksoftirqd} thread or by an explicit function call to \textit{do\_softirq()}.
+Softirqs - even the same type - can run concurrently on multiple \acp{CPU} but cannot interrupt other softirqs.
+Usually, all raised softirqs are handled by the do\_softirq function, but when too many softirqs are raised are pending to be executed, they are moved to the ksoftirqd thread which is scheduled when the \ac{OS} is not busy.
+Tasklets are built on top of softirqs and are not related to tasks as the name may suggest. 
+Compared to softirqs, tasklets have a lighter interface and tasklets of the same type cannot run concurrently on any \ac{CPU}.
+Moreover, they can be created dynamically during run time.
+The last option to defer work is to use to a work queue.
+Work queues schedule kernel threads and can sleep if necessary compared to the other two options
+
 \subsection{Synchronization Features in Linux}
 Linux provides multiple \acp{API} with a variety of task synchronization features. 
 \ac{POSIX} compliant features are most common because of their compatibility across many platforms.
@@ -458,6 +473,16 @@ This mechanism allows priority based regulation of the \ac{ISR} execution becaus
 Moreover, the delay caused by interrupts decreases significantly for high-priority real-time tasks.
 In case an \ac{IRQ} has to be serviced immediately, there is still the possibility to set the \textit{IRQ\_NODELAY} flag on initialization.
 As a result, the \ac{ISR} will not be threaded but proceeded in the original way.
+
+\subsubsection{Softirqs}
+The softirq mechanism has changed through various \ac{RT} patch versions.
+Starting with the first release of the patch, softirqs were treated similar to hardware interrupts, as threads \cite{rostedt:iotrtp}.
+In version 3.0 though, the handling of softirqs was changed to the same setting as in the mainline kernel. \cite{corbet:siar}.
+As this raises problems for the real-time behavior of the kernel, there was another change in version 3.6.1.
+Instead of handling every pending softirq, only the softirq raised by a specific thread is handled as soon as softirqs are permitted. 
+This has the advantage of keeping softirqs locally tied to the raising process.
+Obviously, this does not work for softirqs raised by hardware interrupts as they are not tied to a specific process.
+Those softirqs are still handled by the ksoftirqd thread.
 
 \section{Mathematical Quantification of Operation Systems}
 There are many different parameters to quantify \acp{RTOS}.
@@ -587,4 +612,4 @@ Daemons are background processes which may not only cause jitter but also slow d
 They do not exist in FreeRTOS.
 Unnecessary daemons in Linux can be detected and removed from the system.
 
-\subsection{Test Application}
+%\subsection{Test Application}

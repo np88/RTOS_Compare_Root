@@ -12,7 +12,7 @@ As mentioned before, there is no need to optimize the FreeRTOS boot time, so the
 \subsection{Boot Time of Linux}
 The boot time in Linux $ t_{boot}^{linux} $ was 27 seconds when using the initial boot configuration from Xilinx (see \ref{ss_booting_in_linux}). 
 The new custom configuration was applied step by step to see the effects on the system:
-
+ 
 \begin{enumerate}
 	\item By changing the file system from \ac{RAM} disk to \ac{UBIFS}, $t_{filesys}$ becomes part of $t_{osload}$ and decreases to ?? s
 	\item By further moving the \ac{FPGA} configuration from the \ac{FSBL} to the file system, the total boot time decreases to ?? s 
@@ -25,13 +25,111 @@ The result of this experiment is a boot time which was decreased by 72 \% in rea
 \section{Interrupt Latency}
 
 \section{Task Switching Time}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_debug_FreeRTOS_start_end}
+	\end{center}
+	\caption{Task switching result FreeRTOS} \label{fig_tast_switching_result_free}
+\end{figure}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_results_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Task switching result LinuxRT} \label{fig_tast_switching_result_linux}
+\end{figure}
 
 \section{Preemption Time}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/preemption_time_FreeRTOS_start_end}
+	\end{center}
+	\caption{Preemption result FreeRTOS} \label{fig_preemption_result_free}
+\end{figure}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/preemption_time_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Preemption result LinuxRT} \label{fig_preemption_result_linux}
+\end{figure}
 
 \section{Semaphore Shuffle Time}
+\subsection{Single Mutex}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/mutex_single_FreeRTOS_start_end}
+	\end{center}
+	\caption{Mutex in single task result FreeRTOS} \label{fig_mutex_single_result_free}
+\end{figure}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/mutex_single_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Mutex in single task result LinuxRT} \label{fig_mutex_single_result_linux}
+\end{figure}
+
+\subsection{Semaphore Shuffling}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/mutex_shuffle_FreeRTOS_start_end}
+	\end{center}
+	\caption{Mutex shuffling result FreeRTOS} \label{fig_mutex_shuffle_result_free}
+\end{figure}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/mutex_shuffle_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Mutex shuffling result LinuxRT} \label{fig_mutex_shuffle_result_linux}
+\end{figure}
+
+\subsection{Event Signaling}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/bin_semaphore_FreeRTOS_start_end}
+	\end{center}
+	\caption{Binary semaphore result FreeRTOS} \label{fig_bin_sem_result_free}
+\end{figure}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/cond_var_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Condition variable result LinuxRT} \label{fig_cond_var_result_linux}
+\end{figure}
 
 \section{Message Passing Time}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/bin_semaphore_FreeRTOS_start_end}
+	\end{center}
+	\caption{Binary semaphore result FreeRTOS} \label{fig_bin_sem_result_free}
+\end{figure}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/cond_var_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Condition variable result LinuxRT} \label{fig_cond_var_result_linux}
+\end{figure}
+
 
 \section{Deadlock Breaking Time}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/deadlock_results_FreeRTOS_start_end}
+	\end{center}
+	\caption{Deadlock breaking time FreeRTOS} \label{fig_deadlock_result_free}
+\end{figure}
 
-\section{Test Program}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/deadlock_results_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Deadlock breaking time LinuxRT} \label{fig_deadlock_result_linux}
+\end{figure}
+
+%\section{Test Program}
