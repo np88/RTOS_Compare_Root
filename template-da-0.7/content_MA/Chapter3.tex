@@ -25,6 +25,13 @@ The result of this experiment is a boot time which was decreased by 72 \% in rea
 \section{Interrupt Latency}
 
 \section{Task Switching Time}
+The results for task switching show the minimum overhead in a system with at least two tasks for the maximum priority. 
+This value is also valid for systems with more real-time tasks of the same priority which use the round robin scheduling algorithm.
+For task switching between different priority levels, the scheduling is dependent on the number of priority level.
+In such cases, the complete list has to be searched from the beginning.
+
+\subsection{Task Switching Results FreeRTOS}
+
 \begin{figure}[htb]
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_debug_FreeRTOS_start_end}
@@ -96,7 +103,7 @@ The result of this experiment is a boot time which was decreased by 72 \% in rea
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/cond_var_measurements_cfg6_int_saves}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/cond_var_results_measurements_cfg6_int_saves}
 	\end{center}
 	\caption{Condition variable result LinuxRT} \label{fig_cond_var_result_linux}
 \end{figure}
@@ -104,16 +111,16 @@ The result of this experiment is a boot time which was decreased by 72 \% in rea
 \section{Message Passing Time}
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/bin_semaphore_FreeRTOS_start_end}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_FreeRTOS_start_end}
 	\end{center}
-	\caption{Binary semaphore result FreeRTOS} \label{fig_bin_sem_result_free}
+	\caption{Binary semaphore result FreeRTOS} \label{fig_message_passing_free}
 \end{figure}
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/cond_var_measurements_cfg6_int_saves}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 4cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_measurements_cfg6_int_saves}
 	\end{center}
-	\caption{Condition variable result LinuxRT} \label{fig_cond_var_result_linux}
+	\caption{Condition variable result LinuxRT} \label{fig_message_passing_linux}
 \end{figure}
 
 

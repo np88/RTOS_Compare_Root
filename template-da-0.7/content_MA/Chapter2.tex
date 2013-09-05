@@ -108,6 +108,7 @@ This section provides a short overview over the general application design and e
 To prevent interruption by other tasks, the real-time tasks must have the highest priority in the system.
 Usually, 100000 measurements are collected per operation system per test.
 If this is not valid for a special case, it will be mentioned in the benchmark description.
+The scheduling for both systems is configured to be round robing, hence both are using a preemptive scheduling algorithm.
  
 \subsubsection{FreeRTOS}
 Generally, there are no other tasks in FreeRTOS than the ones created for the test.
@@ -126,6 +127,9 @@ For thread synchronization, the \ac{POSIX} \ac{API} is used whenever possible as
 It can be used for all experiments except for the message passing experiment, because this implementation is not supported by the platform.
 Instead, the message queue provided by the \textit{System V} \ac{IPC} is used.
 System V (read: \textit{System five}) \cite{tlip:svd} is a Unix \ac{OS} version from 1983 and its \ac{API} is still provided by modern Linux distributions.
+\par
+Further, the \textit{mlockall} instruction is used to prevent page swapping during the execution of the test application.
+
  
 \section{Boot time}\label{s_boot_time}
 The boot time is the time from powering on the hardware until the first (user) task is run. 
