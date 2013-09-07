@@ -51,7 +51,6 @@ Moreover, FreeRTOS needs an \ac{FSBL} which can be created by the \ac{SDK}.
 The \ac{FSBL} and the FreeRTOS application must be combined to a boot image.
 The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4.
 
-
 \subsubsection{LinuxRT}\label{sss_linuxrt}
 Xilinx provides own distributions of embedded Linux which can be compiled for many different platforms. 
 The starting point in this thesis is the Xilinx Linux version 3.6 with the corresponding RT patch.
@@ -129,7 +128,6 @@ Instead, the message queue provided by the \textit{System V} \ac{IPC} is used.
 System V (read: \textit{System five}) \cite{tlip:svd} is a Unix \ac{OS} version from 1983 and its \ac{API} is still provided by modern Linux distributions.
 \par
 Further, the \textit{mlockall} instruction is used to prevent page swapping during the execution of the test application.
-
  
 \section{Boot time}\label{s_boot_time}
 The boot time is the time from powering on the hardware until the first (user) task is run. 
@@ -312,16 +310,16 @@ An advantage of this method is that all data is collected without any overhead w
 
 \begin{table}[htbp]
 	\centering
-		\begin{tabular}{|l|l|}
+		\begin{tabular}{|l|l|l|}
 			\hline
-				Task 1							& Task 2						\\
+				& Task 1							& Task 2						\\
 				\hline 
-			  Start time					& --								\\
-			  Yield								& --								\\
-			  --									& Stop time					\\ 
-			  --									& Start time				\\
-			  --									& Yield							\\
-			  Stop time						& --								\\ 			  
+			  1 & Start time					& --								\\
+			  2 & Yield								& --								\\
+			  3 & --									& Stop time					\\ 
+			  4 & --									& Start time				\\
+			  5 & --									& Yield							\\
+			  6 & Stop time						& --								\\ 			  
 			\hline
 		\end{tabular}
 	\caption{Task Switching Algorithm}
@@ -341,15 +339,15 @@ This reactivates A and the test starts over (compare table \ref{tab_preemption})
 
 \begin{table}[htbp]
 	\centering
-		\begin{tabular}{|l|l|l|}
+		\begin{tabular}{|l|l|l|l|}
 			\hline
-				Task 1 (low priority)& Task 2 (high priority)	& \ac{ISR}				\\
+				& Task 1 (low priority)& Task 2 (high priority)	& \ac{ISR}				\\
 				\hline 
-				--									 & Block on event					& --							\\
-			  Loop: Start time		 & --											& --							\\
-			  --									 & --											& Stop task 1			\\
-			  --									 & --							 				& Wake up task 2	\\
-			  --									 & Stop time							& --							\\	  
+				1 & --									 & Block on event					& --							\\
+			  2 & Loop: Start time		 & --											& --							\\
+			  3 & --									 & --											& Stop task 1			\\
+			  4 & --									 & --							 				& Wake up task 2	\\
+			  5 & --									 & Stop time							& --							\\	  
 			\hline
 		\end{tabular}
 	\caption{Preemption from ISR}
@@ -376,19 +374,19 @@ By yielding the processor, task A is scheduled and the test starts over (compare
 \begin{table}[htbp]
 \begin{minipage}[t]{0.45\textwidth}
 	\begin{center}
-		\begin{tabular}{|l|l|}
+		\begin{tabular}{|l|l|l|}
 			\hline
-				Task 1							& Task 2						\\
+				& Task 1							& Task 2						\\
 				\hline 
-			  Take mutex					& --								\\
-			  Yield								& --								\\
-			  --									& Start time				\\ 
-			  --									& Block at mutex		\\
-			  Release mutex				& --								\\
-			  Yield								& --								\\
-			  --									& Stop time					\\ 
-			  --									& Release mutex			\\
-			  --									& Yield							\\			  
+			  1 & Take mutex					& --								\\
+			  2 & Yield								& --								\\
+			  3 & --									& Start time				\\ 
+			  4 & --									& Block at mutex		\\
+			  5 & Release mutex				& --								\\
+			  6 & Yield								& --								\\
+			  7 & --									& Stop time					\\ 
+			  8 & --									& Release mutex			\\
+			  9 & --									& Yield							\\			  
 			\hline
 		\end{tabular}
 	\caption{Semaphore Shuffling Time proposed by Kar}
@@ -397,14 +395,14 @@ By yielding the processor, task A is scheduled and the test starts over (compare
 	\end{minipage} \hfill 
 	\begin{minipage}[t]{0.45\textwidth}
 	\begin{center}
-		\begin{tabular}{|l|}
+		\begin{tabular}{|l|l|}
 			\hline
-				Task 							\\
+				& Task 							\\
 				\hline 
-				Start time				\\ 
-			  Take mutex				\\
-				Release mutex			\\						 
-			  Stop time					\\ 			  
+				1 & Start time				\\ 
+			  2 & Take mutex				\\
+				3 & Release mutex			\\						 
+			  4 & Stop time					\\ 			  
 			\hline
 		\end{tabular}
 	\caption{Semaphore in one single task}
@@ -419,7 +417,6 @@ A task requires a semaphore and releases it immediately after.
 The time it takes to perform these executions is measured.
 Then the test starts over (compare table \ref{tab_sem_single}).
 
-
 \paragraph{Event Signaling}
 This benchmark measures the time it takes a task to wake up on a signal event.
 Task A blocks on a signal.
@@ -432,14 +429,14 @@ This sequence is repeated (see table \ref{tab_binary_semaphore}).
 	\centering
 		\begin{tabular}{|l|l|l|}
 			\hline
-				Task 1 							 	 & Task 2 										\\
+				& Task 1 							 	 & Task 2 										\\
 				\hline 
-				--									   & Block on signal						\\
-			  Start time		 				 & --													\\
-			  Trigger signal				 & --													\\
-			  Yield								 	 & --													\\
-			  --									   & Wake up										\\
-			  --									 	 & Stop time									\\	  
+				1 & --									   & Block on signal						\\
+			  2 & Start time		 				 & --													\\
+			  3 & Trigger signal				 & --													\\
+			  4 & Yield								 	 & --													\\
+			  5 & --									   & Wake up										\\
+			  6 & --									 	 & Stop time									\\	  
 			\hline
 		\end{tabular}
 	\caption{Algorithm to measure wake up time on binary semaphore}
@@ -457,16 +454,16 @@ The starting time is measured before a message is sent via the queue by the seco
 
 \begin{table}[htbp]
 	\centering
-		\begin{tabular}{|l|l|l|}
+		\begin{tabular}{|l|l|l|l|}
 			\hline
-				Task 1 							 & Task 2 								\\
+				& Task 1 							 & Task 2 								\\
 				\hline 
-				--									 & Block on message queue	\\
-			  Start time		 			 & --											\\
-			  Put message to queue & --											\\
-			  Yield								 & --											\\
-			  --									 & Wake up								\\
-			  --									 & Stop time							\\	  
+				1 & --									 & Block on message queue	\\
+			  2 & Start time		 			 & --											\\
+			  3 & Put message to queue & --											\\
+			  4 & Yield								 & --											\\
+			  5 & --									 & Wake up								\\
+			  6 & --									 & Stop time							\\	  
 			\hline
 		\end{tabular}
 	\caption{Message passing algorithm}
@@ -488,25 +485,25 @@ Now A will be scheduled and the test can run again.
 
 \begin{table}[htbp]
 	\centering
-		\begin{tabular}{|l|l|l|}
+		\begin{tabular}{|l|l|l|l|}
 			\hline
-				Task 1 (low priority)						& Task 2 (medium priority)	&  Task 3 (high priority)	\\
+				& Task 1 (low priority)						& Task 2 (medium priority)	&  Task 3 (high priority)	\\
 				\hline 
-				--															& Block on event						& --									\\
-			  --															& --												& Block on event			\\
-			  Take Semaphore 									& --												& --									\\
-			  Unblock task  2									& --							 					& --									\\
-			  Yield														& --												& --									\\
-			  --															&	Unblock task 3						& --									\\
-			  --															& Yield											& --									\\
-			  --															&	--												& Start time					\\  
-			  --															&	--												& Block on Semaphore	\\  	
-			  --															& Do work while 3 blocked		& --									\\	
-			  Unblocked by priority raise			&	--												& --									\\
-			  Give back semaphore							&	--												& --									\\	
-			  Yield														& --	  										& --									\\
-			  --															&	--												& Stop time						\\
-			  --															&	--												& Yield								\\
+				1 & --															& Block on event						& --									\\
+			  2 & --															& --												& Block on event			\\
+			  3 & Take Semaphore 									& --												& --									\\
+			  4 & Unblock task  2									& --							 					& --									\\
+			  5 & Yield														& --												& --									\\
+			  6 & --															&	Unblock task 3						& --									\\
+			  7 & --															& Yield											& --									\\
+			  8 & --															&	--												& Start time					\\  
+			  9 & --															&	--												& Block on Semaphore	\\  	
+			  10 & --															& Do work while 3 blocked		& --									\\	
+			  11 & Unblocked by priority raise		&	--												& --									\\
+			  12 & Give back semaphore						&	--												& --									\\	
+			  13 & Yield													& --	  										& --									\\
+			  14 & --															&	--												& Stop time						\\
+			  15 & --															&	--												& Yield								\\
 			\hline
 		\end{tabular}
 	\caption{Deadlock breaking time}
