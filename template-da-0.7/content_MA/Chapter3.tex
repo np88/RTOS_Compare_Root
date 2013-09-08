@@ -38,7 +38,7 @@ The lower picture shows the latencies plotted over time.
 This curve shows time dependent events like the timer tick.  
 %Further, this presentation of the results is not only valid for the task switching time but for all results presented in the following.
 
-\subsection{Task Switching Results FreeRTOS} 
+\subsection{Task Switching Results FreeRTOS} \label{ss_task_switching_results_freertos}
 \begin{figure}[hbt]
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_debug_FreeRTOS_start_end}
@@ -65,6 +65,7 @@ Moreover, the delay can be caused by loading data needed by the \ac{ISR} to the 
 \par
 Further, small spike clusters which cause a jitter of about 35 ns are visible during the complete test.
 Those cannot be explained by the test setup of the software, so it seems likely that they are caused by hardware, e.g. the cache mechanism.  
+The delays observed in this experiments are also valid for the experiments in the following.
  
 \subsection{Task Switching Results LinuxRT} 
 The mean value for task switching in LinuxRT is 1.46 us and the standard deviation is 131 ns (9.0 \%).
@@ -88,9 +89,19 @@ Because of the higher noise, they do not become as apparent as in the FreeRTOS m
 \section{Semaphore Results}
 This sections summarizes the results for the single mutex latency, the semaphore shuffling time and the event signaling. 
 As the plots look very similar to section \ref{s_task_switching_results}, only the resulting values will be presented.
+The single semaphore experiment shows the overhead arising when no other task interrupts an execution code secured by semaphores. 
+The semaphore shuffling experiment defined by Kar quantifies the semaphore overhead when a second task tries to access data which is locked by a semaphore. 
+The last experiment measures the latency which is caused by event synchronization. 
+Concretely, this means waking up a task by signaling a binary semaphore in FreeRTOS or a condition variable in Linux.
+\par
+In time critical applications, the choice of the synchronization method can be crucial.
+For example, sometimes the overhead of priority inheritance can be avoided by specific application design.
 
 \subsection{Semaphore Results FreeRTOS}
-As all semaphore functions in FreeRTOS are based on message queues.
+All semaphore functions in FreeRTOS are based on message queues.
+Mutexes support priority inheritance compared to the other kind of semaphores provided in FreeRTOS.
+Therefore, the overhead when working with mutexes is slightly higher. 
+The results of this measurement are presented in table \ref{tab_results_semaphores_freertos}. 
 
 \begin{table}[htbp]
 	\centering
@@ -109,10 +120,11 @@ As all semaphore functions in FreeRTOS are based on message queues.
 				Max. tick delay - mean		&						&						&					\\
 			\hline
 		\end{tabular}
-	\caption{Results Semaphore Tests}
-	\label{tab_results_semaphores}
+	\caption{Results semaphore tests in FreeRTOS}
+	\label{tab_results_semaphores_freertos}
 \end{table}
 
+As already mentioned, the causes of delays are summarized in section \ref{ss_task_switching_results_freertos}.
 
 %\subsection{Single Mutex Results}
 
