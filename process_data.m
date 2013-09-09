@@ -1,4 +1,4 @@
-function [mean_data, std_data] = process_data(name,column,factor,ylimit,folder,print_pdf)
+function [mean_data, std_data] = process_data(name,column,factor,ylimit,folder,print_pdf,display_name,num_graph)
 
 % find all directories which contain linux result files
 dirs=dir(folder);
@@ -23,34 +23,38 @@ for i=1:size(dirs,1)
         h = figure;
         data = importdata(filename, ' ', 1);
         if ((ylimit ~= 0) && (ylimit < min(data.data(:,column))) || ylimit < max(data.data(:,column)))
-            yl_t = max(data.data(:,column))*(1/666.666688);
+            yl_t = max(data.data(:,column))*(1/666.666688)
             yl_p = max(data.data(:,column));
         else
             yl_t = ylimit;
             yl_p = max(data.data(:,column));
         end
          % caculate mean
-        mean_data = mean(data.data(:,column)*(1/666.666688));
+        mean_data = mean(data.data(:,column)*(1/666.666688))
         %calculate standard deviation
-        std_data = std(data.data(:,column)*(1/666.666688), 1);
+        std_data = std(data.data(:,column)*(1/666.666688), 1)
         
-        x_nl = unique(data.data(:,column));
-        y_nl = hist(data.data(:,column), x_nl);
-        subplot(2,1,1)
-        plot(x_nl*(1/666.666688),y_nl/factor','--bo','MarkerEdgeColor','b', 'Displayname', strcat(name, i))
-        hold on
-        plot(mean_data, 0, '--ro')
-        hold on
-        plot(mean_data-std_data, 0, '--ro')
-        hold on
-        plot(mean_data+std_data, 0, '--ro')
-        xlabel('Latency [us]');
+        if num_graph > 1
+            x_nl = unique(data.data(:,column));
+            y_nl = hist(data.data(:,column), x_nl);
+            subplot(num_graph,1,1)
+            plot(x_nl*(1/666.666688),y_nl/factor','--kx','MarkerEdgeColor','k', 'Displayname', display_name)
+            hold on
+            plot(mean_data, 0, ':ro', 'Displayname', 'Mean value')
+            hold on
+            plot(mean_data-std_data, 0, ':go', 'Displayname', 'Standard deviation')
+            hold on
+            legend('show');
+            plot(mean_data+std_data, 0, ':go')
+            xlabel('Latency [us]');
+        end
+
         if factor == 1
-            ylabel('Occurence x')
+            ylabel('Occurence')
         else
             ylabel(strcat('Occurence x', int2str(factor)))
         end
-        subplot(2,1,2)
+        subplot(num_graph,1,2)
         % eliminate overrun errors
         time = find (data.data(1:end-1,2) > data.data(2:end,2));
         if ~isempty(time)
@@ -59,12 +63,16 @@ for i=1:size(dirs,1)
                 data.data(time(j,1)+1:time(j+1,1),2) = data.data(time(j,1)+1:time(j+1,1),2) + 2^32*j;
             end
         end
-        plot((data.data(:,2)-data.data(1,2))*(1/666666688), data.data(:,column)*(1/666.666688),'Color','blue')
+        plot((data.data(:,2)-data.data(1,2))*(1/666666688), data.data(:,column)*(1/666.666688),'Color','black','Displayname', display_name)
         hold on
-        plot([0 ((data.data(end,2)-data.data(1,2))*(1/666666688))], [mean_data mean_data], 'Color', 'red')
+        plot([0 ((data.data(end,2)-data.data(1,2))*(1/666666688))], [mean_data mean_data], 'Color', 'red', 'Displayname', 'Mean value')
+        hold on
         ylim([0 yl_t]);
         ylabel('Latency [us]');
         xlabel('Time [s]')
+        if num_graph < 2
+            legend('show');
+        end
 %         subplot(3,1,3)
 %         plot(data.data(:,column),'Color','red')
 %         hold on
