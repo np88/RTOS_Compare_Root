@@ -224,8 +224,99 @@ The mean time for the deadlock breaking time in FreeRTOS is 20.68 us.
 The standard deviation is 643 ns (3.11 \%) and the maximum peak occuring while the timer interrupt is active is 37.146 us.
 This makes a total overhead of 16.466 us.
 The LinuxRT implementation is 9.79 times slower than the same implementation in FreeRTOS.
+While FreeRTOS seems to switch from task 3 directly to task 1 when the semaphore is taken, LinuxRT still switches to task 2 before switching to task 1.
  
 \section{Interrupt Latency} 
+The interrupt latency depends not only on the underlying hardware but also on the handling by the operation system.
+While the only interrupt which is being handled directly by FreeRTOS is the timer tick, Linux supports more advanced handling of interrupts. 
+Therefore, the analysis of the interrupt latency in Linux is more complex (see section \ref{ss_interrupt_latency_results_in_linux}).
+
+\subsection{Interrupt Latency Results in FreeRTOS}
+As there is no \ac{OS} overhead in the interrupt handling in FreeRTOS, it is very fast and predictive.
+The time to handle the interrupt internally and turn on an \ac{LED} from the \ac{ISR} takes no more than 740 ns (see figure \ref{fig_interrupt_latency_freertos}). 
+The mean value is 727.71 ns and the standard deviation 4.775 ns. 
+Even when the \ac{LED} is turned on from a task which is unblocked by the \ac{ISR}, the procedure is only 10 ns slower.  
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.5] 
+		{inputs/pictures_ch3/isr_free}
+	\end{center}
+	\caption[Interrupt latency FreeRTOS]{Interrupt latency FreeRTOS, resolution: 1 us} \label{fig_interrupt_latency_freertos}
+\end{figure}
+
+\subsection{Interrupt Latency Results in Linux}\label{ss_interrupt_latency_results_in_linux}
+The interrupt handling in Linux is quiet complex and many different cases have to be considered. 
+As already mentioned, the \acp{ISR} in LinuxRT are threaded to reduce interrupt delays for critical tasks. 
+Obviously, this increases the total interrupt latency.
+To investigate how much the threading influences the interrupt latency, the tests were also run on a standard Linux platform as well.
+Further, the tests were also performed under load condition as it is desirable to run standard [Wort?] applications on LinuxRT, not only real-time applications. 
+This experiment shows very well the influence of \ac{I/O} bound load on the Linux system.
+
+\subsection{The fastest Interrupt Handling in Linux}
+The first test which was performed is very similar to the FreeRTOS test. 
+It tests the standard Linux system's interrupt latency.
+This means that the interrupts are handled non-threaded and the \ac{LED} is lightened in the \ac{ISR} directly.
+The setup was tested on a standard Linux system.
+The mean value for 50000 measurements is 1.812 us with a standard deviation of 433.06 ns. 
+This is only 2.5 times higher than in FreeRTOS. 
+The maximum measured value is 3.51 us.
+When put under stress by a constant SCP transfer, the value increases to a mean value of 2.679 us and a standard deviation of 1.30 us.
+The maximum value rises to 29.5 us.
+\par
+When the same experiment was repeated for LinuxRT, logically, the results are much higher.
+The mean value is 10.027 us with a standard deviation of 987.36 ns. 
+The maximum measured value is 17.05 us.
+After stressing the system, the mean value stays almost constant at 10.486 us, but the standard deviation rises to 4.496 us and the maximum recorded value to 90 us.
+
+\subsection{Interrupt handling and User Processes}
+Usually, programmer prefer to write programs in user space and not kernel modules. 
+Therefore, in this test a typical user thread scenario is simulated.
+A thread is waiting for an interrupt to occur and then issues a write command to turn off the \ac{LED}. 
+Both experiments were repeated for mainline Linux and LinuxRT. 
+
+\paragraph{LinuxRT}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.5] 
+		{inputs/pictures_ch3/rt_isr_user}
+	\end{center}
+	\caption[Interrupt latency LinuxRT]{Interrupt latency LinuxRT, resolution 5 us} \label{fig_interrupt_latency_linuxrt}
+\end{figure}
+The mean value measured for the user task when using LinuxRT is 24.455 us. 
+The standard deviation is 3.897 us. 
+In figure \ref{fig_interrupt_latency_linuxrt}, the latencies for the experiment are shown.
+Evidently, there is a high jitter although no load was put on the system. 
+The maximum latency is at about 41 us. 
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.5] 
+		{inputs/pictures_ch3/rt_isr_user_load}
+	\end{center}
+	\caption[Interrupt latency LinuxRT with load]{Interrupt latency LinuxRT with load, resolution 15 us} \label{fig_interrupt_latency_linuxrt_load}
+\end{figure}
+Figure \ref{fig_interrupt_latency_linuxrt_load} shows the same experiment when the system was stressed with network load. 
+The mean value for this experiment is 29.375 and the standard deviation is 6.202 us.
+The maximum value here is about 100 us.
+
+\paragraph{Mainline Linux}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.5] 
+		{inputs/pictures_ch3/linux_isr_user}
+	\end{center}
+	\caption{Interrupt latency standard Linux} \label{fig_interrupt_latency_linux}
+\end{figure}
+
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.5] 
+		{inputs/pictures_ch3/linux_isr_user_load}
+	\end{center}
+	\caption{Interrupt latency standard Linux with load} \label{fig_interrupt_latency_linux_load}
+\end{figure}
+
 
 \section{Preemption Time}
 \begin{figure}[htb]
