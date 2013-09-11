@@ -12,7 +12,8 @@ The underlying hardware platform is a Xilinx ZC702 Evaluation Board \cite{xilinx
 The XC7Z020 chip integrates a \ac{PS} and a \ac{PL} on a single die.
 Two ARM Cortex-A9 MPCore application processors running at 666 MHz are located in the \ac{PS}.
 Both cores inherit a 32 kB instruction and a 32 KB data level 1 cache.
-Moreover, they share a 512 kB level 2 cache and 256 kB SRAM.
+Moreover, they share a 512 kB level 2 cache and 256 kB SRAM on-chip memory.
+The platform also provides 1 GB of DDR3 which is comprised of four 256 Mb x 8 SDRAM which are 32 bits wide. 
 The \ac{PL} is an Artix-7 from the Xilinx's 7 series \ac{FPGA} technology and can be used to implement custom hardware designs.
 Further, the evaluation board provides 128 Mb of \ac{QSPI} flash memory.
 
@@ -49,7 +50,7 @@ Therefore, the \ac{OS} itself does not need to be configured.
 Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}) and an \ac{ISR} needs to be implemented. 
 Moreover, FreeRTOS needs an \ac{FSBL} which can be created by the \ac{SDK}.
 The \ac{FSBL} and the FreeRTOS application must be combined to a boot image.
-The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4.
+The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4 which was contributed by the FreeRTOS community.
 
 \subsubsection{LinuxRT}\label{sss_linuxrt}
 Xilinx provides own distributions of embedded Linux which can be compiled for many different platforms. 
@@ -134,7 +135,7 @@ The boot time is the time from powering on the hardware until the first (user) t
 On the ZC702 Evaluation platform, this time can be measured by utilizing user \acp{LED} on the board.  
 The default state of those \acp{LED} is on.
 By turning them off in the first executed task, the exact power up time of the system can be measured.  
-As already mentioned (see \ref{ss_boot_time}), the boot time depends on the complexity of the operation system and the hardware. 
+As already mentioned (see \ref{ss_boot_time_general}), the boot time depends on the complexity of the operation system and the hardware. 
 Further, the evaluation board provides three different ways of booting an \ac{OS}:
 \begin{enumerate}
 	\item Via \ac{JTAG}
@@ -147,7 +148,7 @@ The flow graphs illustrate the differences between the boot process in FreeRTOS 
 
 \subsection{Booting in FreeRTOS}
 The booting process is already described in the previous chapter (see \ref{ss_booting_in_freertos}).
-Based on the information in section \ref{ss_boot_time}, the FreeRTOS boot time can be derived as follows:
+Based on the information in section \ref{s_boot_time}, the FreeRTOS boot time can be derived as follows:
 	\begin{equation}
 		t_{boot}^{free} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} \label{eq_t_boot_free} 
 	\end{equation}

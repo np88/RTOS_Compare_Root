@@ -71,7 +71,7 @@ This task is often used to put the \ac{CPU} in a low-power mode, e.g. scaling do
 Moreover, it can be used to perform background processes or as indicator for capacity utilization.  
   
 \subsection{Scheduling Policies}\label{ss_scheduling_policy} 
-The scheduler decides which task will run next (is allowed to enter the Ready state). 
+The scheduler decides which task will run next (is allowed to enter the Running state). 
 The decision is based on the scheduling policy of the \ac{OS}.
 There are mainly two different types of scheduling: \textit{Preemptive} and \textit{cooperative} scheduling.
 In cooperative scheduling, tasks cannot be interrupted, they have to release the processor voluntarily. 
@@ -251,7 +251,7 @@ Dependent on the application and the right synchronization mechanism, the overal
 \par
 The delays described in this section are \ac{CPU} bound delays compared to delays caused by \ac{I/O} interrupts.
  
-\subsection{Boot Time}\label{ss_boot_time}
+\subsection{Boot Time}\label{ss_boot_time_general}
 The boot time can be a relevant factor for the choice of a specific \ac{OS} if the system needs to start up very fast.
 When a car is started, the driver does not want to wait 15 seconds until the ignition starts running.
 Obviously, the boot time depends on the memory print of the operation system and on the medium from which the \ac{OS} is loaded.
@@ -268,7 +268,7 @@ While booting, it initializes the file system with the previously loaded image a
 Ways to optimize this process will be discussed later (refer to section \ref{s_boot_time}).
 
 \section{FreeRTOS}
-This section described the FreeRTOS in more detail.
+This section describes the FreeRTOS \ac{OS} in more detail.
 The focus is on the scheduling algorithm, interrupt handling and synchronization features.
 
 \subsection{Scheduling in FreeRTOS}\label{ss_scheduling_in_freertos}
@@ -330,12 +330,12 @@ There is barely room for optimization in the first two steps of the booting proc
 However, the last two steps are dependent on the size of the bitstream and the size of the application respectively.
 
 \section{LinuxRT}
-This section described the Linux \ac{OS} in more detail.
+This section describes the Linux \ac{OS} in more detail.
 The focus is on memory management, the scheduling algorithm, interrupt handling and synchronization features.
 Moreover, the differences between the standard Linux Kernel and the RT patch.
 
 \subsection{Memory Management}
-The Linux \ac{OS} uses a quite complex system 
+%The Linux \ac{OS} uses a quite complex system 
 Linux uses a file system to store user programs and system data. 
 This file system is usually larger than the available \ac{RAM}, therefore it is provided on an other medium.
 The medium can be either located on a removable flash disk like an \ac{SD} card, a \ac{QSPI} flash or another medium.
@@ -487,14 +487,14 @@ Those softirqs are still handled by the ksoftirqd thread.
 \section{Mathematical Quantification of Operation Systems}
 There are many different parameters to quantify \acp{RTOS}.
 Some important ones besides real-time capability are freedom of charge, memory footprint, available drivers, licensing, \ac{API} richness and support \cite{Anh:sapeortosfsm}.   
-Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates to use in future projects.
+Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates to be used in future projects.
 To determine which one of the two is suitable for which kind of real-time applications, a set of tests has to be defined and performed.
 Consequently, the parameters which have an influence on the execution time have to be determined and analyzed.
 In the following, the boot time and the real-time task or application run time are described mathematically.
 This formula will later be used to evaluate the performance and the \ac{OS} consideration of a test application.
 
-\subsection{Boot Time}\label{ss_boot_time}
-The boot time $ t_{boot} $ can be calculated straight forward from the already discussed parts of the boot flow (refer to \ref{ss_boot_time}):
+\subsection{Boot Time}\label{ss_boot_time_math}
+The boot time $ t_{boot} $ can be calculated straight forward from the already discussed parts of the boot flow (refer to \ref{ss_boot_time_general}):
 \begin{itemize}
 	\item Time to boot \ac{ROM} $ t_{rom} $
 	\item Time to load the \ac{FSBL} $ t_{fsbl} $
@@ -505,7 +505,7 @@ The boot time $ t_{boot} $ can be calculated straight forward from the already d
 	\item Time to load the file system $ t_{filesys}$
 	\item Time to boot the \ac{OS} $ t_{boot} $
 \end{itemize} 
-As already discussed, the complexity of the boot process is dependent on the \ac{OS}.
+As already discussed, the complexity of the boot process is dependent on the \ac{OS} and the underlying hardware setup.
 For Linux, the boot time consists of all steps listed above whereas FreeRTOS only needs the first three steps. 
   
 \subsection{Applications and Real-Time Tasks}
@@ -516,7 +516,7 @@ Unexpected delays, mainly from interrupts, cause latency to vary.
 Moreover, unexpected delays can be caused by loading memory pages to \ac{RAM}.
 This variation is called jitter and, logically, should be as low as possible. 
 \par
-Based the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, the execution time of a specific real-time task or application\footnote{In the following, the term application also refers to one run of a critical real-time task.} can be described by the following factors:
+Based on the introduced delays in section \ref{s_hardware_delays_and_os_jitter}, the execution time of a specific real-time task or application\footnote{In the following, the term application also refers to one run of a critical real-time task.} can be described by the following factors:
 \begin{enumerate}
 	\item Deterministic part 
 	\begin{equation}
@@ -579,7 +579,7 @@ This benchmark is a weighted mean of the following six parameters:
 	\item Message passing latency
 \end{itemize}
 Details on the single parameters are given in the next chapter (see \ref{ch_measurements}).
-In contrast to Kar's procedure, the absolute values are used for this work. 
+In contrast to Kar's procedure where a mean value is calculated from the single components, the absolute results are used in this work. 
 
 \subsection{Jitter}
 The jitter $ t_{jitter} $ should be as low as possible. 

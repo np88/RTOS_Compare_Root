@@ -305,17 +305,17 @@ The maximum value here is about 100 us.
 \subsubsection{Mainline Linux}
 To see how significant the differences between LinuxRT and the mainline kernel are, the same experiment is also repeated using the mainline kernel. 
 \par
-The mean value measured for the user task is ?? us. 
-The standard deviation is ?? us (?? \%). 
+The mean value measured for the user task is 12.350 us. 
+The standard deviation is 1.250 us (10.12 \%). 
 In figure \ref{fig_interrupt_latency_linux}, the latencies for the experiment are shown.
-The maximum value is at about 29 us. 
+The maximum value is at 26.47 us. 
 
 \begin{figure}[htb]
 	\begin{center}
 		\includegraphics[scale=0.5] 
 		{inputs/pictures_ch3/linux_isr_user}
 	\end{center}
-	\caption[Interrupt latency standard Linux]{Interrupt latency standard Linux} \label{fig_interrupt_latency_linux}
+	\caption[Interrupt latency standard Linux]{Interrupt latency standard Linux, resolution 5 us} \label{fig_interrupt_latency_linux}
 \end{figure}
 
 \begin{figure}[htb]
@@ -323,11 +323,12 @@ The maximum value is at about 29 us.
 		\includegraphics[scale=0.5] 
 		{inputs/pictures_ch3/linux_isr_user_load}
 	\end{center}
-	\caption{Interrupt latency standard Linux with load} \label{fig_interrupt_latency_linux_load}
+	\caption[Interrupt latency standard Linux with load]{Interrupt latency standard Linux with load, resolution 5 us} \label{fig_interrupt_latency_linux_load}
 \end{figure}
 Figure \ref{fig_interrupt_latency_linux_load} shows the same experiment stressed with \ac{I/O} load.  
-As in LinuxRT, the maximum registered value is unacceptably large (115 us).
-The mean value is at 15.853 us and the standard deviation at 6.850 us (43.2 us \%).
+As in LinuxRT, the maximum registered value is unacceptably large (90.92 us).
+Moreover, an even higher value could be observed in other experiments.
+The mean value is at 15.853 us and the standard deviation at 6.01 us (37.91 us \%).
 
 \section{Preemption Time}
 The preemption time is related to the interrupt latency, but measures the time that it takes to interrupt a low priority task and then continue a high priority task.
