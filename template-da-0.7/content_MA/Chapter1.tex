@@ -188,7 +188,8 @@ This causes high priority interrupts to disturb the execution of lower prioritiz
  
 \section{Hardware Delays and \ac{OS} jitter}\label{s_hardware_delays_and_os_jitter}
 Different delays caused by the underlying hardware or the \ac{OS} are crucial in real-time applications.
-In this work, the term \textit{delay} refers to unexpected events which extend the execution time of a real-time task.
+In this work, the term \textit{delay} refers to unexpected events which extend the mean execution time of a real-time task.
+This delay also referred to as jitter.  
 
 \begin{figure}[htb]
 	\begin{center}
@@ -196,7 +197,6 @@ In this work, the term \textit{delay} refers to unexpected events which extend t
 	\end{center}
 	\caption[Delay in task caused by interrupt]{Delay in task caused by interrupt} \label{fig_delay}
 \end{figure}
-
 
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
 There are mainly four kind of delays and one kind of latency:
@@ -295,7 +295,7 @@ In case there are multiple tasks in one list, the \ac{RR} algorithm is used to p
 FreeRTOS itself contains only one interrupt: The timer tick (refer to section \ref{ss_timer_tick}.
 Other devices and interrupts may be installed on demand, but they are not handled by the OS. 
 It is only in charge of task managing and inter-task communication.
-For the application development, it means that an interrupt handler has to be written and registered in the \ac{GIC}.
+For the application development, it means that an interrupt handler has to be written and registered in the interrupt controller.
 As all interrupt handling is up to the programmer, it is easy to keep track of the number of interrupts in the system.
 
 \subsection{Synchronization Features in FreeRTOS}
@@ -509,10 +509,10 @@ As already discussed, the complexity of the boot process is dependent on the \ac
 For Linux, the boot time consists of all steps listed above whereas FreeRTOS only needs the first three steps. 
   
 \subsection{Applications and Real-Time Tasks}
-The execution time of a task is referred to as latency.
+The mean execution time of a task is referred to as latency.
 It depends mainly on the executed application code, the underlying hardware and the latency caused by calls to synchronizing mechanisms of the \ac{OS}. 
-For real-time tasks, latency should be as deterministic as possible.
-Unexpected delays, mainly from interrupts, cause latency to vary.
+For real-time tasks, the latency should be as deterministic as possible.
+Unexpected delays, for example from interrupts, cause latency to vary.
 Moreover, unexpected delays can be caused by loading memory pages to \ac{RAM}.
 This variation is called jitter and, logically, should be as low as possible. 
 \par

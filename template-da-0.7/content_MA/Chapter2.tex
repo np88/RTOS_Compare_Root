@@ -30,8 +30,16 @@ Moreover, the \ac{EMIO} pins can be used to extend the number of connected perip
 \par
 When the Zynq platform is used in future projects, most likely both \ac{PS} and \ac{PL} will be utilized.
 This chip is especially useful to combine a powerful \ac{CPU} and own hardware designs.
-Therefore, an interrupt generator was implemented in the \ac{PL} part to utilize the \ac{PL}.
+Therefore, a pulse generator was implemented in the \ac{PL} part to utilize the \ac{PL}.
 It is connected as \ac{GPIO} device.
+The pulse generator is used to trigger interrupts which are then handles by the \ac{GIC} of the \ac{APU} (see figure \ref{fig_pulse_generator}). 
+
+\begin{figure}[htb]
+		\begin{center}
+			\includegraphics[scale=0.71]{inputs/pictures_ch2/pulse_generator}
+			\caption{Integration of pulse generator} \label{fig_pulse_generator}
+		\end{center}
+\end{figure} 
 
 \subsection{Development Tools}
 The Xilinx Design Suite version 14.4 was used to create the test environment and the tests.
@@ -46,10 +54,10 @@ Both need to be configured such that the implemented interrupt generator can be 
 
 \subsubsection{FreeRTOS}
 As already mentioned, interrupt management does not effect the FreeRTOS kernel.
-Therefore, the \ac{OS} itself does not need to be configured.
+Therefore, the \ac{OS} itself needs only some basic configuration, e.g. the maximum number of priorities is set to 4 (maximum used in the benchmarking programs).
 Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}) and an \ac{ISR} needs to be implemented. 
 Moreover, FreeRTOS needs an \ac{FSBL} which can be created by the \ac{SDK}.
-The \ac{FSBL} and the FreeRTOS application must be combined to a boot image.
+The \ac{FSBL}, the FreeRTOS application and, optionally, an \ac{FPGA} configuration file must be combined to a boot image.
 The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4 which was contributed by the FreeRTOS community.
 
 \subsubsection{LinuxRT}\label{sss_linuxrt}
@@ -97,8 +105,8 @@ The final configuration reduces the kernel size from 2,8[?] MB to 1,9 MB.
 \subsection{Time measurement}
 The time measurement should be as accurate as possible.
 High measuring overheads could falsify the results, so software timers should be avoided. 
-One elegant way is to access the \ac{CPU} cycle counter register of the ARM Cortex-A9 processor using inline-assembly code [Reference to the ARM Cortex A9 Architecture Manual].
-This code is compiled into four assembly instructions when copying the register value to an array.
+One elegant way is to access the \ac{CPU} cycle counter register of the ARM Cortex-A9 processor using inline-assembly code \cite{arm:aarmaaae}.
+This code is compiled into four assembly instructions [ref to appendix] when copying the register value to an array.
 The advantages of this method is not only low overhead but also the \ac{OS} independence of the assembly code.
 Hence this method can be used for both FreeRTOS and LinuxRT.
 However, the \ac{CPU} has to keep running at the same frequency during the whole measurement process, otherwise the results will be wrong.
@@ -111,9 +119,12 @@ If this is not valid for a special case, it will be mentioned in the benchmark d
 The scheduling for both systems is configured to be round robing, hence both are using a preemptive scheduling algorithm.
  
 \subsubsection{FreeRTOS}
-Generally, there are no other tasks in FreeRTOS than the ones created for the test.
+Generally, there are no other tasks in FreeRTOS than the ones created for the test and the idle task.
 Consequently, the real-time tasks have the highest priority in the system anyway.
 For all system calls, the FreeRTOS \ac{API} is used. 
+%Nonetheless, a FreeRTOS port which includes \ac{MPU} support exists for ARM Cortex-M3 microcontrollers.
+%Using this post, tasks can be created either in user or in privileged mode \ref{freertos}.
+%This function is not supported by the used port.
 
 \subsubsection{LinuxRT}
 In Linux, multi-tasking applications are realized using pthreads.
@@ -371,18 +382,6 @@ The starting time is measured before a message is sent via the queue by the seco
 \end{table}
 
 \section{Deadlock Breaking Time}
-The deadlock breaking time is the time which it takes for the \ac{OS} to resolve priority inversion caused by low priority tasks holding a resource needed by a high-priority task (see table \ref{tab_deadlock}). 
-The experiment is set up similar to the given example for priority inheritance (for details refer to \ref{ss_priority_inheritance}) and repeated 100000 times: 
-Task A with the lowest priority starts executing.
-A takes a mutex and starts a second task B with higher priority than itself.
-B preempts the first task and starts task C with the highest priority. 
-C tries to take the same mutex as the first task and is blocked.
-Consequently, the priority of the A is raised, it can finish execution (in the test scenario there is no work to be done), release the mutex and unblock C.
-The starting time is measured before C takes the mutex, the ending time after C returns from the Blocked state.
-To repeat the test, the original state of the tasks has to be restored.
-Therefore, C cancels task B, so it will not preempt A and suspends itself.
-Now A will be scheduled and the test can run again.
-
 \begin{table}[htbp]
 	\centering
 		\begin{tabular}{|l|l|l|l|}
@@ -410,6 +409,17 @@ Now A will be scheduled and the test can run again.
 	\label{tab_deadlock}
 \end{table}
 
+The deadlock breaking time is the time which it takes for the \ac{OS} to resolve priority inversion caused by low priority tasks holding a resource needed by a high-priority task (see table \ref{tab_deadlock}). 
+The experiment is set up similar to the given example for priority inheritance (for details refer to \ref{ss_priority_inheritance}) and repeated 100000 times: 
+Task A with the lowest priority starts executing.
+A takes a mutex and starts a second task B with higher priority than itself.
+B preempts the first task and starts task C with the highest priority. 
+C tries to take the same mutex as the first task and is blocked.
+Consequently, the priority of the A is raised, it can finish execution (in the test scenario there is no work to be done), release the mutex and unblock C.
+The starting time is measured before C takes the mutex, the ending time after C returns from the Blocked state.
+To repeat the test, the original state of the tasks has to be restored.
+Therefore, C cancels task B, so it will not preempt A and suspends itself.
+Now A will be scheduled and the test can run again.
 
 \section{Interrupt Latency}
 Interrupt latency is defined as the time which passes from triggering an interrupt until the first instruction of the interrupt service routine. 
@@ -485,16 +495,6 @@ This can be done for example by using the \ac{SSH} protocol \cite{tlip:tsspa}.
 To prevent the system from being overload by one huge file, a small file is sent over and over again. 
 
 \section{Preemption Time}
-The preemption time is the time which it takes to interrupt a task and schedule another task of higher priority.
-This can happen when a task with a high priority is woken up by an other task or \ac{ISR} triggering a signal or releasing a mutex.
-In this experiment, there is one low priority task A and a high priority task B.
-B starts first and blocks on a signal event.
-A is running in a permanent loop and reading the current \ac{CPU} cycle counter register.
-At some point in time, an \ac{IRQ} occurs and the task is interrupted.
-From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context switch happens.
-When B is activated, it measures the ending time and yields.
-This reactivates A and the test starts over (compare table \ref{tab_preemption}).
-
 \begin{table}[htbp]
 	\centering
 		\begin{tabular}{|l|l|l|l|}
@@ -511,4 +511,15 @@ This reactivates A and the test starts over (compare table \ref{tab_preemption})
 	\caption{Preemption from ISR}
 	\label{tab_preemption}
 \end{table}
+
+The preemption time is the time which it takes to interrupt a task and schedule another task of higher priority.
+This can happen when a task with a high priority is woken up by an other task or \ac{ISR} triggering a signal or releasing a mutex.
+In this experiment, there is one low priority task A and a high priority task B.
+B starts first and blocks on a signal event.
+A is running in a permanent loop and reading the current \ac{CPU} cycle counter register.
+At some point in time, an \ac{IRQ} occurs and the task is interrupted.
+From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context switch happens.
+When B is activated, it measures the ending time and yields.
+This reactivates A and the test starts over (compare table \ref{tab_preemption}).
+
 %\section{Test program}
