@@ -23,12 +23,6 @@ The new custom configuration was applied step by step to see the effects on the 
 The result of this experiment is a boot time which was decreased by 72 \% in read-write mode and by 80 \% in read-only mode.
 
 \section{Task Switching Results}\label{s_task_switching_results}
-The results for task switching show the minimum overhead in a system with at least two tasks for the maximum priority. 
-This value is also valid for systems with more real-time tasks of the same priority which use the round robin scheduling algorithm.
-For task switching between different priority levels, the scheduling is dependent on the number of priority level.
-In such cases, the complete list has to be searched from the beginning.
-Therefore, the task switching time is slightly higher than for task switching within the same priority level.
-\par
 The measurements are presented in two different figures. 
 The upper one always shows the time measured on the x axis and the number this time has occurred on the y axis. 
 This curve gives a good overview over the statistic and deviation of the measurement.

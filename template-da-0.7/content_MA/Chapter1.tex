@@ -487,11 +487,11 @@ Those softirqs are still handled by the ksoftirqd thread.
 \section{Mathematical Quantification of Operation Systems}
 There are many different parameters to quantify \acp{RTOS}.
 Some important ones besides real-time capability are freedom of charge, memory footprint, available drivers, licensing, \ac{API} richness and support \cite{Anh:sapeortosfsm}.   
-Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates to be used in future projects.
-To determine which one of the two is suitable for which kind of real-time applications, a set of tests has to be defined and performed.
+Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates for the application in future projects.
+To determine which of the two is suitable for what kind of real-time projects, a set of tests has to be defined and performed.
 Consequently, the parameters which have an influence on the execution time have to be determined and analyzed.
 In the following, the boot time and the real-time task or application run time are described mathematically.
-This formula will later be used to evaluate the performance and the \ac{OS} consideration of a test application.
+This formula will later be used to evaluate the \acp{OS}.
 
 \subsection{Boot Time}\label{ss_boot_time_math}
 The boot time $ t_{boot} $ can be calculated straight forward from the already discussed parts of the boot flow (refer to \ref{ss_boot_time_general}):
@@ -505,12 +505,12 @@ The boot time $ t_{boot} $ can be calculated straight forward from the already d
 	\item Time to load the file system $ t_{filesys}$
 	\item Time to boot the \ac{OS} $ t_{boot} $
 \end{itemize} 
-As already discussed, the complexity of the boot process is dependent on the \ac{OS} and the underlying hardware setup.
+The complexity of the boot process is dependent on the \ac{OS} and the underlying hardware setup.
 For Linux, the boot time consists of all steps listed above whereas FreeRTOS only needs the first three steps. 
   
 \subsection{Applications and Real-Time Tasks}
 The mean execution time of a task is referred to as latency.
-It depends mainly on the executed application code, the underlying hardware and the latency caused by calls to synchronizing mechanisms of the \ac{OS}. 
+It depends mainly on the executed application code, the underlying hardware and the latencies caused by calls to synchronizing mechanisms of the \ac{OS}. 
 For real-time tasks, the latency should be as deterministic as possible.
 Unexpected delays, for example from interrupts, cause latency to vary.
 Moreover, unexpected delays can be caused by loading memory pages to \ac{RAM}.
@@ -525,7 +525,7 @@ Based on the introduced delays in section \ref{s_hardware_delays_and_os_jitter},
 	\end{equation}  		
 		\begin{enumerate}
 			\item Execution time for application code $ t_{app} $ 
-			\item Execution time for \ac{OS} related features where $ n_{os} $ is the number of \ac{OS} 
+			\item Execution time $ t_{sync} $ for \ac{OS} related features where $ n_{sync} $ is the number of \ac{OS} 
 						related features and $ x_{sync}^{i} $ is the number of times this feature was used in the application 
 						$ t_{sync} = \sum\limits_{i=1}^{n_{sync}} {x_{sync}^{i} * t_{sync}^{i}} $
 			\item Execution time for \acp{ISR} belonging to the application $ n_{isr} $ is the number of 
@@ -552,10 +552,11 @@ Based on the introduced delays in section \ref{s_hardware_delays_and_os_jitter},
 \end{enumerate}
  
 $ t_{jitter} $ is also dependent on the probability of the single delays.
-As only the worst case execution time is of interest for further consideration, the formula stated above can be used for the calculation of $ t_{jitter} $ without modification.    
+As only the worst case execution time is of interest for further consideration, it will be assumed that all events can happen right after each other.
+Consequently, the formula stated above can be used for the calculation of $ t_{jitter} $ without modification.    
 Logically, both FreeRTOS and Linux have different sources of delays. 
 For FreeRTOS $ t_{daem} $, $ t_{swap} $ and $ t_{int} $ are zero. 
-The programmer does not need to worry about any unexpected events caused by this parts of the operation system.
+The programmer does not need to worry about any unexpected events.
 On the contrary, in Linux all of these delays have to be considered or eliminated carefully.
 
 \section{Benchmark Preparation}
@@ -569,7 +570,7 @@ The application code is not available at the time where the times are measured, 
 For the latencies related to the \ac{OS} and the interrupt latency the Rhealstone benchmark can be utilized. 
 As already mentioned, it was introduced by Kar and Porter in 1989 \cite{kar:artbp} and was further modified and published by Kar in 1990 \cite{kar:itrb}.
 The purpose of the Rhealstone benchmark was to find a metric for real-time systems which is comparable to the Dhrystone \cite{weicker:dasspb} and Whetstone \cite{wichmann:asb} benchmarks.
-This benchmark is a weighted mean of the following six parameters:
+The Rhealstone benchmark is a weighted mean of the following six parameters:
 \begin{itemize}
 	\item Interrupt latency
 	\item Task switching time
@@ -595,11 +596,11 @@ Interrupts usually occur infrequently and hence cause undefined delays.
 In FreeRTOS, the only interrupt always available in the system is the timer tick.
 Whenever other interrupts are added to the system, they are not considered jitter.
 In LinuxRT, the number of interrupts depends on the drivers loaded. 
-Yet, there is still the possibility to remove unnecessary drivers and control the inputs of the system to avoid as much jitter as possible.
+Yet, there is still the possibility to remove unnecessary drivers and control the inputs of the system to avoid indeterministic jitter.
 
 \paragraph{Cache Misses}
 Cache misses depend on the hardware and cannot be controlled actively.
-Careful application design can minimize the memory print and therefore the number of cache misses.
+Careful application design can minimize the memory foot print and therefore the number of cache misses.
 
 \paragraph{Page Swapping}
 If the \ac{OS} uses virtual memory space, page swapping can cause delays during the execution of a real-time task.

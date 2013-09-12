@@ -13,7 +13,7 @@ The XC7Z020 chip integrates a \ac{PS} and a \ac{PL} on a single die.
 Two ARM Cortex-A9 MPCore application processors running at 666 MHz are located in the \ac{PS}.
 Both cores inherit a 32 kB instruction and a 32 KB data level 1 cache.
 Moreover, they share a 512 kB level 2 cache and 256 kB SRAM on-chip memory.
-The platform also provides 1 GB of DDR3 which is comprised of four 256 Mb x 8 SDRAM which are 32 bits wide. 
+The platform also provides 1 GB of DDR3 which is comprised of four 256 Mb x 8 SDRAM that are 32 bits wide. 
 The \ac{PL} is an Artix-7 from the Xilinx's 7 series \ac{FPGA} technology and can be used to implement custom hardware designs.
 Further, the evaluation board provides 128 Mb of \ac{QSPI} flash memory.
 
@@ -26,11 +26,11 @@ Further, the evaluation board provides 128 Mb of \ac{QSPI} flash memory.
 
 The \ac{PS} uses so called \ac{MIO} pins to connect to peripheral devices to the processor.
 Those pins can be configured to connect either \acp{GPIO}, Ethernet, \ac{SPI} and others.
-Moreover, the \ac{EMIO} pins can be used to extend the number of connected peripherals.
+Moreover, the \ac{EMIO} pins can be used to increase the number of connected peripherals.
 \par
-When the Zynq platform is used in future projects, most likely both \ac{PS} and \ac{PL} will be utilized.
+The Zynq platform will be used in projects where most likely both \ac{PS} and \ac{PL} will be utilized.
 This chip is especially useful to combine a powerful \ac{CPU} and own hardware designs.
-Therefore, a pulse generator was implemented in the \ac{PL} part to utilize the \ac{PL}.
+To make use of the \ac{PL}, a pulse generator \ac{FPGA} module was implemented.
 It is connected as \ac{GPIO} device.
 The pulse generator is used to trigger interrupts which are then handles by the \ac{GIC} of the \ac{APU} (see figure \ref{fig_pulse_generator}). 
 
@@ -55,9 +55,9 @@ Both need to be configured such that the implemented interrupt generator can be 
 \subsubsection{FreeRTOS}
 As already mentioned, interrupt management does not effect the FreeRTOS kernel.
 Therefore, the \ac{OS} itself needs only some basic configuration, e.g. the maximum number of priorities is set to 4 (maximum used in the benchmarking programs).
-Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}) and an \ac{ISR} needs to be implemented. 
+Still, the hardware needs to be initialized appropriately on system startup (refer to \ref{ss_interrupts_in_freertos}) and an \ac{ISR} needs to be implemented for the pulse generator. 
 Moreover, FreeRTOS needs an \ac{FSBL} which can be created by the \ac{SDK}.
-The \ac{FSBL}, the FreeRTOS application and, optionally, an \ac{FPGA} configuration file must be combined to a boot image.
+The \ac{FSBL}, the FreeRTOS application and the \ac{FPGA} configuration file must be combined to a boot image.
 The FreeRTOS version in this project based on version 7.0.2 and is a special port for Xilinx \ac{SDK} 14.4 which was contributed by the FreeRTOS community.
 
 \subsubsection{LinuxRT}\label{sss_linuxrt}
@@ -65,8 +65,8 @@ Xilinx provides own distributions of embedded Linux which can be compiled for ma
 The starting point in this thesis is the Xilinx Linux version 3.6 with the corresponding RT patch.
 This was the most recent version available at the beginning of this work.
 
-\paragraph{Overview Linux Development process}
-Setting up LinuxRT is composed of many steps compared to FreeRTOS (see fig. \ref{fig_xilinx_tool_flow}):
+\paragraph{Overview of the Linux Development process}
+Setting up LinuxRT is composed of many steps (see fig. \ref{fig_xilinx_tool_flow}) compared to FreeRTOS:
 \begin{enumerate}
 	\item Configuring and building U-Boot (\ac{SSBL})
 	\item Configuring and building Linux-Image (wrapped with U-Boot header):
@@ -76,9 +76,9 @@ Setting up LinuxRT is composed of many steps compared to FreeRTOS (see fig. \ref
 			\item Apply RT Patch
 		\end{enumerate}
 	\item Creating a device tree blob\footnote{A device tree is a data structure which describes the underlying hardware. A device tree is passed to the \ac{OS} at boot time, so it can initialize the hardware dynamically.\cite{device_tree}}
-	\item Building a \ac{FSBL}
-	\item Creating a boot image (\textit{zlib} compressed) from the files produced in the previous steps 
+	\item Building an \ac{FSBL}
 	\item Configuring and building a file system
+	\item Creating a boot image (\textit{zlib} compressed) from the files produced in the previous steps 
 \end{enumerate}
 
 \begin{figure}[htb]
@@ -109,7 +109,7 @@ One elegant way is to access the \ac{CPU} cycle counter register of the ARM Cort
 This code is compiled into four assembly instructions [ref to appendix] when copying the register value to an array.
 The advantages of this method is not only low overhead but also the \ac{OS} independence of the assembly code.
 Hence this method can be used for both FreeRTOS and LinuxRT.
-However, the \ac{CPU} has to keep running at the same frequency during the whole measurement process, otherwise the results will be wrong.
+However, the \ac{CPU} has to keep running at the same frequency during the complete test run, otherwise the results will be wrong.
 
 \subsection{Application Design}
 This section provides a short overview over the general application design and execution.
@@ -129,17 +129,20 @@ For all system calls, the FreeRTOS \ac{API} is used.
 \subsubsection{LinuxRT}
 In Linux, multi-tasking applications are realized using pthreads.
 The development of an application should be kept as simple as possible, therefore all applications will be implemented in user space.
-All real-time thread in Linux get the highest possible priority using the preemptive \ac{RR} \ac{RT} scheduling class.
+All real-time threads in Linux get the highest possible priority using the preemptive \ac{RR} \ac{RT} scheduling class.
 As the parent process and its child threads are scheduled individually, the parent has to have a higher priority than the children while creating the child threads.
 If not, it will be interrupted by the first thread with higher priority and hence cannot invoke the other ones.
 When all threads have been started, the priority of the parent is simply decreased below the one of the lowest real-time thread.
 \par
-For thread synchronization, the \ac{POSIX} \ac{API} is used whenever possible as this is the commonly used \ac{API} for Linux systems.
-It can be used for all experiments except for the message passing experiment, because this implementation is not supported by the platform.
-Instead, the message queue provided by the \textit{System V} \ac{IPC} is used.
+For thread synchronization, the \ac{POSIX} \ac{API} is used whenever possible as this is the commonly used multi-threading \ac{API} for Linux systems.
+It can be utilized for all experiments except for the message passing experiment, because this part of the \ac{API} is not supported by the platform.
+Instead, the message queue \ac{API} provided by the \textit{System V} \ac{IPC} is used.
 System V (read: \textit{System five}) \cite{tlip:svd} is a Unix \ac{OS} version from 1983 and its \ac{API} is still provided by modern Linux distributions.
 \par
 Further, the \textit{mlockall} instruction is used to prevent page swapping during the execution of the test application.
+Another important factor is not to expose the system to external interrupts from the Ethernet or \ac{UART} devices.
+[Daemens]
+By considering this, $ t_swap $ and $ t_int $ can be set to zero for the Linux system.
  
 \section{Boot time}\label{s_boot_time}
 The boot time is the time from powering on the hardware until the first (user) task is run. 
@@ -153,13 +156,13 @@ Further, the evaluation board provides three different ways of booting an \ac{OS
 	\item From \ac{SD} card
 	\item From \ac{QSPI} flash
 \end{enumerate}
-The boot from \ac{QSPI} flash is the fastest and the one most likely used in later projects.
+The boot from \ac{QSPI} flash is the fastest and the one most likely preferred in later projects.
 Hence it will be used in the following experiments as well.
 The flow graphs illustrate the differences between the boot process in FreeRTOS (fig. \ref{fig_boot_freertos}) and LinuxRT (fig. \ref{fig_boot_linux_xilinx} and fig. \ref{fig_boot_linux_custom}).
 
 \subsection{Booting in FreeRTOS}
 The booting process is already described in the previous chapter (see \ref{ss_booting_in_freertos}).
-Based on the information in section \ref{s_boot_time}, the FreeRTOS boot time can be derived as follows:
+Based on the information in section \ref{s_boot_time}, the FreeRTOS boot time can be described as follows:
 	\begin{equation}
 		t_{boot}^{free} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} \label{eq_t_boot_free} 
 	\end{equation}
@@ -173,7 +176,7 @@ Whereas there is no time optimization needed for FreeRTOS because the complete b
 \end{figure} 
 
 \subsection{Booting in Linux}\label{ss_booting_in_linux}
-The booting process in Linux is shown in figure \ref{fig_boot_linux_xilinx}, it can be derived as follows:
+The booting process in Linux is shown in figure \ref{fig_boot_linux_xilinx}, it can be described as follows:
 \begin{equation}
 t_{boot}^{Linux} = t_{rom} + t_{fsbl} +  t_{fpga} + t_{osload} +  t_{ssbl} + t_{tree} + t_{filesys} + t_{boot}
 \label{eq_t_boot_linux} 
@@ -211,13 +214,13 @@ Besides, by adding a bitstream (copying it to the \ac{SD} card), this time incre
 \par
 The very first step to decrease this time has already been done by compressing the Linux kernel (see \ref{sss_linuxrt}).
 The next step is to move the bitstream inside of the boot image.
-This has to be done not only to speed up the booting process but also because of the limited \ac{QSPI} size of 128 kB.
+This has to be done not only to speed up the booting process but also because of the limited \ac{QSPI} size of 128 Mb.
 By moving the bitstream into the boot image, it is compressed as well. 
 In Linux, the \ac{PL} can be configured from the \ac{OS} by simply writing the bitstream to the device file corresponding to the \ac{FPGA}. 
 This decreases $t_{fpga}$ to a range of milliseconds. 
 Finally, the last step is to change the default file system to a file system that does not need to be loaded by the \ac{SSBL}.
 A good option is to create a \textit{\ac{UBIFS}} flash file system \cite{ubifs}.
-\ac{UBIFS} is based on \ac{UBI} which itself works on \ac{MTD} devices \cite{mtd}.
+\ac{UBIFS} is based on \textit{\ac{UBI}} which itself works on \textit{\acp{MTD}} \cite{mtd}.
 \ac{MTD} is an abstraction layer for raw flash devices (no block devices!) in Linux.
 On top of that, the volume management system \ac{UBI} takes care of mapping logical erase blocks to physical ones.  
 On one hand, \ac{UBIFS} has the advantage of fast mounting speed which is not dependent on the flash size.
@@ -227,13 +230,18 @@ Nonetheless, an experimental new \ac{UBI} feature called \textit{fastmap} is ava
 Another advantage is, that \ac{UBIFS} allows changes to the file system to be stored at power-off.
 This is not possible when using a standard ram disk image.
 \par
-The initialization is completely removed from the boot loader, it is done on kernel start-up.
+The file system initialization is completely removed from the boot loader, it is done on kernel start-up.
 A disadvantage of this method is that \ac{UBIFS} needs a reconfiguration of the kernel.
 The new boot process is shown in figure \ref{fig_boot_linux_custom}. 
 
 \section{Task Switching Time} 
 The task switching time is the time it takes for a task to start after an other task has finished or yielded the processor.
 It is important to point out, that the task switching time is not preemption time because the processor is given away voluntarily.
+The task switching latency shows the minimum overhead in a system with at least two tasks for the maximum priority. 
+This value is also valid for systems with more real-time tasks of the same priority which use the round robin scheduling algorithm.
+For task switching between different priority levels, the scheduling is dependent on the number of priority level.
+In such cases, the complete list has to be searched from the beginning.
+Therefore, the task switching time is slightly higher than for task switching within the same priority level.
 Both \acp{OS} implement a yield function which allows the calling task to invoke the scheduler.
 It can be used in the experiment.
 \par
@@ -267,15 +275,18 @@ An advantage of this method is that all data is collected without any overhead w
  
 \section{Semaphore Shuffle Time}
 The semaphore shuffle time defined by Kar is used to measure the overhead caused by using semaphores to ensure mutual exclusion.
-More precisely, it is the time between a task B being blocked on a semaphore which is taken by task A and and the unblock when the semaphore is released.  
+More precisely, it is the time between a task B being blocked on a semaphore which is taken by task A and then unblocked when the semaphore is released.  
 Besides, it is possible, that a task protects a critical section by mutexes, but is not interrupted by another task.
 This case has to be considered as well.
-Based on the above test cases, mutexes are used to implement mutual exclusion.
-Further, signaling is a widely used feature to synchronize events, therefore it has to be included in the benchmark as well.  
+Based on the above test cases, not counting semaphores but mutexes are used to implement mutual exclusion.
+\par
+Furthermore, signaling is a widely used feature to synchronize events, therefore it has to be included in the benchmark as well.  
 Consequently, the semaphore shuffling results in three different tests.
+The synchronization tests are important as they can influence the design of an application.
+For time critical applications, it is preferable to use the fastest methods avaiable.
 
 \paragraph{Semaphore Shuffling Time by Kar}
-In the first benchmark, two task are passing a mutex from one to the other.
+In the first benchmark, two tasks are passing a mutex from one to the other.
 Task A starts by taking the the mutex and yields.
 Then the time measurement is started, task B tries to take the same mutex and is blocked.
 Now A is rescheduled, releases the semaphore and yields again.
@@ -356,9 +367,11 @@ This sequence is repeated (see table \ref{tab_binary_semaphore}).
 
 \section{Message Passing Time}
 The message passing time is the time which is takes a task to receive a message sent by another task.
+As message passing is also used for task synchronization, its latency can have an impact on the application design.
 Two tasks with equal priorities can be used for the test.
 The first task tries to read from a task queue, it is blocked until a message arrives.
-Then the second task is scheduled, sends a message via the message queue and yields immediately. [what kind of message?] 
+Then the second task is scheduled, sends a message via the message queue and yields immediately. 
+The messages created have a size of one byte.
 Consequently, the first task is unblocked and retrieves the message sent.
 Now that the queue is empty, the test run can be repeated.
 The starting time is measured before a message is sent via the queue by the second task, the ending time after the first task receives the message (see table \ref{tab_message_passing}).
@@ -410,10 +423,12 @@ The starting time is measured before a message is sent via the queue by the seco
 \end{table}
 
 The deadlock breaking time is the time which it takes for the \ac{OS} to resolve priority inversion caused by low priority tasks holding a resource needed by a high-priority task (see table \ref{tab_deadlock}). 
-The experiment is set up similar to the given example for priority inheritance (for details refer to \ref{ss_priority_inheritance}) and repeated 100000 times: 
-Task A with the lowest priority starts executing.
-A takes a mutex and starts a second task B with higher priority than itself.
-B preempts the first task and starts task C with the highest priority. 
+If this time is too large on specific systems, the application has to be redesigned by removing the priority inversion. 
+The experiment is set up similar to the given example for priority inheritance (for details refer to \ref{ss_priority_inheritance}): 
+First, the high priority tasks are blocked on events.
+Then task A with the lowest priority starts executing.
+A takes a mutex and unblocks the second task B with higher priority than itself.
+B preempts the first task and unblocks task C with the highest priority. 
 C tries to take the same mutex as the first task and is blocked.
 Consequently, the priority of the A is raised, it can finish execution (in the test scenario there is no work to be done), release the mutex and unblock C.
 The starting time is measured before C takes the mutex, the ending time after C returns from the Blocked state.
@@ -423,11 +438,13 @@ Now A will be scheduled and the test can run again.
 
 \section{Interrupt Latency}
 Interrupt latency is defined as the time which passes from triggering an interrupt until the first instruction of the interrupt service routine. 
-For this  experiment, the assumption is made that devices in real application are often connected as \ac{GPIO}.
-Therefore, the described interrupt generator will be utilized.
+As interrupts are handled differently in the two \acp{OS}, the interrupt latency can be a crucial factor when fast interrupt handling is important.
+For this  experiment, the assumption is made that devices in real application are often connected as \acp{GPIO}.
+Therefore, the described pulse generator will be utilized.
 It has a 5ms period of which the positive pulse is 5 us and the remaining time is negative.
 The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see table \ref{tab_interrupt_latency}).
-The time in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
+It measures the time from the interrupt being triggered until the output of the \ac{ISR} is visible on the hardware.
+The latency in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
 The detailed execution flow is described in the following:
 
 \begin{table}[htbp]
@@ -449,7 +466,7 @@ The detailed execution flow is described in the following:
 			  																									& If yes, perform \ac{ISR}											& 	\\
 		 		\hline
 		 		\multicolumn{2}{ |c| }{ }	& \\	
-		 		\multicolumn{2}{ |c| }{Turn on \ac{LED}}					& Stop	\\
+		 		\multicolumn{2}{ |c| }{Turn off \ac{LED}}					& Stop	\\
 		 		\multicolumn{2}{ |c| }{Return}										&			 	\\	   
 			\hline
 		\end{tabular}
@@ -457,7 +474,7 @@ The detailed execution flow is described in the following:
 	\label{tab_interrupt_latency}
 \end{table}
 
-The only difference between the two operation systems is the handling of the \ac{IRQ}.
+The only difference between the two operation systems is the \ac{IRQ} handling.
 Table \ref{tab_interrupt_latency} shows how much time is spent when the actions are performed in the \ac{ISR} directly. 
 Yet, there is often the case that a thread is resumed from within the \ac{ISR}.
 This case should be considered as well.
@@ -484,15 +501,16 @@ It is expected that the non-threaded handling is faster and more predictive.
 As this method of interrupt handling is the standard on the mainline kernel, the mainline kernel will be used to test the non-threaded interrupts.
 \par
 Further, it is part of the test to see how stable the Linux RT system works under load conditions.
-Load conditions can be either \ac{CPU} bound or hardware bound. 
+Load conditions can be either \ac{CPU} bound or ac{I/O} bound. 
 \ac{CPU} bound conditions are for example many working threads running concurrently on the system.
 This can be simulated running the \textit{Stress} \cite{stress} program.
-Stress is a program which can run a definite number of working threads on a system that produce for example \ac{CPU} and/or \ac{I/O} load.
+Stress can run a definite number of working threads on a system that produce for example \ac{CPU} and/or \ac{I/O} load.
 To put the system under \ac{I/O} load, the Ethernet connection can be used.
+It does not only generate hardware interrupts but also softirqs.
 Ethernet is a good choice because it will be most likely used in real applications.
 The load can be created by constantly transferring data to the system under test.
 This can be done for example by using the \ac{SSH} protocol \cite{tlip:tsspa}.
-To prevent the system from being overload by one huge file, a small file is sent over and over again. 
+To prevent the system from being overload by one large file, a small file is sent over and over again. 
 
 \section{Preemption Time}
 \begin{table}[htbp]
@@ -514,10 +532,11 @@ To prevent the system from being overload by one huge file, a small file is sent
 
 The preemption time is the time which it takes to interrupt a task and schedule another task of higher priority.
 This can happen when a task with a high priority is woken up by an other task or \ac{ISR} triggering a signal or releasing a mutex.
+This experiment is important because it simulates a situation which will very likely happen in  a real application.
 In this experiment, there is one low priority task A and a high priority task B.
 B starts first and blocks on a signal event.
 A is running in a permanent loop and reading the current \ac{CPU} cycle counter register.
-At some point in time, an \ac{IRQ} occurs and the task is interrupted.
+At some point in time, an \ac{IRQ} from the pulse generator occurs and the task is interrupted.
 From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context switch happens.
 When B is activated, it measures the ending time and yields.
 This reactivates A and the test starts over (compare table \ref{tab_preemption}).
