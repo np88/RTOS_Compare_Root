@@ -158,10 +158,10 @@ Here, FreeRTOS is 3.01 times faster than Linux.
 \end{table}
 
 \section{Message Passing Time}
-Message passing is another mechanism of task synchronization, so it is relevant to consider its performance.
+Message passing is another mechanism of task synchronization.
 The algorithm (see table \ref{tab_message_passing}) also provides some points where a task switch can cause faulty results.
 One possible error is that the execution is interrupt between line 2 and 3.
-This causes one task switching delay because task 2 is not schedulable, so task 1 will be rescheduled.
+This causes one additional task switching delay because task 2 is not schedulable, so task 1 will be rescheduled.
 Another error can happen when task 2 is interrupted before blocking on the queue. 
 This causes the message to be already available in the queue after task 1 yields the processor. 
 Therefore, task 2 does not block but retrieves the message immediately what takes less time than the original procedure.
@@ -176,7 +176,7 @@ Therefore, task 2 does not block but retrieves the message immediately what take
 The mean time for passing one message with the content of one byte is 901 ns. 
 The standard deviation is 24.9 ns (2.76 \%) and the maximum peak occuring while the timer interrupt is active is 2.531 us.
 This makes a total overhead of 1,63 us. 
-The plot (figure \ref{fig_message_passing_free}) clearly shows the error cases discussed above.  
+The lower graph (figure \ref{fig_message_passing_free}) clearly shows the error cases discussed above.  
 
 \subsection{Message Passing in LinuxRT}
 \begin{figure}[htb]
@@ -186,7 +186,7 @@ The plot (figure \ref{fig_message_passing_free}) clearly shows the error cases d
 	\caption{Condition variable result LinuxRT} \label{fig_message_passing_linux}
 \end{figure}
 
-As already mentioned, the SysV \ac{API} was used for this experiment, not the POSIX \ac{API} as it is not supported by the used platform.
+As already mentioned, the SysV \ac{API} was used for this experiment, not the POSIX \ac{API} as it is not supported by the platform.
 The mean time for passing one message in LinuxRT with the content of one byte is 5.135 us (see figure \ref{fig_message_passing_linux}). 
 The standard deviation is 268 ns (5.22 \%) and the maximum peak occuring while the timer interrupt is active is 18.657 us.
 This makes a total overhead of 13.522 us. 
@@ -195,8 +195,8 @@ The mean message passing latency in FreeRTOS is 5.7 times faster than in LinuxRT
 \section{Deadlock Breaking Time}
 The detailed algorithm to obtain the deadlock breaking time is described in table \ref{tab_deadlock}.
 This time gives an orientation on the time the operation system needs to resolve a priority inversion by the implemented priority inheritance algorithm.
-As usually the task with the highest possible priority is running in this experiment, the timer tick only causes an unnecessary context switch which results in the same task being continued.
-This experiment has similarities to the semaphore shuffling but also includes the priority inheritence component.
+As usually only one active task is running in this experiment, the timer tick causes an unnecessary context switch which results in the same task being continued.
+This experiment has similarities to the semaphore shuffling but also includes the priority inheritance component.
 
 \subsection{Deadlock Breaking Time in FreeRTOS}
 \begin{figure}[htb]
@@ -216,11 +216,11 @@ This makes a total overhead of 1,74 us.
 	\end{center}
 	\caption{Deadlock breaking time LinuxRT} \label{fig_deadlock_result_linux}
 \end{figure}
-The mean time for the deadlock breaking time in FreeRTOS is 20.68 us. 
+The mean time for the deadlock breaking time in LinuxRT is 20.68 us. 
 The standard deviation is 643 ns (3.11 \%) and the maximum peak occuring while the timer interrupt is active is 37.146 us.
 This makes a total overhead of 16.466 us.
 The LinuxRT implementation is 9.79 times slower than the same implementation in FreeRTOS.
-While FreeRTOS seems to switch from task 3 directly to task 1 when the semaphore is taken, LinuxRT still switches to task 2 before switching to task 1.
+[results from give].
  
 \section{Interrupt Latency} 
 The interrupt latency depends not only on the underlying hardware but also on the handling by the operation system.
