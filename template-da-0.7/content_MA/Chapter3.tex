@@ -1,6 +1,8 @@
 \chapter{Results}\label{ch_results}
 In this chapter, the results from the previously described experiments are presented.
 Moreover, the indeterministic aspects of the are further investigated for both operation systems. 
+The main observation is - as expected - that LinuxRT is usually slower than FreeRTOS and has a higher jitter. 
+This is especially recognizable when the benchmarks become more complex, for example for the deadlock breaking time or for the preemption time.
 
 \section{Boot Time}
 This section mainly shows the possible decrease of the boot time in Linux as there was no need to further improve the start up time of FreeRTOS.
@@ -23,8 +25,8 @@ The new custom configuration was applied step by step to see the effects on the 
 The result of this experiment is a boot time which was decreased by 72 \% in read-write mode and by 80 \% in read-only mode.
 
 \section{Task Switching Results}\label{s_task_switching_results}
-The measurements are presented in two different figures. 
-The upper one always shows the time measured on the x axis and the number this time has occurred on the y axis. 
+The measurements are presented in two different graphs. 
+The upper one always shows the number of the occurrence of one latency over time. 
 This curve gives a good overview over the statistic and deviation of the measurement.
 The lower picture shows the latencies plotted over time. 
 This curve shows time dependent events like the timer tick.  
@@ -57,17 +59,16 @@ Moreover, the delay can be caused by loading data needed by the \ac{ISR} to the 
 \par
 Further, small spike clusters which cause a jitter of about 35 ns are visible during the complete test.
 Those cannot be explained by the test setup of the software, so it seems likely that they are caused by hardware, e.g. the cache mechanism.  
-The delays observed in this experiments are also valid for the experiments in the following.
+The delays observed in this experiments are also valid for the following experiments.
  
 \subsection{Task Switching Results LinuxRT} 
 The mean value for task switching in LinuxRT is 1.46 us and the standard deviation is 131 ns (9.0 \%).
-The higher standard deviation is nicely visible in the upper plot of figure \ref{fig_tast_switching_result_linux}. 
+The higher standard deviation is shown nicely in the upper graph of figure \ref{fig_tast_switching_result_linux}. 
 Moreover, the timer tick is clearly recognizable every 10 ms.
 Its maximum value is 18.945 us whereas the lower values are pending around 10 us.
 Therefore, the maximum tick overhead is 17.485 us.
-The reasons for the differences of the tick delay are the same as in FreeRTOS.
-Further, LinuxRT executes softirqs after the tick interrupt.
-Their number varies from tick to tick and therefore causes different delays. 
+The reasons for the different tick timer delays can not be clearly determined because no appropriate tracing tools were available.
+Besides the different timer tick entry points and the cache mechanism, the reasons for different latencies will be discussed later (refer to section \ref{}). 
 As in FreeRTOS, small spike clusters are visible during the complete test.
 Because of the higher noise, they do not become as apparent as in the FreeRTOS measurement.
 
@@ -107,7 +108,7 @@ The results of this measurement are presented in table \ref{tab_results_semaphor
 				\hline 
 				Mean  										& 257 ns		& 1.912 us	& 846 ns	\\
 			  \hline
-			  Std. deviation (total)	  & 15.2 ns		& 31 ns			&	4ns			\\
+			  Std. deviation (total)	  & 15.2 ns		& 31 ns			&	4 ns			\\
 			  \hline
 			  Std. deviation (\%)  			& 5.9 \%		& 1.64 \%		&	0.47 \% \\ 
 			  \hline
@@ -116,7 +117,7 @@ The results of this measurement are presented in table \ref{tab_results_semaphor
 				Max. tick delay - mean		&						&						&					\\
 			\hline
 		\end{tabular}
-	\caption{Results semaphore tests in FreeRTOS}
+	\caption{Results of the semaphore benchmarking in FreeRTOS}
 	\label{tab_results_semaphores_freertos}
 \end{table}
 
@@ -124,6 +125,7 @@ As already mentioned, the causes of delays are summarized in section \ref{ss_tas
 
 \subsection{Semaphore Results LinuxRT}
 The Linux implementation of the tests uses the POSIX \ac{API}.
+It should be mentioned that the semaphores in this test are not configured to use priority inheritence. 
 Comparing the mean values (see table \ref{tab_results_semaphores_linux}), the single semaphore test scores as well as the one in FreeRTOS.
 Still, the standard deviation is much higher (46 \% compared to 5.9 \%).
 The semaphore shuffling time in LinuxRT is 3.3 times higher than in FreeRTOS.
