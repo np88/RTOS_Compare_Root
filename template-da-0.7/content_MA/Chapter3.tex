@@ -3,6 +3,7 @@ In this chapter, the results from the previously described experiments are prese
 Moreover, the indeterministic aspects of the are further investigated for both operation systems. 
 The main observation is - as expected - that LinuxRT is usually slower than FreeRTOS and has a higher jitter. 
 This is especially recognizable when the benchmarks become more complex, for example for the deadlock breaking time or for the preemption time.
+To create the same initial situation for every benchmark, the Linux operation system was rebooted every time before performing a test.
 
 \section{Boot Time}
 This section mainly shows the possible decrease of the boot time in Linux as there was no need to further improve the start up time of FreeRTOS.
@@ -12,17 +13,16 @@ The boot time of FreeRTOS has been quantified by formula \ref{eq_t_boot_free}.
 As mentioned before, there is no need to optimize the FreeRTOS boot time, so the final $ t_{boot}^{free} $ is 1,1 s.
 
 \subsection{Boot Time of Linux}
-The boot time in Linux $ t_{boot}^{linux} $ was 27 seconds when using the initial boot configuration from Xilinx (see \ref{ss_booting_in_linux}). 
-The new custom configuration was applied step by step to see the effects on the system:
- 
-\begin{enumerate}
-	\item By changing the file system from \ac{RAM} disk to \ac{UBIFS}, $t_{filesys}$ becomes part of $t_{osload}$ and decreases to ?? s
-	\item By further moving the \ac{FPGA} configuration from the \ac{FSBL} to the file system, the total boot time decreases to ?? s 
-	\item Finally, the booting is moved from \ac{SD} card to \ac{QSPI} what decreases the boot time to ?? s.
-	\item Optionally, the \ac{UBIFS} can be mounted read-only. This further decreases the boot time by 2 seconds, because some start-up checks are skipped in this mode. 
-\end{enumerate}
-
-The result of this experiment is a boot time which was decreased by 72 \% in read-write mode and by 80 \% in read-only mode.
+The boot time in Linux $ t_{boot}^{linux} $ was initially 20 seconds when using the boot configuration with a custom kernel from Xilinx (see \ref{ss_booting_in_linux}). 
+With the new boot configuration described in section \ref{ss_booting_in_linux} the boot time could be reduced to 7.5 seconds. 
+One main factor is the \ac{FPGA} configuration of the \ac{FSBL} which takes 11 seconds in the original configuration.
+The change of the file system has an impact of 2 seconds as well but this is a minor factor as the \ac{UBI} gets slower with increasing memory. 
+Extensive use of the system caused for example a command history and further cache data to be stored and checked on start-up.
+This leads to an increase of the boot time to 9 seconds when the series of benchmarks was finished.
+Yet, it is still possible to load the file system in read-only mode which decreases $ t_{boot}^{linux} $ to 5.7 s.
+This can be for example used in a running systems where no writing of data to the file system is necessary.
+In configuration mode, the system can be easily booted in read-write mode so that existing applications or configuration files can be updated. 
+The result of this experiment is a boot time which was decreased by 55 \% in read-write mode and by 71.5 \% in read-only mode.
 
 \section{Task Switching Results}\label{s_task_switching_results}
 The measurements are presented in two different graphs. 
@@ -104,17 +104,17 @@ The results of this measurement are presented in table \ref{tab_results_semaphor
 	\centering
 		\begin{tabular}{|l||l|l|l|}
 			\hline
-				Test 											& Single 		& Shuffle 	& Binary 	\\
+				Test 											& Single 		& Shuffle 	& Binary 	  \\
 				\hline 
-				Mean  										& 257 ns		& 1.912 us	& 846 ns	\\
+				Mean  										& 257 ns		& 1.912 us	& 846 ns	  \\
 			  \hline
-			  Std. deviation (total)	  & 15.2 ns		& 31 ns			&	4 ns			\\
+			  Std. deviation (total)	  & 15.2 ns		& 31 ns			&	4 ns		  \\
 			  \hline
-			  Std. deviation (\%)  			& 5.9 \%		& 1.64 \%		&	0.47 \% \\ 
+			  Std. deviation (\%)  			& 5.9 \%		& 1.64 \%		&	0.47 \%   \\ 
 			  \hline
-			  Max. tick delay	(total)		& 4.569 us	& 5.166 us	&	1.3 us  \\
+			  Max. tick delay	(total)		& 4.569 us	& 5.166 us	&	1.3 us    \\
 				\hline
-				Max. tick delay - mean		&						&						&					\\
+				Max. tick delay - mean		&	4.312	us	&	3.254	us	&	0.454 us  \\
 			\hline
 		\end{tabular}
 	\caption{Results of the semaphore benchmarking in FreeRTOS}
@@ -231,7 +231,7 @@ Therefore, the analysis of the interrupt latency in Linux is more complex (see s
 As there is no \ac{OS} overhead in the interrupt handling in FreeRTOS, it is very fast and predictive.
 The time to handle the interrupt internally and turn on an \ac{LED} from the \ac{ISR} takes no more than 740 ns (see figure \ref{fig_interrupt_latency_freertos}). 
 The mean value is 727.71 ns and the standard deviation 4.775 ns (0.66 \%). 
-Even when the \ac{LED} is turned on from a task which is unblocked by the \ac{ISR}, the procedure is only 10 ns slower.  
+Even when the \ac{LED} is turned on from a task which is unblocked by the \ac{ISR}, the procedure is only 10 ns [?] slower.  
 \begin{figure}[htb]
 	\begin{center}
 		\includegraphics[scale=0.5] 
@@ -259,7 +259,7 @@ The maximum measured value is 3.51 us.
 When put under stress by a constant SCP transfer, the value increases to a mean value of 2.679 us and a standard deviation of 1.30 us (48.53 \%).
 The maximum value rises to 29.5 us.
 \par
-When the same experiment was repeated for LinuxRT, logically, the results are much higher.
+When the same experiment was repeated for LinuxRT, logically, the resulting values are much higher.
 The mean value is 10.027 us with a standard deviation of 987.36 ns. 
 The maximum measured value is 17.05 us.
 After stressing the system, the mean value stays almost constant at 10.486 us, but the standard deviation rises to 4.496 us (42.88 \%) and the maximum recorded value to 90 us.
@@ -281,11 +281,11 @@ The lower channel shows the reaction of the \ac{OS}.
 	\end{center}
 	\caption[Interrupt latency LinuxRT]{Interrupt latency LinuxRT, resolution 5 us} \label{fig_interrupt_latency_linuxrt}
 \end{figure}
-The mean value measured for the user task when using LinuxRT is 24.455 us. 
-The standard deviation is 3.897 us (115.94 \%). 
+The mean value measured for the user task when using LinuxRT is 23.527 us. 
+The standard deviation is 1.629 us (6.92 \%). 
 In figure \ref{fig_interrupt_latency_linuxrt}, the latencies for the experiment are shown.
 Evidently, there is a high jitter although no load was put on the system. 
-The maximum latency is at about 41 us. 
+The maximum latency is 40.03 us. 
 
 \begin{figure}[htb]
 	\begin{center}
@@ -296,7 +296,7 @@ The maximum latency is at about 41 us.
 \end{figure}
 Figure \ref{fig_interrupt_latency_linuxrt_load} shows the same experiment when the system was stressed with network load. 
 The mean value for this experiment is 29.375 and the standard deviation is 6.202 us (21.11 \%).
-The maximum value here is about 100 us.
+The maximum value here is 126.836 us.
 
 \subsubsection{Mainline Linux}
 To see how significant the differences between LinuxRT and the mainline kernel are, the same experiment is also repeated using the mainline kernel. 
@@ -327,9 +327,9 @@ Moreover, an even higher value could be observed in other experiments.
 The mean value is at 15.853 us and the standard deviation at 6.01 us (37.91 us \%).
 
 \section{Preemption Time}
+The situation captured in this benchmark is often occurring in real-time applications.  
 The preemption time is related to the interrupt latency, but measures the time that it takes to interrupt a low priority task and then continue a high priority task.
-Further, a difference is that the test program does not record the time it takes to communicate with the peripheral devices.
-As this situation occurs very often in real-time systems, this is an important measurement [Wort].  
+Another difference is that the test program does not record the time it takes to communicate with the peripheral devices (trigger interrupt, turning on \ac{LED}).
 The \ac{GPIO} interrupt is triggered by the interrupt generator every 5 ms.
 
 \subsection{Preemption Time in FreeRTOS}
@@ -347,7 +347,6 @@ The maximum value is 2.626 us.
 Because the results were recorded only every 5 ms, it is likely that one peak in the in the upper plot results from the test being interrupted by the timer tick. 
 The other peak is the uninterrupted measurement. 
 
-
 \subsection{Preemption Time in LinuxRT}
 \begin{figure}[htb]
 	\begin{center}
@@ -355,11 +354,23 @@ The other peak is the uninterrupted measurement.
 	\end{center}
 	\caption{Preemption result LinuxRT} \label{fig_preemption_result_linux}
 \end{figure}
-The mean value measured for the preemption time in LinuxRT is 15.370 us. 
-The standard deviation is 9.170 us (59.66 \%). 
+The mean value measured for the preemption time in LinuxRT is 15.370 us and the standard deviation is 9.170 us (59.66 \%). 
 In figure \ref{fig_preemption_result_linux}, the results of the experiment are shown.
 The maximum value is 109.968 us.
-This results in a total maximum overhead of 94.598 us.  
+This results in a total maximum overhead of 94.598 us which is one of the highest measured in all tests. 
+The mean time is 7.28 times higher than in FreeRTOS.
+ 
+\section{Jitter}
+As discussed in section \ref{ss_jitter2}, jitter can have a crucial influence on the execution time of an application.
+Formula \ref{eq_indet_app} describes the worst case scenario:\\
+$t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{swap} + t_{daem}$ \\
+Based on the results, all the single parameters will be discussed for the operation systems under test. 
+
+\subsection{Jitter in FreeRTOS}
+As expected from a light-weight \ac{RTOS}, the jitter in FreeRTOS is small and predictive.
+$ t_{int}$,  $t_{swap} $ and $t_{daem}$ are not available and therefore set to zero. 
+$ t_{tick} $ was measured throughout the experiments. 
+The largest value recorded is 4.312 us in the single semaphore experiment.  
 
 
 %\subsection{Single Mutex Results}

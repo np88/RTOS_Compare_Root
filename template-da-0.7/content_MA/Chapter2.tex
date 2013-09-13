@@ -100,7 +100,7 @@ This does not necessarily have an impact on the implemented test application:
 The most important drivers are \ac{SPI}, Ethernet and \ac{UART} driver.
 All other drivers for \ac{USB} devices, blue ray or CD player, and more will be removed.
 Further, there are options which allow kernel tracing (e.g. ftrace) which will be disabled when running the experiments.  
-The final configuration reduces the kernel size from 2,8[?] MB to 1,9 MB. 
+The final configuration reduces the kernel size from 2.8 MB to 1.9 MB. 
 
 \subsection{Time measurement}
 The time measurement should be as accurate as possible.
@@ -208,9 +208,9 @@ There are three bottlenecks in this process:
 \end{itemize}
 
 The default Linux configuration provided by Xilinx does not include an \ac{FPGA} bitstream and is run from \ac{SD} card.
-This takes 15 seconds in total.
-Whereas $t_{boot}$ is only 3 seconds and $t_{fpga}$ is 0, the other delays sum up to 12 seconds, which is mostly due to the transfer of the Linux image and the file system . 
-Besides, by adding a bitstream (copying it to the \ac{SD} card), this time increases by another $ t_{fpga} $ of 15 seconds.   
+This takes 13 seconds in total.
+Whereas $t_{boot}$ is only 3 seconds and $t_{fpga}$ is 0, the other delays sum up to 10 seconds, which is mostly due to the transfer of the Linux image and the file system . 
+Besides, by adding a bitstream to the boot image, this time increases by another $ t_{fpga} $ which depends on the size of the bit stream.   
 \par
 The very first step to decrease this time has already been done by compressing the Linux kernel (see \ref{sss_linuxrt}).
 The next step is to move the bitstream inside of the boot image.
@@ -500,6 +500,13 @@ Both alternatives will be implemented.
 It is expected that the non-threaded handling is faster and more predictive.
 As this method of interrupt handling is the standard on the mainline kernel, the mainline kernel will be used to test the non-threaded interrupts.
 \par
+Interrupt service routines in Linux can only be installed in kernel modules. 
+This means that the only way to be notified of an interrupt occurrence is to perform e.g. a read command to the driver of a hardware device and be blocked until the interrupt occurs.
+It is always the easier way and therefore preferred by a developer to write a program running in user mode than an own driver.
+Further, some programs might need to use the \ac{FPU} what should be avoided in kernel mode (\cite{love:lkd}).
+The \ac{FPU} registers have to be manually saved and restored inside the kernel.
+Moreover, floating point instructions are complex and decrease the runtime of the particular kernel code. 
+\par
 Further, it is part of the test to see how stable the Linux RT system works under load conditions.
 Load conditions can be either \ac{CPU} bound or ac{I/O} bound. 
 \ac{CPU} bound conditions are for example many working threads running concurrently on the system.
@@ -532,7 +539,7 @@ To prevent the system from being overload by one large file, a small file is sen
 
 The preemption time is the time which it takes to interrupt a task and schedule another task of higher priority.
 This can happen when a task with a high priority is woken up by an other task or \ac{ISR} triggering a signal or releasing a mutex.
-This experiment is important because it simulates a situation which will very likely happen in  a real application.
+This experiment is important because it simulates a situation which often happens in real applications.
 In this experiment, there is one low priority task A and a high priority task B.
 B starts first and blocks on a signal event.
 A is running in a permanent loop and reading the current \ac{CPU} cycle counter register.
@@ -540,5 +547,5 @@ At some point in time, an \ac{IRQ} from the pulse generator occurs and the task 
 From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context switch happens.
 When B is activated, it measures the ending time and yields.
 This reactivates A and the test starts over (compare table \ref{tab_preemption}).
-
+The test is repeated 25000 times.
 %\section{Test program}

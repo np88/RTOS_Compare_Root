@@ -582,7 +582,7 @@ The Rhealstone benchmark is a weighted mean of the following six parameters:
 Details on the single parameters are given in the next chapter (see \ref{ch_measurements}).
 In contrast to Kar's procedure where a mean value is calculated from the single components, the absolute results are used in this work. 
 
-\subsection{Jitter}
+\subsection{Jitter}\label{ss_jitter2}
 The jitter $ t_{jitter} $ should be as low as possible. 
 This requires careful consideration while configuring the underlying \ac{OS} and designing real-time applications.
 Therefore, all causes of delays are briefly examined whether they can possibly be eliminated.
@@ -601,6 +601,7 @@ Yet, there is still the possibility to remove unnecessary drivers and control th
 \paragraph{Cache Misses}
 Cache misses depend on the hardware and cannot be controlled actively.
 Careful application design can minimize the memory foot print and therefore the number of cache misses.
+As cache analysis is a very complex topic, it will not be covered in detail by this work.
 
 \paragraph{Page Swapping}
 If the \ac{OS} uses virtual memory space, page swapping can cause delays during the execution of a real-time task.
