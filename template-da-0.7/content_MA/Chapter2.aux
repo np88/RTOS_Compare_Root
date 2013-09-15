@@ -14,10 +14,10 @@
 \@writefile{brf}{\backcite{xilinx:zc702_ev_board}{{25}{3.1.1}{subsection.3.1.1}}}
 \@writefile{brf}{\backcite{xilinx:zynq7000}{{25}{3.1.1}{subsection.3.1.1}}}
 \undonewlabel{acro:PS}
-\newlabel{acro:PS}{{3.1.1}{25}{Hardware Platform\relax }{section*.52}{}}
+\newlabel{acro:PS}{{3.1.1}{25}{Hardware Platform\relax }{section*.50}{}}
 \acronymused{PS}
 \undonewlabel{acro:PL}
-\newlabel{acro:PL}{{3.1.1}{25}{Hardware Platform\relax }{section*.53}{}}
+\newlabel{acro:PL}{{3.1.1}{25}{Hardware Platform\relax }{section*.51}{}}
 \acronymused{PL}
 \acronymused{PS}
 \acronymused{PL}
@@ -25,23 +25,29 @@
 \acronymused{QSPI}
 \acronymused{PS}
 \undonewlabel{acro:MIO}
-\newlabel{acro:MIO}{{3.1.1}{25}{Hardware Platform\relax }{section*.54}{}}
+\newlabel{acro:MIO}{{3.1.1}{25}{Hardware Platform\relax }{section*.52}{}}
 \acronymused{MIO}
 \undonewlabel{acro:GPIO}
-\newlabel{acro:GPIO}{{3.1.1}{25}{Hardware Platform\relax }{section*.55}{}}
+\newlabel{acro:GPIO}{{3.1.1}{25}{Hardware Platform\relax }{section*.53}{}}
 \acronymused{GPIO}
 \undonewlabel{acro:SPI}
-\newlabel{acro:SPI}{{3.1.1}{25}{Hardware Platform\relax }{section*.56}{}}
+\newlabel{acro:SPI}{{3.1.1}{25}{Hardware Platform\relax }{section*.54}{}}
 \acronymused{SPI}
 \undonewlabel{acro:EMIO}
-\newlabel{acro:EMIO}{{3.1.1}{25}{Hardware Platform\relax }{section*.57}{}}
+\newlabel{acro:EMIO}{{3.1.1}{25}{Hardware Platform\relax }{section*.55}{}}
 \acronymused{EMIO}
 \acronymused{PS}
 \acronymused{PL}
 \acronymused{CPU}
 \acronymused{PL}
-\acronymused{PL}
+\acronymused{FPGA}
 \acronymused{GPIO}
+\undonewlabel{acro:GIC}
+\newlabel{acro:GIC}{{3.1.1}{25}{Hardware Platform\relax }{section*.56}{}}
+\acronymused{GIC}
+\undonewlabel{acro:APU}
+\newlabel{acro:APU}{{3.1.1}{25}{Hardware Platform\relax }{section*.57}{}}
+\acronymused{APU}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Zynq-7000 AP SoC Block Diagram}}{26}{figure.3.1}}
 \@writefile{brf}{\backcite{xilinx:zc702_ev_board}{{26}{3.1}{figure.3.1}}}
 \newlabel{fig_zynq_block_diagram}{{3.1}{26}{Zynq-7000 AP SoC Block Diagram\relax }{figure.3.1}{}}
@@ -57,74 +63,85 @@
 \acronymused{OS}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}\ac {OS} Configuration}{26}{subsection.3.1.3}}
 \citation{device_tree}
-\citation{xilinx:gt}
-\citation{xilinx:gt}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Integration of pulse generator}}{27}{figure.3.2}}
+\newlabel{fig_pulse_generator}{{3.2}{27}{Integration of pulse generator\relax }{figure.3.2}{}}
 \@writefile{toc}{\contentsline {subsubsection}{FreeRTOS}{27}{section*.60}}
 \acronymused{OS}
 \acronymused{ISR}
 \acronymused{FSBL}
 \acronymused{SDK}
 \acronymused{FSBL}
+\acronymused{FPGA}
 \acronymused{SDK}
 \@writefile{toc}{\contentsline {subsubsection}{LinuxRT}{27}{section*.61}}
 \newlabel{sss_linuxrt}{{3.1.3}{27}{LinuxRT\relax }{section*.61}{}}
-\@writefile{toc}{\contentsline {paragraph}{Overview Linux Development process}{27}{section*.62}}
+\@writefile{toc}{\contentsline {paragraph}{Overview of the Linux Development process}{27}{section*.62}}
 \acronymused{SSBL}
+\citation{xilinx:gt}
+\citation{xilinx:gt}
 \acronymused{FSBL}
-\@writefile{toc}{\contentsline {paragraph}{Configuring Linux}{27}{section*.63}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Development process of a Linux boot image}}{28}{figure.3.3}}
+\@writefile{brf}{\backcite{xilinx:gt}{{28}{3.3}{figure.3.3}}}
+\newlabel{fig_xilinx_tool_flow}{{3.3}{28}{Development process of a Linux boot image\relax }{figure.3.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Configuring Linux}{28}{section*.63}}
 \acronymused{OS}
-\@writefile{brf}{\backcite{device_tree}{{27}{1}{Item.20}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Development process of a Linux boot image}}{28}{figure.3.2}}
-\@writefile{brf}{\backcite{xilinx:gt}{{28}{3.2}{figure.3.2}}}
-\newlabel{fig_xilinx_tool_flow}{{3.2}{28}{Development process of a Linux boot image\relax }{figure.3.2}{}}
+\@writefile{brf}{\backcite{device_tree}{{28}{1}{Item.20}}}
+\citation{arm:aarmaaae}
 \acronymused{OS}
 \acronymused{SPI}
 \undonewlabel{acro:UART}
-\newlabel{acro:UART}{{3.1.3}{28}{Configuring Linux\relax }{section*.64}{}}
+\newlabel{acro:UART}{{3.1.3}{29}{Configuring Linux\relax }{section*.64}{}}
 \acronymused{UART}
 \undonewlabel{acro:USB}
-\newlabel{acro:USB}{{3.1.3}{28}{Configuring Linux\relax }{section*.65}{}}
+\newlabel{acro:USB}{{3.1.3}{29}{Configuring Linux\relax }{section*.65}{}}
 \acronymused{USB}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.4}Time measurement}{28}{subsection.3.1.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.4}Time measurement}{29}{subsection.3.1.4}}
 \acronymused{CPU}
-\citation{tlip:svd}
+\@writefile{brf}{\backcite{arm:aarmaaae}{{29}{3.1.4}{subsection.3.1.4}}}
 \acronymused{OS}
 \acronymused{CPU}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1.5}Application Design}{29}{subsection.3.1.5}}
 \@writefile{toc}{\contentsline {subsubsection}{FreeRTOS}{29}{section*.66}}
 \acronymused{API}
 \@writefile{toc}{\contentsline {subsubsection}{LinuxRT}{29}{section*.67}}
+\newlabel{ss_linuxRT_application_design}{{3.1.5}{29}{LinuxRT\relax }{section*.67}{}}
 \acronymused{RR}
 \acronymused{RT}
+\citation{tlip:svd}
 \acronymused{POSIX}
 \acronymused{API}
 \acronymused{API}
+\acronymused{API}
+\acronymused{API}
 \undonewlabel{acro:IPC}
-\newlabel{acro:IPC}{{3.1.5}{29}{LinuxRT\relax }{section*.68}{}}
+\newlabel{acro:IPC}{{3.1.5}{30}{LinuxRT\relax }{section*.68}{}}
 \acronymused{IPC}
-\@writefile{brf}{\backcite{tlip:svd}{{29}{3.1.5}{section*.67}}}
+\@writefile{brf}{\backcite{tlip:svd}{{30}{3.1.5}{section*.67}}}
 \acronymused{OS}
 \acronymused{API}
-\citation{xilinx:zbff}
-\citation{xilinx:zbff}
+\acronymused{UART}
+\acronymused{I/O}
+\undonewlabel{acro:SSH}
+\newlabel{acro:SSH}{{3.1.5}{30}{LinuxRT\relax }{section*.69}{}}
+\acronymused{SSH}
+\undonewlabel{acro:FTP}
+\newlabel{acro:FTP}{{3.1.5}{30}{LinuxRT\relax }{section*.70}{}}
+\acronymused{FTP}
 \@writefile{toc}{\contentsline {section}{\numberline {3.2}Boot time}{30}{section.3.2}}
 \newlabel{s_boot_time}{{3.2}{30}{Boot time\relax }{section.3.2}{}}
 \undonewlabel{acro:LED}
-\newlabel{acro:LED}{{3.2}{30}{Boot time\relax }{section*.69}{}}
+\newlabel{acro:LED}{{3.2}{30}{Boot time\relax }{section*.71}{}}
 \acronymused{LED}
 \acronymused{LED}
 \acronymused{OS}
 \undonewlabel{acro:JTAG}
-\newlabel{acro:JTAG}{{1}{30}{Boot time\relax }{section*.70}{}}
+\newlabel{acro:JTAG}{{1}{30}{Boot time\relax }{section*.72}{}}
 \acronymused{JTAG}
 \acronymused{SD}
 \acronymused{QSPI}
 \acronymused{QSPI}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Booting in FreeRTOS}{30}{subsection.3.2.1}}
-\newlabel{eq_t_boot_free}{{3.1}{30}{Booting in FreeRTOS\relax }{equation.3.2.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces FreeRTOS boot}}{30}{figure.3.3}}
-\@writefile{brf}{\backcite{xilinx:zbff}{{30}{3.3}{figure.3.3}}}
-\newlabel{fig_boot_freertos}{{3.3}{30}{FreeRTOS boot\relax }{figure.3.3}{}}
+\citation{xilinx:zbff}
+\citation{xilinx:zbff}
 \citation{xilinx:zbff}
 \citation{xilinx:zbff}
 \citation{xilinx:zbff}
@@ -132,113 +149,123 @@
 \citation{ubifs}
 \citation{mtd}
 \citation{ubi}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Booting in FreeRTOS}{31}{subsection.3.2.1}}
+\newlabel{eq_t_boot_free}{{3.1}{31}{Booting in FreeRTOS\relax }{equation.3.2.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces FreeRTOS boot}}{31}{figure.3.4}}
+\@writefile{brf}{\backcite{xilinx:zbff}{{31}{3.4}{figure.3.4}}}
+\newlabel{fig_boot_freertos}{{3.4}{31}{FreeRTOS boot\relax }{figure.3.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Booting in Linux}{31}{subsection.3.2.2}}
 \newlabel{ss_booting_in_linux}{{3.2.2}{31}{Booting in Linux\relax }{subsection.3.2.2}{}}
 \newlabel{eq_t_boot_linux}{{3.2}{31}{Booting in Linux\relax }{equation.3.2.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Xilinx Standard Boot}}{31}{figure.3.4}}
-\@writefile{brf}{\backcite{xilinx:zbff}{{31}{3.4}{figure.3.4}}}
-\newlabel{fig_boot_linux_xilinx}{{3.2.2}{31}{Booting in Linux\relax }{figure.3.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Xilinx Standard Boot}}{31}{figure.3.5}}
-\@writefile{brf}{\backcite{xilinx:zbff}{{31}{3.5}{figure.3.5}}}
-\newlabel{fig_boot_linux_custom}{{3.2.2}{31}{Booting in Linux\relax }{figure.3.5}{}}
 \acronymused{QSPI}
 \acronymused{QSPI}
 \acronymused{FPGA}
 \acronymused{FPGA}
-\acronymused{SD}
 \acronymused{SD}
 \acronymused{QSPI}
 \acronymused{PL}
 \acronymused{OS}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Xilinx Standard Boot}}{32}{figure.3.5}}
+\@writefile{brf}{\backcite{xilinx:zbff}{{32}{3.5}{figure.3.5}}}
+\newlabel{fig_boot_linux_xilinx}{{3.2.2}{32}{Booting in Linux\relax }{figure.3.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Xilinx Standard Boot}}{32}{figure.3.6}}
+\@writefile{brf}{\backcite{xilinx:zbff}{{32}{3.6}{figure.3.6}}}
+\newlabel{fig_boot_linux_custom}{{3.2.2}{32}{Booting in Linux\relax }{figure.3.6}{}}
 \acronymused{FPGA}
 \acronymused{SSBL}
 \undonewlabel{acro:UBIFS}
-\newlabel{acro:UBIFS}{{3.2.2}{32}{Booting in Linux\relax }{section*.71}{}}
+\newlabel{acro:UBIFS}{{3.2.2}{32}{Booting in Linux\relax }{section*.73}{}}
 \acronymused{UBIFS}
-\@writefile{brf}{\backcite{ubifs}{{32}{3.2.2}{figure.3.5}}}
+\@writefile{brf}{\backcite{ubifs}{{32}{3.2.2}{figure.3.6}}}
 \acronymused{UBIFS}
 \undonewlabel{acro:UBI}
-\newlabel{acro:UBI}{{3.2.2}{32}{Booting in Linux\relax }{section*.72}{}}
+\newlabel{acro:UBI}{{3.2.2}{32}{Booting in Linux\relax }{section*.74}{}}
 \acronymused{UBI}
 \undonewlabel{acro:MTD}
-\newlabel{acro:MTD}{{3.2.2}{32}{Booting in Linux\relax }{section*.73}{}}
+\newlabel{acro:MTD}{{3.2.2}{32}{Booting in Linux\relax }{section*.75}{}}
 \acronymused{MTD}
-\@writefile{brf}{\backcite{mtd}{{32}{3.2.2}{figure.3.5}}}
+\@writefile{brf}{\backcite{mtd}{{32}{3.2.2}{figure.3.6}}}
 \acronymused{MTD}
 \acronymused{UBI}
 \acronymused{UBIFS}
 \acronymused{UBI}
 \acronymused{UBI}
 \acronymused{UBI}
-\@writefile{brf}{\backcite{ubi}{{32}{3.2.2}{figure.3.5}}}
+\@writefile{brf}{\backcite{ubi}{{32}{3.2.2}{figure.3.6}}}
 \acronymused{UBIFS}
 \acronymused{UBIFS}
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Interrupt Latency}{32}{section.3.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Task Switching Time}{33}{section.3.3}}
+\acronymused{OS}
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces Task Switching Algorithm}}{33}{table.3.1}}
+\newlabel{tab_task_switching}{{3.1}{33}{Task Switching Algorithm\relax }{table.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Semaphore Shuffle Time}{33}{section.3.4}}
+\@writefile{toc}{\contentsline {paragraph}{Semaphore Shuffling Time by Kar}{34}{section*.76}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Semaphore Shuffling Time proposed by Kar}}{34}{table.3.2}}
+\newlabel{tab_sem_kar}{{3.2}{34}{Semaphore Shuffling Time proposed by Kar\relax }{table.3.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.3}{\ignorespaces Semaphore in one single task}}{34}{table.3.3}}
+\newlabel{tab_sem_single}{{3.3}{34}{Semaphore in one single task\relax }{table.3.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Semaphore in a single Task}{34}{section*.77}}
+\@writefile{toc}{\contentsline {paragraph}{Event Signaling}{34}{section*.78}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces Algorithm to measure wake up time on binary semaphore}}{35}{table.3.4}}
+\newlabel{tab_binary_semaphore}{{3.4}{35}{Algorithm to measure wake up time on binary semaphore\relax }{table.3.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}Message Passing Time}{35}{section.3.5}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Message passing algorithm}}{35}{table.3.5}}
+\newlabel{tab_message_passing}{{3.5}{35}{Message passing algorithm\relax }{table.3.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}Deadlock Breaking Time}{35}{section.3.6}}
+\acronymused{OS}
+\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Deadlock breaking time}}{36}{table.3.6}}
+\newlabel{tab_deadlock}{{3.6}{36}{Deadlock breaking time\relax }{table.3.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}Interrupt Latency}{36}{section.3.7}}
+\acronymused{OS}
 \acronymused{GPIO}
 \acronymused{CPU}
+\acronymused{ISR}
 \acronymused{CPU}
 \acronymused{IRQ}
 \acronymused{ISR}
-\acronymused{ISR}
-\acronymused{ISR}
-\citation{stress}
-\citation{tlip:tsspa}
+\citation{love:lkd}
 \acronymused{FPGA}
 \acronymused{GIC}
 \acronymused{ISR}
 \acronymused{ISR}
 \acronymused{LED}
-\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces Interrupt latency in FreeRTOS and Linux}}{33}{table.3.1}}
-\newlabel{tab_interrupt_latency}{{3.1}{33}{Interrupt latency in FreeRTOS and Linux\relax }{table.3.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Interrupt Measurement FreeRTOS}{33}{subsection.3.3.1}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.7}{\ignorespaces Interrupt latency in FreeRTOS and Linux}}{37}{table.3.7}}
+\newlabel{tab_interrupt_latency}{{3.7}{37}{Interrupt latency in FreeRTOS and Linux\relax }{table.3.7}{}}
+\acronymused{ISR}
+\acronymused{ISR}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.1}Interrupt Measurement FreeRTOS}{37}{subsection.3.7.1}}
 \acronymused{ISR}
 \acronymused{OS}
 \acronymused{GPIO}
 \acronymused{GPIO}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Interrupt Measurement LinuxRT}{33}{subsection.3.3.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.2}Interrupt Measurement LinuxRT}{37}{subsection.3.7.2}}
 \acronymused{UART}
 \acronymused{ISR}
+\citation{stress}
+\citation{tlip:tsspa}
+\undonewlabel{acro:FPU}
+\newlabel{acro:FPU}{{3.7.2}{38}{Interrupt Measurement LinuxRT\relax }{section*.79}{}}
+\acronymused{FPU}
+\@writefile{brf}{\backcite{love:lkd}{{38}{3.7.2}{subsection.3.7.2}}}
+\acronymused{FPU}
 \acronymused{CPU}
 \acronymused{CPU}
-\@writefile{brf}{\backcite{stress}{{33}{3.3.2}{subsection.3.3.2}}}
+\@writefile{brf}{\backcite{stress}{{38}{3.7.2}{subsection.3.7.2}}}
 \acronymused{CPU}
 \acronymused{I/O}
 \acronymused{I/O}
-\undonewlabel{acro:SSH}
-\newlabel{acro:SSH}{{3.3.2}{33}{Interrupt Measurement LinuxRT\relax }{section*.74}{}}
 \acronymused{SSH}
-\@writefile{brf}{\backcite{tlip:tsspa}{{33}{3.3.2}{subsection.3.3.2}}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.4}Task Switching Time}{34}{section.3.4}}
-\acronymused{OS}
-\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Task Switching Algorithm}}{34}{table.3.2}}
-\newlabel{tab_task_switching}{{3.2}{34}{Task Switching Algorithm\relax }{table.3.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.5}Preemption Time}{34}{section.3.5}}
+\@writefile{brf}{\backcite{tlip:tsspa}{{38}{3.7.2}{subsection.3.7.2}}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.8}Preemption Time}{38}{section.3.8}}
+\acronymused{ISR}
+\@writefile{lot}{\contentsline {table}{\numberline {3.8}{\ignorespaces Preemption from ISR}}{38}{table.3.8}}
+\newlabel{tab_preemption}{{3.8}{38}{Preemption from ISR\relax }{table.3.8}{}}
 \acronymused{ISR}
 \acronymused{CPU}
 \acronymused{IRQ}
 \acronymused{ISR}
-\acronymused{ISR}
-\@writefile{lot}{\contentsline {table}{\numberline {3.3}{\ignorespaces Preemption from ISR}}{35}{table.3.3}}
-\newlabel{tab_preemption}{{3.3}{35}{Preemption from ISR\relax }{table.3.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.6}Semaphore Shuffle Time}{35}{section.3.6}}
-\@writefile{toc}{\contentsline {paragraph}{Semaphore Shuffling Time by Kar}{35}{section*.75}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces Semaphore Shuffling Time proposed by Kar}}{35}{table.3.4}}
-\newlabel{tab_sem_kar}{{3.4}{35}{Semaphore Shuffling Time proposed by Kar\relax }{table.3.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Semaphore in one single task}}{35}{table.3.5}}
-\newlabel{tab_sem_single}{{3.5}{35}{Semaphore in one single task\relax }{table.3.5}{}}
-\@writefile{toc}{\contentsline {paragraph}{Semaphore in a single Task}{36}{section*.76}}
-\@writefile{toc}{\contentsline {paragraph}{Event Signaling}{36}{section*.77}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Algorithm to measure wake up time on binary semaphore}}{36}{table.3.6}}
-\newlabel{tab_binary_semaphore}{{3.6}{36}{Algorithm to measure wake up time on binary semaphore\relax }{table.3.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.7}Message Passing Time}{36}{section.3.7}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.7}{\ignorespaces Message passing algorithm}}{36}{table.3.7}}
-\newlabel{tab_message_passing}{{3.7}{36}{Message passing algorithm\relax }{table.3.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.8}Deadlock Breaking Time}{37}{section.3.8}}
-\acronymused{OS}
-\@writefile{lot}{\contentsline {table}{\numberline {3.8}{\ignorespaces Deadlock breaking time}}{37}{table.3.8}}
-\newlabel{tab_deadlock}{{3.8}{37}{Deadlock breaking time\relax }{table.3.8}{}}
 \@setckpt{content_MA/Chapter2}{
-\setcounter{page}{38}
+\setcounter{page}{39}
 \setcounter{equation}{2}
 \setcounter{enumi}{3}
 \setcounter{enumii}{3}
@@ -253,7 +280,7 @@
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
-\setcounter{figure}{5}
+\setcounter{figure}{6}
 \setcounter{table}{8}
 \setcounter{LT@tables}{0}
 \setcounter{LT@chunks}{0}

@@ -590,6 +590,12 @@ Therefore, all causes of delays are briefly examined whether they can possibly b
 \paragraph{Timer Tick} 
 The timer tick occurs at a predefined frequency and cannot be eliminated without radical changes to the kernel.
 One benefit is that this delay is deterministic and can be included into the application design. 
+Further, one possibility to remove delays caused by the timer tick (and other interrupts) is to put time critical code into a critical section.
+This is possible in FreeRTOS and in Linux kernel mode.
+Still it is important to be aware of the timer interrupt delay, especially in Linux where programs which are running in user mode cannot turn off interrupts. 
+This latency is also important in systems where nested interrupts are enabled because the timer tick usually has the highest priority and can occur when handling other time critical interrupts. 
+Still, it is worth knowing whether the system behavior decreases the performance of the application in an unacceptable way or if the delay can be tolerated.
+Obviously, it is preferable not to influence the \ac{OS}' behavior as little as possible.         
 
 \paragraph{Interrupts}
 Interrupts usually occur infrequently and hence cause undefined delays. 
@@ -600,8 +606,12 @@ Yet, there is still the possibility to remove unnecessary drivers and control th
 
 \paragraph{Cache Misses}
 Cache misses depend on the hardware and cannot be controlled actively.
+The effectiveness of a cache is dependent on its size and the cache control algorithm.
+It tries to pre-fetch data by observing the system behavior and pre-calculating the next data access.
+As cache analysis is a very complex topic and does not directly apply to the analysis of operation systems, it will not be covered by this work.
 Careful application design can minimize the memory foot print and therefore the number of cache misses.
-As cache analysis is a very complex topic, it will not be covered in detail by this work.
+Logically, memory accesses from the \ac{OS} influence the cache behavior as well. 
+Therefore, \acp{OS} which do not make heavy use of large memory structures perform better. 
 
 \paragraph{Page Swapping}
 If the \ac{OS} uses virtual memory space, page swapping can cause delays during the execution of a real-time task.
@@ -613,5 +623,6 @@ Nevertheless, the programmer is in charge of using this function correctly.
 Daemons are background processes which may not only cause jitter but also slow down the boot process. 
 They do not exist in FreeRTOS.
 Unnecessary daemons in Linux can be detected and removed from the system.
+This is especially important for daemons which make a large use of \ac{I/O} accesses.
 
 %\subsection{Test Application}

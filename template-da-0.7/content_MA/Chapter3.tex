@@ -222,7 +222,7 @@ This makes a total overhead of 16.466 us.
 The LinuxRT implementation is 9.79 times slower than the same implementation in FreeRTOS.
 [results from give].
  
-\section{Interrupt Latency} 
+\section{Interrupt Latency}\label{s_interrup_latency} 
 The interrupt latency depends not only on the underlying hardware but also on the handling by the operation system.
 While the only interrupt which is being handled directly by FreeRTOS is the timer tick, Linux supports more advanced handling of interrupts. 
 Therefore, the analysis of the interrupt latency in Linux is more complex (see section \ref{ss_interrupt_latency_results_in_linux}).
@@ -364,13 +364,85 @@ The mean time is 7.28 times higher than in FreeRTOS.
 As discussed in section \ref{ss_jitter2}, jitter can have a crucial influence on the execution time of an application.
 Formula \ref{eq_indet_app} describes the worst case scenario:\\
 $t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{swap} + t_{daem}$ \\
-Based on the results, all the single parameters will be discussed for the operation systems under test. 
+Based on the results, the single parameters will be discussed for the operation systems under test. 
+As already mentioned, the cache time will not be handled because cache performance analysis is such a complex topic that it would exceed the limitations of this work.
+The results presented are only valid for the current system setup and can be different for setups with e.g. multi-core support.
+As already mentioned, the jitter in FreeRTOS is very predictive and can be reduced to the timer tick only.
+For Linux, the overall system performance is stable when the application is designed correctly and no \ac{I/O} load is applied to the system.
 
 \subsection{Jitter in FreeRTOS}
 As expected from a light-weight \ac{RTOS}, the jitter in FreeRTOS is small and predictive.
 $ t_{int}$,  $t_{swap} $ and $t_{daem}$ are not available and therefore set to zero. 
 $ t_{tick} $ was measured throughout the experiments. 
 The largest value recorded is 4.312 us in the single semaphore experiment.  
+Therefore, $ t_{tick} $ will be set to 4.312 us.
+\par
+The final $t_{jitter}$ results to $ t_{tick} $ and 4.312 us for FreeRTOS.
+The equation shows impressively how low \ac{OS} jitter is and consequently, how deterministic the system behaves.  
+ 
+\subsection{Jitter in Linux}
+The jitter sources in Linux have to be investigated more closely than the ones in FreeRTOS.
+As described in section \ref{ss_linuxRT_application_design}, some significant jitter sources can simply be eliminated by careful system and application design.
+
+\subsubsection{Page Swapping} 
+ 
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.6] 			{inputs/pictures_ch3/mutex_shuffle_measurements_cfg2_linux_printf_release}
+	\end{center}
+	\caption{Mutex shuffling results without applying RAM lock} \label{fig_no_mlock_mutex_shuffling}
+\end{figure}
+\begin{figure}[htb]
+
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.6] 			{inputs/pictures_ch3/deadlock_results_measurements_cfg2_linux_printf_release}
+	\end{center}
+	\caption{Deadlock breaking results without applying RAM lock} \label{fig_no_mlock_deadlock}
+\end{figure}
+
+As already mentioned, page swapping can cause delays and should be turned off for time critical applications. 
+The benchmark set has been performed without \ac{RAM} locking as well to investigate the result of the call to mlockall() function.
+The effects of page swapping are visualized for the mutex shuffling (figure \ref{fig_no_mlock_mutex_shuffling}) and the deadlock breaking benchmark (figure \ref{fig_no_mlock_deadlock}).
+The figures clearly show, that page swapping has a negative effect on the application performance.
+Table \ref{tab_results_ram_lock} shows a comparison for both benchmarks with and without the \ac{RAM} lock.
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l||l||l||l|l|}
+			\hline
+				Test 											& Shuffle lock & Shuffle no lock & Deadlock lock & Deadlock no lock \\
+				\hline 
+				Mean  										& 6.342 us		 & 6.447 us 			 & 20.68 us			 & 20.73 us					\\
+			  \hline
+			  Std. deviation (total)	  & 286 ns			 & 527 ns 				 & 643 ns				 & 913 ns						\\
+			  \hline 
+			  Std. deviation (\%)  			& 4.51 \%			 & 8.17 \% 				 & 3.11 \% 			 & 4.40 \%					\\ 
+			  \hline
+			  Max. tick delay	(total)		& 27.084 us	 	 & 30.542 us 			 & 37.146 us		 & 60.473 				\\
+			\hline
+		\end{tabular}
+	\caption{RAM lock effect on Deadlock breaking time and semaphore shuffling time}
+	\label{tab_results_ram_lock}
+\end{table}
+
+The test shows that the \ac{RAM} lock has only a slight effect on the mean result, but the standard deviation increases especially for applications with a small mean time. 
+Further, the maximum tick delay highly increases for this configuration.
+
+\subsubsection{Daemons}
+The number of daemons in Linux can be controlled actively, especially in embedded distributions, the number of daemons is limited by default.
+The daemons available in the custom system are an \ac{SSH} and an \ac{FTP} daemon.
+Both require an Ethernet connection and as shown in section \ref{s_interrup_latency}, this is not acceptable for a real-time application.
+Consequently, both daemons are not allowed to actively communicate via network while a critical application is running.
+
+\subsubsection{CPU Bound Load}
+\ac{CPU} bound load means that a process is performing a task where no \ac{I/O} communication is necessary.
+These can be for example processes which are collecting system data for statistical purposes. 
+Further, bottom halves of \acp{ISR} can also perform \ac{CPU} bound actions based on data which was previously collected during the top half of the interrupt.
+As this kind of load always depends on correct priority settings, real-time tasks should not be affected by \ac{CPU} load. 
+An experiment where \ac{CPU} load was simulated by the Stress program shows no difference in behavior between the stressed and the non-stressed system.
+
+\subsubsection{Timer Tick and Interrupt Delays}
+
 
 
 %\subsection{Single Mutex Results}
