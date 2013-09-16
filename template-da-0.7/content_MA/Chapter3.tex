@@ -345,7 +345,7 @@ The standard deviation is 75 us (3.55 \%).
 In figure \ref{fig_preemption_result_free}, the results of the experiment are shown.
 The maximum value is 2.626 us. 
 Because the results were recorded only every 5 ms, it is likely that one peak in the in the upper plot results from the test being interrupted by the timer tick. 
-The other peak is the uninterrupted measurement. 
+The other peak results from the uninterrupted measurement. 
 
 \subsection{Preemption Time in LinuxRT}
 \begin{figure}[htb]
@@ -358,6 +358,10 @@ The mean value measured for the preemption time in LinuxRT is 15.370 us and the 
 In figure \ref{fig_preemption_result_linux}, the results of the experiment are shown.
 The maximum value is 109.968 us.
 This results in a total maximum overhead of 94.598 us which is one of the highest measured in all tests. 
+Obviously, the overhead results from using the interrupts.
+Its source could not be further localized as the tracing possibilities were limited and the installation of proper tracing tools would extend the limits of this work. 
+It is also not obvious why there are three peaks and not only two line in the FreeRTOS measurement.
+One possibility is that nested interrupt handling in Linux takes more time than in FreeRTOS. 
 The mean time is 7.28 times higher than in FreeRTOS.
  
 \section{Jitter}
@@ -442,8 +446,11 @@ As this kind of load always depends on correct priority settings, real-time task
 An experiment where \ac{CPU} load was simulated by the Stress program shows no difference in behavior between the stressed and the non-stressed system.
 
 \subsubsection{Timer Tick and Interrupt Delays}
-
-
+The highest captured value for the timer tick which can for sure be defined as $t_{tick}$ is 28.892 us in the single semaphore benchmark.
+The tick value is significantly larger than in FreeRTOS because Linux is performing more operations than rescheduling and updating of the internal timers. 
+For example, it checks and invokes \ac{RCU} callbacks.
+Further, the hierarchy of nested function calls has a high impact on the over-all performance of the system. 
+As clearly shown in the interrupt latency and preemption benchmarks, 
 
 %\subsection{Single Mutex Results}
 
