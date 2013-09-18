@@ -68,7 +68,7 @@ Moreover, the timer tick is clearly recognizable every 10 ms.
 Its maximum value is 18.945 us whereas the lower values are pending around 10 us.
 Therefore, the maximum tick overhead is 17.485 us.
 The reasons for the different tick timer delays can not be clearly determined because no appropriate tracing tools were available.
-Besides the different timer tick entry points and the cache mechanism, the reasons for different latencies will be discussed later (refer to section \ref{}). 
+Besides the different timer tick entry points and the cache mechanism, the reasons for different latencies will be discussed later (refer to section \ref{ss_jitter_in_linux}). 
 As in FreeRTOS, small spike clusters are visible during the complete test.
 Because of the higher noise, they do not become as apparent as in the FreeRTOS measurement.
 
@@ -229,9 +229,11 @@ Therefore, the analysis of the interrupt latency in Linux is more complex (see s
 
 \subsection{Interrupt Latency Results in FreeRTOS}
 As there is no \ac{OS} overhead in the interrupt handling in FreeRTOS, it is very fast and predictive.
-The time to handle the interrupt internally and turn on an \ac{LED} from the \ac{ISR} takes no more than 740 ns (see figure \ref{fig_interrupt_latency_freertos}). 
+The time to handle the interrupt internally and turn on an \ac{LED} from the \ac{ISR} takes no more than 750 ns (see figure \ref{fig_interrupt_latency_freertos}). 
 The mean value is 727.71 ns and the standard deviation 4.775 ns (0.66 \%). 
-Even when the \ac{LED} is turned on from a task which is unblocked by the \ac{ISR}, the procedure is only 10 ns [?] slower.  
+When the \ac{LED} is turned on from a user task which is unblocked by the \ac{ISR}, the mean time increases to 933.66 ns.
+The standard deviation for this experiment is 41.01 ns (4.39 \%) and the maximum measured value is 1.163 us.
+  
 \begin{figure}[htb]
 	\begin{center}
 		\includegraphics[scale=0.5] 
@@ -248,7 +250,7 @@ To investigate how much the threading influences the interrupt latency, the test
 Further, the tests were also performed under load condition as it is desirable to run standard [Wort?] applications on LinuxRT, not only real-time applications. 
 This experiment shows very well the influence of \ac{I/O} bound load on the Linux system.
 
-\subsection{The fastest Interrupt Handling in Linux}
+\subsubsection{The fastest Interrupt Handling in Linux}
 The first test which was performed is very similar to the FreeRTOS test. 
 It tests the standard Linux system's interrupt latency.
 This means that the interrupts are handled non-threaded and the \ac{LED} is lightened in the \ac{ISR} directly.
@@ -264,7 +266,13 @@ The mean value is 10.027 us with a standard deviation of 987.36 ns.
 The maximum measured value is 17.05 us.
 After stressing the system, the mean value stays almost constant at 10.486 us, but the standard deviation rises to 4.496 us (42.88 \%) and the maximum recorded value to 90 us.
 
-\subsection{Interrupt handling and User Processes}
+\subsubsection{Interrupt Handling and User Processes in LinuxRT}
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[scale=0.5]{inputs/pictures_ch3/rt_isr_user}
+	\end{center}
+	\caption[Interrupt latency LinuxRT]{Interrupt latency LinuxRT, resolution 5 us} 	\label{fig_interrupt_latency_linuxrt}
+\end{figure}
 Usually, programmer prefer to write programs in user space and not kernel modules. 
 Therefore, in this test a typical user thread scenario is simulated.
 A thread is waiting for an interrupt to occur and then issues a write command to turn off an \ac{LED}. 
@@ -273,14 +281,6 @@ The results were recorded by an oscilloscope.
 In the figures (\ref{fig_interrupt_latency_linuxrt} - \ref{fig_interrupt_latency_linux_load}), the upper channel shows the pulse generator which triggers the interrupt.
 The lower channel shows the reaction of the \ac{OS}.  
 
-\subsubsection{LinuxRT}
-\begin{figure}[htb]
-	\begin{center}
-		\includegraphics[scale=0.5] 
-		{inputs/pictures_ch3/rt_isr_user}
-	\end{center}
-	\caption[Interrupt latency LinuxRT]{Interrupt latency LinuxRT, resolution 5 us} \label{fig_interrupt_latency_linuxrt}
-\end{figure}
 The mean value measured for the user task when using LinuxRT is 23.527 us. 
 The standard deviation is 1.629 us (6.92 \%). 
 In figure \ref{fig_interrupt_latency_linuxrt}, the latencies for the experiment are shown.
@@ -294,11 +294,12 @@ The maximum latency is 40.03 us.
 	\end{center}
 	\caption[Interrupt latency LinuxRT with load]{Interrupt latency LinuxRT with load, resolution 15 us} \label{fig_interrupt_latency_linuxrt_load}
 \end{figure}
-Figure \ref{fig_interrupt_latency_linuxrt_load} shows the same experiment when the system was stressed with network load. 
-The mean value for this experiment is 29.375 and the standard deviation is 6.202 us (21.11 \%).
-The maximum value here is 126.836 us.
 
-\subsubsection{Mainline Linux}
+Figure \ref{fig_interrupt_latency_linuxrt_load} shows the same experiment when the system was stressed with network load. 
+The mean value for this experiment is 27.375 and the standard deviation is 6.676 us (24.39 \%).
+The maximum value here is 53.740 us, it is 34 \% higher than without load.
+
+\subsubsection{Interrupt Handling and User Processes in Mainline Linux}
 To see how significant the differences between LinuxRT and the mainline kernel are, the same experiment is also repeated using the mainline kernel. 
 \par
 The mean value measured for the user task is 12.350 us. 
@@ -322,9 +323,10 @@ The maximum value is at 26.47 us.
 	\caption[Interrupt latency standard Linux with load]{Interrupt latency standard Linux with load, resolution 5 us} \label{fig_interrupt_latency_linux_load}
 \end{figure}
 Figure \ref{fig_interrupt_latency_linux_load} shows the same experiment stressed with \ac{I/O} load.  
-As in LinuxRT, the maximum registered value is unacceptably large (90.92 us).
+As in LinuxRT, the maximum registered value is unacceptably large: 90.92 us and more than three times higher than without load.
 Moreover, an even higher value could be observed in other experiments.
-The mean value is at 15.853 us and the standard deviation at 6.01 us (37.91 us \%).
+The mean value is at 15.853 us and the standard deviation at 6.01 us (37.91 \%).
+From this experiment, the strength of LinuxRT becomes visible as the high network load can be preempted by real-time tasks with higher priority.
 
 \section{Preemption Time}
 The situation captured in this benchmark is often occurring in real-time applications.  
@@ -361,7 +363,6 @@ This results in a total maximum overhead of 94.598 us which is one of the highes
 Obviously, the overhead results from using the interrupts.
 Its source could not be further localized as the tracing possibilities were limited and the installation of proper tracing tools would extend the limits of this work. 
 It is also not obvious why there are three peaks and not only two line in the FreeRTOS measurement.
-One possibility is that nested interrupt handling in Linux takes more time than in FreeRTOS. 
 The mean time is 7.28 times higher than in FreeRTOS.
  
 \section{Jitter}
@@ -384,7 +385,7 @@ Therefore, $ t_{tick} $ will be set to 4.312 us.
 The final $t_{jitter}$ results to $ t_{tick} $ and 4.312 us for FreeRTOS.
 The equation shows impressively how low \ac{OS} jitter is and consequently, how deterministic the system behaves.  
  
-\subsection{Jitter in Linux}
+\subsection{Jitter in Linux}\label{ss_jitter_in_linux}
 The jitter sources in Linux have to be investigated more closely than the ones in FreeRTOS.
 As described in section \ref{ss_linuxRT_application_design}, some significant jitter sources can simply be eliminated by careful system and application design.
 
@@ -449,8 +450,54 @@ An experiment where \ac{CPU} load was simulated by the Stress program shows no d
 The highest captured value for the timer tick which can for sure be defined as $t_{tick}$ is 28.892 us in the single semaphore benchmark.
 The tick value is significantly larger than in FreeRTOS because Linux is performing more operations than rescheduling and updating of the internal timers. 
 For example, it checks and invokes \ac{RCU} callbacks.
-Further, the hierarchy of nested function calls has a high impact on the over-all performance of the system. 
-As clearly shown in the interrupt latency and preemption benchmarks, 
+Moreover, the hierarchy of nested function calls has a high impact on the over-all performance of the system. 
+The interrupt latency benchmarks proves that LinuxRT has a lower throughput but behaves more deterministic under heavy \ac{I/O} load. 
+The maximum jitter value is almost twice as high for mainline Linux than for LinuxRT.
+Still, the preemption benchmark shows infrequently occurring peaks of up to 110 us. 
+%As clearly shown in the interrupt latency and preemption benchmarks, Linux does not behave deterministically when put under high \ac{I/O} load.
+Before using LinuxRT in real-time applications in the current configuration, the cause of this behavior should be determined.
+%The consequence is that LinuxRT should not be used for real-time applications in the current configuration.
+Yet, this does not mean that LinuxRT cannot be used for real-time applications at all.
+It is possible to use a multi-core configuration and process interrupts with only a number of dedicated \acp{CPU}.
+This would be even possible for the current hardware platform as the board inherits a dual core processor.
+Further, there are a few mechanisms which propose ways to work around the timer tick.
+Lee and Park introduce a technique to improve real-time performance by predicting the timer interrupt \cite{lee:dltfirtpoelbpoti}.
+
+\section{Summary}
+This section briefly summarizes the results which were presented throughout this chapter and gives a final comparison between the two operation systems under test.
+\par
+Table \ref{tab_summary} gives an overview over the collected results.
+In the column \textit{Factor}, the factor between the mean FreeRTOS and mean LinuxRT value is calculated. 
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l||l|l||l|l||l|}
+			\hline
+				Test & \multicolumn{2}{|c||}{FreeRTOS} & \multicolumn{2}{|c||}{Linux}	& Factor				 	 \\
+				\hline 
+																	& mean			 & std. dev. 		 & mean			  & std. dev. 	&			 \\
+				\hline 
+				Task Switching						& 238 ns	 	 & 1.6 \%		 		 & 1.46 us	  & 9.0 \%			&	6.1	 \\
+			  \hline
+			  Semaphore single				  & 257 ns		 & 5.9 \%  			 & 252 ns		  &	46 \% 			&	0.98 \\
+			  \hline 
+			  Semaphore Shuffling 			& 1.912 us 	 & 1.64 \% 			 & 6.342 us  	&	4.51 \%			&	3.32 \\ 
+			  \hline
+			  Event Signaling						& 846 ns		 & 0.47 \% 			 & 2.544 us		& 7.09 \%			&	3.01 \\
+			  \hline
+			  Message Passing						& 901 ns		 & 2.76 \% 			 & 5.135 us		& 5.22 \%			&	5.7  \\
+			  \hline
+			  Deadlock Breaking					& 2.113 us	 & 1.63 \% 			 & 20.68 us		& 3.11 \%			&	9.79 \\
+			  \hline
+			  Interrupt Latency (fast)	& 727.71 ns	 & 0.66 \% 			 & 1.812 us		& 22.90 \%		&	2.49 \\
+			  \hline
+			  Interrupt Latency (user)	& 933.66 ns	 & 4.39 \% 			 & 23.527 us	& 6.92 \%			&	25.19 \\
+			\hline
+		\end{tabular}
+	\caption{Result summary for the benchmarks}
+	\label{tab_summary}
+\end{table}
+ 
 
 %\subsection{Single Mutex Results}
 

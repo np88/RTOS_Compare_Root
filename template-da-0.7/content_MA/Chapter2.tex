@@ -550,5 +550,6 @@ At some point in time, an \ac{IRQ} from the pulse generator occurs and the task 
 From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context switch happens.
 When B is activated, it measures the ending time and yields.
 This reactivates A and the test starts over (compare table \ref{tab_preemption}).
-The test is repeated 25000 times.
+The test is repeated 40000 times.
+For the LinuxRT test, it is important to set the priority of the \ac{ISR} between the priority of the two other tasks. 
 %\section{Test program}
