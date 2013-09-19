@@ -362,6 +362,7 @@ The maximum value is 109.968 us.
 This results in a total maximum overhead of 94.598 us which is one of the highest measured in all tests. 
 Obviously, the overhead results from using the interrupts.
 Its source could not be further localized as the tracing possibilities were limited and the installation of proper tracing tools would extend the limits of this work. 
+
 It is also not obvious why there are three peaks and not only two line in the FreeRTOS measurement.
 The mean time is 7.28 times higher than in FreeRTOS.
  
@@ -467,7 +468,7 @@ Lee and Park introduce a technique to improve real-time performance by predictin
 This section briefly summarizes the results which were presented throughout this chapter and gives a final comparison between the two operation systems under test.
 \par
 Table \ref{tab_summary} gives an overview over the collected results.
-In the column \textit{Factor}, the factor between the mean FreeRTOS and mean LinuxRT value is calculated. 
+In the final right column, the factor between the mean FreeRTOS and mean LinuxRT value is calculated. 
 
 \begin{table}[htbp]
 	\centering
@@ -475,29 +476,55 @@ In the column \textit{Factor}, the factor between the mean FreeRTOS and mean Lin
 			\hline
 				Test & \multicolumn{2}{|c||}{FreeRTOS} & \multicolumn{2}{|c||}{Linux}	& Factor				 	 \\
 				\hline 
-																	& mean			 & std. dev. 		 & mean			  & std. dev. 	&			 \\
+																						& mean			 & std. dev. 		 & mean			  & std. dev. 	&			 \\
 				\hline 
-				Task Switching						& 238 ns	 	 & 1.6 \%		 		 & 1.46 us	  & 9.0 \%			&	6.1	 \\
+				Task Switching											& 238 ns	 	 & 1.6 \%		 		 & 1.46 us	  & 9.0 \%			&	6.1	 \\
 			  \hline
-			  Semaphore single				  & 257 ns		 & 5.9 \%  			 & 252 ns		  &	46 \% 			&	0.98 \\
+			  Semaphore single									  & 257 ns		 & 5.9 \%  			 & 252 ns		  &	46 \% 			&	0.98 \\
 			  \hline 
-			  Semaphore Shuffling 			& 1.912 us 	 & 1.64 \% 			 & 6.342 us  	&	4.51 \%			&	3.32 \\ 
+			  Semaphore Shuffling 								& 1.912 us 	 & 1.64 \% 			 & 6.342 us  	&	4.51 \%			&	3.32 \\ 
 			  \hline
-			  Event Signaling						& 846 ns		 & 0.47 \% 			 & 2.544 us		& 7.09 \%			&	3.01 \\
+			  Event Signaling											& 846 ns		 & 0.47 \% 			 & 2.544 us		& 7.09 \%			&	3.01 \\
 			  \hline
-			  Message Passing						& 901 ns		 & 2.76 \% 			 & 5.135 us		& 5.22 \%			&	5.7  \\
+			  Message Passing											& 901 ns		 & 2.76 \% 			 & 5.135 us		& 5.22 \%			&	5.7  \\
 			  \hline
-			  Deadlock Breaking					& 2.113 us	 & 1.63 \% 			 & 20.68 us		& 3.11 \%			&	9.79 \\
+			  Deadlock Breaking										& 2.113 us	 & 1.63 \% 			 & 20.68 us		& 3.11 \%			&	9.79 \\
 			  \hline
-			  Interrupt Latency (fast)	& 727.71 ns	 & 0.66 \% 			 & 1.812 us		& 22.90 \%		&	2.49 \\
+			  Interrupt Latency (fast)						& 727.71 ns	 & 0.66 \% 			 & 1.812 us		& 22.90 \%		&	2.49 \\
 			  \hline
-			  Interrupt Latency (user)	& 933.66 ns	 & 4.39 \% 			 & 23.527 us	& 6.92 \%			&	25.19 \\
+			  Interrupt Latency (user), RT				& 933.66 ns	 & 4.39 \% 			 & 23.527 us  & 6.92 \%			&	25.19 \\
+			  %\hline
+			  Linux mainline kernel								& 					 &  			 			 & 12.350 us	& 10.12 \%		&	13.23 \\
+			  \hline
+			  Preemption													& 2.111 us	 & 3.55 \% 			 & 15.370 us	& 59.66 \%		&	7.28 \\
 			\hline
 		\end{tabular}
 	\caption{Result summary for the benchmarks}
 	\label{tab_summary}
 \end{table}
+
+The results point out the strengths and weaknesses of LinuxRT compared to FreeRTOS.
+Therefore, it becomes clear which kind of applications can be served by a LinuxRT system and where it gets to its limits.
+Linux suffers especially from long interrupt latency times due to its complex interrupt handling.
+Still, when using the non-threaded interrupt handling for LinuxRT, it is possible to handle \ac{I/O} inputs from user space at a mean time of 12.350 us. 
+When considering the worst case time for interrupt handling, an interrupt could be processed within 30 us.
+The worst-case processing time of a threaded interrupt with load is at 54 us.
+This means that the jitter arising from putting the system under network load is not even 25 us.
+Practically, user space programs should be written when the processing of sensor data needs complex calculations which for example include usage of an \ac{FPU}.
+Simple sensor-actor applications can be processed directly in the \ac{ISR}.
+The worst-case time of 4 us without additional interrupt load is very fast and barely slower than in FreeRTOS. 
+Obviously, the maximum latency of the application $t_{app}$ has to be considered as well.
+\par
+Besides the interrupt handling, the other Rhealstone benchmarks give an idea about the overall performance of LinuxRT compared to FreeRTOS.
+Especially task switching, message passing and deadlock breaking causes large delays in LinuxRT.
+Applications with a high number of tasks and many task switches suffer from slow context switching in Linux. 
+This is a point where optimization could increase performance as Linux and FreeRTOS are using the same scheduling algorithm for real-time tasks.  
+
+To minimize $t_{jitter}$, the system and application has to be designed carefully. 
+It is naive to assume, a complex \ac{OS} like LinuxRT would work for real-time applications without being tuned.
  
+ 
+
 
 %\subsection{Single Mutex Results}
 
