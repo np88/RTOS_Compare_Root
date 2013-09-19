@@ -515,11 +515,23 @@ Simple sensor-actor applications can be processed directly in the \ac{ISR}.
 The worst-case time of 4 us without additional interrupt load is very fast and barely slower than in FreeRTOS. 
 Obviously, the maximum latency of the application $t_{app}$ has to be considered as well.
 \par
-Besides the interrupt handling, the other Rhealstone benchmarks give an idea about the overall performance of LinuxRT compared to FreeRTOS.
+Besides the interrupt handling, the other Rhealstone benchmarks give an idea about the overall performance of LinuxRT compared to FreeRTOS and correspond to $t_{os}$. 
 Especially task switching, message passing and deadlock breaking causes large delays in LinuxRT.
 Applications with a high number of tasks and many task switches suffer from slow context switching in Linux. 
 This is a point where optimization could increase performance as Linux and FreeRTOS are using the same scheduling algorithm for real-time tasks.  
-
+The other aspect in which LinuxRT performs really bad is resolving deadlock situations by using priority inheritance.
+The complexity of the POSIX compliant \ac{API} is particularly recognizable at this point.
+One solution to this problem is an application design which does not allow such situations. 
+Yet, it is sometimes necessary to create applications where priority inversion can occur because another solution would be too complex.
+Depending on the real-time requirements, LinuxRT can fail because it needs about 20 us longer to resolve a deadlock. 
+A better solution to this problem would be the design of a semaphore lightweight \ac{API} for real-time applications.
+As semaphores and mutexes are a very common memory access synchronization technique, this would cause some significant improvement in performance.
+The downside of this approach is a higher memory footprint of the operation system.
+Further, it was shown that event signaling is twice as fast than message passing in LinuxRT for the used \acp{API}.
+Because both methods implement similar functions, it is faster to use event signaling and shared memory between two threads than passing messages.
+In FreeRTOS, the related \acp{API} calls perform almost the same.
+This shows the correctness of the results as the semaphore implementation in FreeRTOS is completely based on message queues.
+\par
 To minimize $t_{jitter}$, the system and application has to be designed carefully. 
 It is naive to assume, a complex \ac{OS} like LinuxRT would work for real-time applications without being tuned.
  
