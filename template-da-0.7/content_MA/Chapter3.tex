@@ -526,6 +526,7 @@ Yet, it is sometimes necessary to create applications where priority inversion c
 Depending on the real-time requirements, LinuxRT can fail because it needs about 20 us longer to resolve a deadlock. 
 A better solution to this problem would be the design of a semaphore lightweight \ac{API} for real-time applications.
 As semaphores and mutexes are a very common memory access synchronization technique, this would cause some significant improvement in performance.
+It would also reduce the standard deviation which is in general higher in LinuxRT than in FreeRTOS.
 The downside of this approach is a higher memory footprint of the operation system.
 Further, it was shown that event signaling is twice as fast than message passing in LinuxRT for the used \acp{API}.
 Because both methods implement similar functions, it is faster to use event signaling and shared memory between two threads than passing messages.
@@ -549,6 +550,13 @@ By doing this, $t_{jitter}$ is nearly eliminated so that mainly $t_{det}$ remain
 The downside of this method is that one \ac{CPU} is heavily loaded by communicating with \ac{I/O} devices while the other one can only run preemptable \ac{CPU} bound processes.
 Although $t_{jitter}$ can be minimized in the introduced method, LinuxRT is barely used for real-time applications in industry.
 This is mainly due to the complexity of the system which makes it hard to meet necessary verification demands.
+\par
+Summarized, it always depends on the hardware platform and the (real-time) requirements which \ac{OS} to choose.
+Under certain conditions, LinuxRT is a promising candidate for soft real-time.
+Yet, the hard real-time systems usually needs certification what is the main drawback of LinuxRT. 
+Further, the memory footprint might be too large for certain hardware platforms. 
+Still, it is worth trying whether an operation system like LinuxRT can meet the demands of a certain application.
+The advantages are still overwhelming: Driver support for a wide range of hardware platforms, a large community, portability between different platforms and application maintenance independent of the \ac{OS}.  
 
 %\subsection{Single Mutex Results}
 
