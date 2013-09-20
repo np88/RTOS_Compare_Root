@@ -1,1 +1,39 @@
-\chapter{Conclusion and Outlook}\label{ch_conclusion}
+\chapter{Concluding Remarks}\label{ch_conclusion}
+Concluding, the first part of this chapter gives a brief summary of the development process[Wort] in this work.
+The second part introduces possibilities of future work and extensions.
+
+\section{Summary and Reflection}   
+In the following, the main parts of this thesis are summarized:
+
+\begin{itemize}
+	\item 
+	The first chapter gives an introduction to the topic. 
+	It explains the timing problems in real-time systems and the role and challenges of \acp{RTOS}.
+	Moreover, it outlines why the \acp{OS} LinuxRT and FreeRTOS were chosen for the comparison.
+	\item
+	In the second chapter, a detailed background on operation systems is given with focus on FreeRTOS and LinuxRT.
+	Based on that, sources of delays caused by hard ware and the \ac{OS} are analyzed.
+	Finally, it is discussed which delays occur in the \acp{OS} under test and how they can be minimized or completely eliminated.
+	\item
+	Derived from the analysis in chapter two, a set of benchmarks to quantify the operation systems is defined in chapter three.
+	These are mainly based on the real-time Rhealstone benchmark proposed by Kar.
+	Some extensions to measure boot time and detailed interrupt handling were made.
+	Further, the underlying test hardware platform is introduced.
+	\item
+	The fourth chapter contains the results of the test which were described in chapter three.
+	Further, a comparison and interpretation of these results is given.
+	One important result is the maximum interrupt latency under network load.
+	Moreover, the complex implementation of the Linux POSIX \ac{API} is clearly shown in the results.
+	This enables concrete optimization of sources which have strong impact on the system behavior.	
+	The results obtained give the possibility to compare different synchronization methods, tune the performance of an application and estimate whether an \ac{OS} is suitable for a specific task or not.
+\end{itemize}
+
+The goal of this work was to make a comparison between the two operation systems LinuxRT and FreeRTOS. 
+The difficulty of this task is the big difference between those two operation system and to justify such a comparison.
+FreeRTOS is a light-weight system with a low memory footprint which is certifiable, very fast and predictive. 
+Jitter from the \ac{OS} is barely available. 
+The drawback is that any change in the applications includes recompilation and reprogramming of the hardware.
+Moreover, every driver and its handling has to be implemented manually if needed.
+LinuxRT supports lots of drivers and is convenient for application design, but the complexity of the system has a high impact on its real-time capability.
+This work uses the Rhealstone method to create a benchmark suite and to obtain the possibilities and limitations of the two \acp{OS}.
+

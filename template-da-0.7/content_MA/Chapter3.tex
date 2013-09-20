@@ -480,23 +480,27 @@ In the final right column, the factor between the mean FreeRTOS and mean LinuxRT
 				\hline 
 				Task Switching											& 238 ns	 	 & 1.6 \%		 		 & 1.46 us	  & 9.0 \%			&	6.1	 \\
 			  \hline
-			  Semaphore single									  & 257 ns		 & 5.9 \%  			 & 252 ns		  &	46 \% 			&	0.98 \\
+			  Semaphore single									  & 257 ns		 & 5.9 \%  			 & 252 ns		  &	46 \% 			&	0.98  \\
 			  \hline 
-			  Semaphore Shuffling 								& 1.912 us 	 & 1.64 \% 			 & 6.342 us  	&	4.51 \%			&	3.32 \\ 
+			  Semaphore Shuffling 								& 1.912 us 	 & 1.64 \% 			 & 6.342 us  	&	4.51 \%			&	3.32  \\ 
 			  \hline
-			  Event Signaling											& 846 ns		 & 0.47 \% 			 & 2.544 us		& 7.09 \%			&	3.01 \\
+			  Event Signaling											& 846 ns		 & 0.47 \% 			 & 2.544 us		& 7.09 \%			&	3.01  \\
 			  \hline
-			  Message Passing											& 901 ns		 & 2.76 \% 			 & 5.135 us		& 5.22 \%			&	5.7  \\
+			  Message Passing											& 901 ns		 & 2.76 \% 			 & 5.135 us		& 5.22 \%			&	5.7   \\
 			  \hline
-			  Deadlock Breaking										& 2.113 us	 & 1.63 \% 			 & 20.68 us		& 3.11 \%			&	9.79 \\
+			  Deadlock Breaking										& 2.113 us	 & 1.63 \% 			 & 20.68 us		& 3.11 \%			&	9.79  \\
 			  \hline
-			  Interrupt Latency (fast)						& 727.71 ns	 & 0.66 \% 			 & 1.812 us		& 22.90 \%		&	2.49 \\
+			  Interrupt Latency (fast)						& 727.71 ns	 & 0.66 \% 			 & 1.812 us		& 22.90 \%		&	2.49  \\
 			  \hline
 			  Interrupt Latency (user), RT				& 933.66 ns	 & 4.39 \% 			 & 23.527 us  & 6.92 \%			&	25.19 \\
 			  %\hline
 			  Linux mainline kernel								& 					 &  			 			 & 12.350 us	& 10.12 \%		&	13.23 \\
 			  \hline
-			  Preemption													& 2.111 us	 & 3.55 \% 			 & 15.370 us	& 59.66 \%		&	7.28 \\
+			  Preemption													& 2.111 us	 & 3.55 \% 			 & 15.370 us	& 59.66 \%		&	7.28  \\
+			  \hline
+			  \hline
+			  Boot Time											&  \multicolumn{2}{|c|}{1.1 s} & 	\multicolumn{2}{|c|}{9 s (RW)} & 8.18 \\ 
+			  		 													& &  \multicolumn{2}{|c|}{} 	 & 	\multicolumn{2}{|c|}{5.5 s (RO)} & 5 \\ 
 			\hline
 		\end{tabular}
 	\caption{Result summary for the benchmarks}
@@ -516,6 +520,7 @@ The worst-case time of 4 us without additional interrupt load is very fast and b
 Obviously, the maximum latency of the application $t_{app}$ has to be considered as well.
 \par
 Besides the interrupt handling, the other Rhealstone benchmarks give an idea about the overall performance of LinuxRT compared to FreeRTOS and correspond to $t_{os}$. 
+The performance of an application can be estimated by calculating $t_{det}$ for the given algorithm.
 Especially task switching, message passing and deadlock breaking causes large delays in LinuxRT.
 Applications with a high number of tasks and many task switches suffer from slow context switching in Linux. 
 This is a point where optimization could increase performance as Linux and FreeRTOS are using the same scheduling algorithm for real-time tasks.  
@@ -532,6 +537,11 @@ Further, it was shown that event signaling is twice as fast than message passing
 Because both methods implement similar functions, it is faster to use event signaling and shared memory between two threads than passing messages.
 In FreeRTOS, the related \acp{API} calls perform almost the same.
 This shows the correctness of the results as the semaphore implementation in FreeRTOS is completely based on message queues.
+\par
+LinuxRT further has a large boot time compared to FreeRTOS. 
+Still, 5.5 us is acceptable for most real-time applications if it is possible to run the file system in read-only mode.
+An option is to boot the \ac{OS} in read-write mode only when diagnostics or system updates have to be done.
+The disadvantage of this method is that software cannot be update on-the-fly, but in real-time systems updates should not be made while the system is running anyway.
 \par
 Besides the application design, the system has to be set up carefully to minimize $t_{jitter}$. 
 It is naive to assume, a complex \ac{OS} like LinuxRT would work for real-time applications without being tuned or without restrictions although this would the most desirable situation.
@@ -556,7 +566,7 @@ Under certain conditions, LinuxRT is a promising candidate for soft real-time.
 Yet, the hard real-time systems usually needs certification what is the main drawback of LinuxRT. 
 Further, the memory footprint might be too large for certain hardware platforms. 
 Still, it is worth trying whether an operation system like LinuxRT can meet the demands of a certain application.
-The advantages are still overwhelming: Driver support for a wide range of hardware platforms, a large community, portability between different platforms and application maintenance independent of the \ac{OS}.  
+The advantages are still overwhelming: Driver support for a wide range of hardware platforms, a large community, portability between different platforms, advanced synchronization features and application maintenance independent of the \ac{OS}.  
 
 %\subsection{Single Mutex Results}
 
