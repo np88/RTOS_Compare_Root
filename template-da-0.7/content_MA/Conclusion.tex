@@ -44,6 +44,15 @@ It shows the risks and limitations of LinuxRT but also its possibilities: It is 
 The benchmarks provide a solid base to compare operation systems.
 Yet, there are always possibilities to enhance and extend the functionality.
 
+\subsubsection{System Setup}
+As already mentioned (see chapter \ref{s_summary}), the system setup used in this work can be changed.
+One special case to consider is the multicore support of both systems.
+A big drawback of FreeRTOS is that there does not exist an official version which supports multiple \acp{CPU}.
+Nevertheless, some effort has been made in this domain \cite{mistry:affmaer}.
+As Linux supports this feature in its kernel configuration, it can be used during system design.
+For example, non-critical interrupts can be handled by only one specific \ac{CPU} and the real-time tasks can run on another one.
+This is often done when the underlying hardware resources are available. 
+
 \subsubsection{Periodic Timers}
 One important aspect for real-time system which was not handled in this work is the implementation of periodic tasks.
 As the name suggests, these tasks are scheduled periodically by the operation system.
@@ -62,15 +71,6 @@ This function is available in both operation systems.
 Further, the Linux developers have released kernel 3.10 which provides a first step to (nearly) full tickless mode \cite{corbet:nftoi}.
 This means not only stopping the timer tick when the system is idle but removing the tick almost completely. 
 Doing this is a big step towards saving power and as well a huge step towards removing the largest component of $t_{jitter}$ from the system.
-
-\subsubsection{System Setup}
-As already mentioned (see chapter \ref{s_summary}), the system setup used in this work can be changed.
-One special case to consider is the multicore support of both systems.
-A big drawback of FreeRTOS is that there does not exist an official version which supports multiple \acp{CPU}.
-Nevertheless, some effort has been made in this domain \cite{mistry:affmaer}.
-As Linux supports this feature in its kernel configuration, it can be used during system design.
-For example, non-critical interrupts can be handled by only one specific \ac{CPU} and the real-time tasks can run on another one.
-This is often done when the underlying hardware resources are available. 
 
 \subsubsection{Light-weight APIs}
 An obvious result from the experiments was the inefficiency of the POSIX \ac{API} compared to the FreeRTOS \ac{API}.
