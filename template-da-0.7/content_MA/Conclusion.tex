@@ -1,5 +1,5 @@
 \chapter{Concluding Remarks}\label{ch_conclusion}
-Concluding, the first part of this chapter gives a brief summary of the development process[Wort] in this work.
+Concluding, the first part of this chapter gives a brief summary of this work.
 The second part introduces possibilities of future work and extensions.
 
 \section{Summary and Reflection}   
@@ -23,7 +23,7 @@ In the following, the main parts of this thesis are summarized:
 	The fourth chapter contains the results of the test which were described in chapter three.
 	Further, a comparison and interpretation of these results is given.
 	One important result is the maximum interrupt latency under network load.
-	Moreover, the complex implementation of the Linux POSIX \ac{API} is clearly shown in the results.
+	Moreover, the complexity of the Linux POSIX \ac{API} is clearly shown in the results.
 	This enables concrete optimization of sources which have strong impact on the system behavior.	
 	The results obtained give the possibility to compare different synchronization methods, tune the performance of an application and estimate whether an \ac{OS} is suitable for a specific task or not.
 \end{itemize}
@@ -32,11 +32,11 @@ The goal of this work was to make a comparison between the two operation systems
 The difficulty of this task is the big difference between those two operation system and to justify such a comparison.
 FreeRTOS is a light-weight system with a low memory footprint which is certifiable, very fast and predictive. 
 Jitter from the \ac{OS} is barely available. 
-The drawback is that any change in the applications includes recompilation and reprogramming of the hardware.
+The drawback is that any change in an application includes recompilation and reprogramming of the hardware.
 Moreover, every driver and its handling has to be implemented manually if needed.
 LinuxRT supports lots of drivers and is convenient for application design, but the complexity of the system has a high impact on its real-time capability.
 This work uses the Rhealstone method to create a benchmark suite and to obtain the possibilities and limitations of the two \acp{OS}.
-With minor modifications, the test programs can also be run on different hardware platforms and be used to compare  them.
+With minor modifications, the test programs can also be run on different hardware platforms and used to compare  them.
 The result of this work is not a concrete answer to the question when to utilize which operation system but a guideline.
 It shows the risks and limitations of LinuxRT but also its possibilities: It is up to the right configuration. 
 
@@ -49,36 +49,33 @@ As already mentioned (see chapter \ref{s_summary}), the system setup used in thi
 One special case to consider is the multicore support of both systems.
 A big drawback of FreeRTOS is that there does not exist an official version which supports multiple \acp{CPU}.
 Nevertheless, some effort has been made in this domain \cite{mistry:affmaer}.
-As Linux supports this feature in its kernel configuration, it can be used during system design.
-For example, non-critical interrupts can be handled by only one specific \ac{CPU} and the real-time tasks can run on another one.
+As Linux supports this feature in its kernel configuration, it can be exploited during system design.
+For example, non-critical interrupts can be handled by only one specific \ac{CPU} and the real-time tasks can run on different one.
 This is often done when the underlying hardware resources are available. 
 
 \subsubsection{Periodic Timers}
 One important aspect for real-time system which was not handled in this work is the implementation of periodic tasks.
-As the name suggests, these tasks are scheduled periodically by the operation system.
+As the name suggests, these tasks are scheduled periodically by the operating system.
 Depending on their function, some tasks may need different periods to execute their work.
-Therefore, it is important to investigate whether the \ac{OS} provides a timer function and how accurate the timer works.
+Therefore, it is important to investigate whether the \ac{OS} provides a timer function and its accuracy.
 At the current time, both FreeRTOS and LinuxRT provide a timer function.
 In FreeRTOS, the time resolution depends on the tick interval of the system.
 The Linux kernel provides high-resolution timers independent of the timer tick.
 
 \subsubsection{Power Consumption}
 Power consumption may not obviously seem to be related to the operation system but more to the underlying hardware platform.
-Still, the \ac{OS} can provide functions to control this hardware and for example put a device into sleep mode or to reduce the \ac{CPU} frequency.
+Still, the \ac{OS} can provide functions to control this hardware and, for instance, put a device into sleep mode or to reduce the \ac{CPU} frequency.
 Especially Linux provides a lot of kernel configurations to enable and disable power saving modes.
 Another way to save power is to put the kernel into a tickless mode which was discussed previously \ref{ss_timer_tick}.
 This function is available in both operation systems.
-Further, the Linux developers have released kernel 3.10 which provides a first step to (nearly) full tickless mode \cite{corbet:nftoi}.
+Going one step further, the Linux developers have released kernel 3.10 which provides a first version of a (nearly) full tickless mode \cite{corbet:nftoi}.
 This means not only stopping the timer tick when the system is idle but removing the tick almost completely. 
 Doing this is a big step towards saving power and as well a huge step towards removing the largest component of $t_{jitter}$ from the system.
 
 \subsubsection{Light-weight APIs}
 An obvious result from the experiments was the inefficiency of the POSIX \ac{API} compared to the FreeRTOS \ac{API}.
-This does not only relate to more nested function calls but also to the amount of functions this \ac{API} provide.
+This is not only related to more nested function calls but also to the amount of configurations this \ac{API} provide.
 It is worth investigating how much of this functionality is really necessary.
 Linux' performance is up to nine times slower for \ac{API} calls than the one FreeRTOS, six times if the application can be considered free of priority inversion.
-An obvious solution to this problem is the implementation of a light-weight \ac{API} for real-time applications which provides less functionalities.
-Instead, the overall performance would increase and make the operation system more attractive compared to its competitors.
-
-
-
+An obvious solution to this problem is the implementation of a light-weight \ac{API} for real-time applications which provides less configuration options.
+Consequently, the operation system would become more attractive in terms of performance compared to its competitors.
