@@ -10,27 +10,32 @@ Still, there was no operating system.
 The next computer generation arose with the development of the transistor in the mid-1950s.
 For the first time, a program was written down in FORTRAN or assembler, then punched in cards and processed by a computer, all developed by IBM. 
 To optimize the process, multiple jobs were recorded on a tape and processed together by the ``ancestor of today's operating system'' \cite{tanenbaum:mos} which was developed concurrently.
+With the introduction of \acp{IC}, IBM developed its 360 series.
+This series ranged from less powerful and cheaper machines to more powerful and expensive ones.
+New was the idea to use the same architecture and instruction set on all machines, what means that the \ac{OS} can run on all machines as well.
+Further, the time sharing principle for multiple users was invented later on.
+This and the boom of minicomputers influenced the development of the UNIX operating system.
+From the early eighties and the introduction of \ac{LSI} circuits, the development of the personal computer dominated and \textit{General Purpose \acp{OS}} like \ac{DOS} and later MicroSoft Windows, Apple's \ac{MAC} and Linux became popular until today. 
 
-
-
-
-
-
-\par
-Nowadays, electrical systems have grown so complex that they are usually managed by \acp{OS}. 
+\section{Why Operating Systems?}
 An operating system is a software program which provides access to the underlying hardware. 
 Its purpose is to manage hardware resources - for example \ac{CPU} time, memory or \ac{I/O} access - as well as system and user processes efficiently. 
+The \ac{OS} decides, when a process is allowed to run and access the resources.
+Further, \acp{OS} provide synchronization features for task management, for instance semaphores or message passing.
+Many \acp{OS} also inherit a set of drivers for different hardware platforms.
+This shortens the development process of a new product and therefore the time-to-market.
 Depending on the application there are different kinds of \acp{OS}. 
-In \textit{General Purpose \acp{OS}} like Windows, \ac{MAC} OS or Linux, the main goal is to maintain fairness between different users or processes. 
+In General Purpose \acp{OS} the main goal is to maintain fairness between different users or processes. 
 Consequently, every user or process should get an equal time slice of the available \ac{CPU} time or other shared resources like \ac{RAM}. 
 \acp{OS} are also used in embedded systems. 
 In contrast to General Purpose \acp{OS}, operation systems for embedded devices often have to run under special conditions, e.g. limited memory size or low power consumption. 
+Some examples are embedded Linux, FreeRTOS or $\mu$COS.
 
-\section{Real-Time Systems}
+\subsection{Real-Time Systems}
 A special kind of embedded systems are \acp{RTOS} which are designed to meet specific deadlines. 
-The main property of an \ac{RTOS} is determinism (and not necessarily high-speed performance). 
-%Such \ac{RTOS} are mainly used for security applications. 
-Real-time systems are divided into two main classes, depending of the consequence caused by missing a deadline:
+The main property of an \ac{RTOS} is determinism (and not necessarily high-speed performance).  
+Further, real-time does not mean that the system is safety critical as this usually implies more safety arrangements, for instance redundancy.
+Real-time systems are commonly divided into two classes \cite{stromblad:elfrtoemd}, depending of the consequence caused by missing a deadline:
 \begin{itemize}
 	\item Hard
 	%\item Firm
@@ -45,9 +50,15 @@ More applications can be found in medical systems or industry processing control
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
 These kind of systems are usually used for application with a continuous data flow like multimedia streaming applications or on-line reservation systems.
 Missing of one data packet in these application may cause noise in a video conference but no lives would be harmed.
-\par
-The class of a system always depends on the application. 
-To meet the given requirements, the underlying hardware and - often - an \ac{OS} have to be chosen appropriately. 
+\subsection{How to choose?}
+The class of a system always depends on its application. 
+To meet the given requirements, the underlying hardware and - often - an \ac{OS} have to be chosen appropriately.
+%Some microcontrollers do not even have enough memory to support a light-weight \ac{OS}.
+%In that case the application has to run as a \textit{bare-metal application}.
+Assuming that the hardware allows to run more than a light-weight \ac{OS}, the choice of the operating system always depends on the real-time requirements of the system.
+Systems which have to provide hard real-time usually must be verified and certified.
+Verification means that each state of the system must be well defined and every change of input leads to a determined state as well. 
+ 
 In embedded systems, Linux is widely used because it is free of charge, has a large community and therefore a high level of support. 
 Moreover, it is comfortable to use as it embeds features like a command terminal, flexible module integration and a large number of available hardware drivers. 
 Yet, resulting from its complexity, the downside of Linux is still the lack of real-time capability. 
@@ -74,7 +85,7 @@ It is supported on many platforms, is freely available and already used in diffe
 Therefore, it is a good candidate to be used as reference.  
 The next point to consider is how \acp{OS} can be compared to each other.
  
-\section{Benchmarking of RTOS}
+\subsection{Benchmarking of RTOS}
 There are quite many criteria which can be applied to benchmark \acp{OS}.
 For \ac{RTOS}, obviously, it is most important to consider features typically used in real-time applications.
 Those are mainly task synchronization features, e.g. semaphores, message queues or signals.
