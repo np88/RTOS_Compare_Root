@@ -50,28 +50,42 @@ More applications can be found in medical systems or industry processing control
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
 These kind of systems are usually used for application with a continuous data flow like multimedia streaming applications or on-line reservation systems.
 Missing of one data packet in these application may cause noise in a video conference but no lives would be harmed.
-\subsection{How to choose?}
-The class of a system always depends on its application. 
-To meet the given requirements, the underlying hardware and - often - an \ac{OS} have to be chosen appropriately.
-%Some microcontrollers do not even have enough memory to support a light-weight \ac{OS}.
-%In that case the application has to run as a \textit{bare-metal application}.
-Assuming that the hardware allows to run more than a light-weight \ac{OS}, the choice of the operating system always depends on the real-time requirements of the system.
-Systems which have to provide hard real-time usually must be verified and certified.
-Verification means that each state of the system must be well defined and every change of input leads to a determined state as well. 
- 
+
+\subsection{How to choose the right OS?}
+The class of a system always depends on its application. To meet the given requirements,
+the underlying hardware and - often - an OS have to be chosen appropriately. 
+Assuming that the hardware is capable of running more than a light-weight OS, the choice of the operating
+system always depends on the real-time requirements of the system. 
+Systems which have to provide hard real-time usually must be verified and certified. 
+Verification means that each state of the system must be well defined and every change of input leads to a
+determined state as well.
+Soft real-time does usually not require that kind of verification, but the timings should be reliable. 
 In embedded systems, Linux is widely used because it is free of charge, has a large community and therefore a high level of support. 
-Moreover, it is comfortable to use as it embeds features like a command terminal, flexible module integration and a large number of available hardware drivers. 
-Yet, resulting from its complexity, the downside of Linux is still the lack of real-time capability. 
-Although extensions like \textit{\ac{RTAI}} \cite{rtai}, \textit{Xenomai} \cite{xenomai}, the \textit{PREEMPT\_RT} patch and many commercial Linux distribution exist, reliability of the system is hard to proof. 
+Moreover, it is comfortable to use as it embeds features like a command terminal, flexible module integration and a large number of available hardware drivers.
+Yet, resulting from its structure and complexity, the downside of mainline Linux is still the lack of real-time capability.
+\par
 To achieve hard real-time performance, usually special \acp{OS} are used. 
 Those can be based on a real-time kernel design or light-weight \acp{OS} like for example \textit{$\mu$COS} \cite{micrium:microcos} or \textit{FreeRTOS} \cite{freertos}.
 They have very small memory footprint, fast boot time and no background services (deamons) which could unexpectedly disturb the execution of real-time tasks. 
-Therefore the execution time of tasks or the interrupt latency are highly predictable.
-The jitter (variance of latencies) is very low compared to a system like Linux. 
-The disadvantage of these systems is that every change in the underlying hardware requires a reconfiguration of the \ac{OS}.
-Furthermore, a high-level communication with the system is not provided and has to be implemented if needed.  
+Therefore the execution time of tasks and interrupt processing is highly predictable.
+The jitter (variance of execution time) is very low compared to a general purpose \ac{OS}.
+Yet, those systems have multiple disadvantages:
+In light-weight \acp{OS}, every change in the underlying hardware requires a reconfiguration of the OS.
+Furthermore, a high-level communication (e.g. terminal) with the system is not provided and has to be implemented if needed. 
+Another solution is one of the hard real-time extensions for Linux like \textit{\ac{RTAI}} (based on a micro kernel) \cite{rtai} or \textit{Xenomai} (real-time development framework) \cite{xenomai}.
+Further, companies like ENEA \cite{stromblad:elfrtoemd} make an effort to improve the real-time performance of their proprietary ENEA Linux.  
+A hard real-time \ac{OS} is PikeOS \cite{sysgo:prt} which was developed by \textit{SYSGO Embedded Systems} and is not related to Linux.
+
+\subsubsection{The preferred RTOS}
+Obviously, the operating systems described above are not the optimum choice for developers. 
+But what is actually the optimum with time considered the most valuable resource?
+A system which provides all necessary drivers, requires as low configuration and modification as possible and can guarantee the right level of real-time capability. 
+Further, it should be free of charge and have a high level of support.
+This sounds rather impossible. 
+All of the systems are either proprietary and therefore not free of charge for development, light-weight systems which do not provide any drivers or  
+
+
 Consequently, an \ac{OS} which can provide deterministic timing as well as the convenience of a more advanced system is desirable.  
-\par
 To make the right choice regarding an \ac{OS}, it is necessary to know how exactly the given systems differ in performance. 
 Obviously, a Linux-based system will have higher latencies and jitter. 
 Still, recently especially the Linux PREEMT\_RT patch (further: \textit{LinuxRT}) was improved a lot in the matter of predictability and is easy to apply to an existing Linux distribution. 
