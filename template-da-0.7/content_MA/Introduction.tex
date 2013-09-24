@@ -3,8 +3,25 @@ It is hard to imagine that the history of modern digital computers began in the 
 The English mathematician Charles Babbage (1792-1871) designed his \textit{analytical engine} which was purely mechanical. 
 He never got it working though because it was not possible to produce the high precision components that he needed.  Obviously, he did not need an operating system for his analytical machine.
 During some of his work, he cooperated with Ada Lovelace who wrote an algorithm for this machine to calculate Bernoulli numbers in 1843 \cite{toole:ateon} and therefore is considered the first programmer.
-\par
-Not until 100 years later, Zuse, von Neumann and others succeeded to build calculating engines. 
+
+\begin{figure}[htb]
+	\begin{minipage}[ht]{7.5cm}
+		\begin{center}
+		\includegraphics[scale=1.1]{inputs/pictures_intro/z3}
+		\caption[Z3, constructed by Konrad Zuse in 1941]{Z3, constructed by Konrad Zuse in 1941 \cite{uh:kz}} 		\label{fig_z3}
+		\end{center}
+	\end{minipage}
+	\hspace{0.5cm}
+	\begin{minipage}[ht]{7.5cm}
+		\begin{center}
+		\includegraphics[scale=0.9]{inputs/pictures_intro/zynq}
+		\caption[Zynq All Programmable SoC from Xilinx (2012)]{Zynq All Programmable SoC from Xilinx (2012) \cite{maxfield:xtzapstg}} \label{fig_zynq}
+		\end{center}
+	\end{minipage}
+\end{figure}  
+
+
+Not until 100 years later, Zuse, von Neumann and others succeeded to build calculating engines (fig. \ref{fig_z3}). 
 Those machines were made of relays and later vacuum tubes, the programming was realized via plugboards and then punched cards.
 Still, there was no operating system.
 The next computer generation arose with the development of the transistor in the mid-1950s.
@@ -16,6 +33,7 @@ New was the idea to use the same architecture and instruction set on all machine
 Further, the time sharing principle for multiple users was invented later on.
 This and the boom of minicomputers influenced the development of the UNIX operating system.
 From the early eighties and the introduction of \ac{LSI} circuits, the development of the personal computer dominated and \textit{General Purpose \acp{OS}} like \ac{DOS} and later MicroSoft Windows, Apple's \ac{MAC} and Linux became popular until today. 
+Nowadays, very large scale integration circuits allow millions of transistors on one die (fig. \ref{fig_zynq}). 
 
 \section{Why Operating Systems?}
 An operating system is a software program which provides access to the underlying hardware. 
@@ -49,11 +67,11 @@ In hard real-time systems, missing a deadline causes system failure and is not t
 An example is the engine control system of a car which can be damaged or cause an accident because of delayed signals.
 Another example is the release of an airbag in a car. 
 It has to be triggered immediately when a crash happens, any delay could cause the loss of lives. 
-More applications can be found in medical systems or industry processing control.  
+More applications are found in medical systems or industry processing control.  
 %In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
 These kind of systems are usually used for application with a continuous data flow like multimedia streaming applications or on-line reservation systems.
-Missing of one data packet in these application may cause noise in a video conference but no lives would be harmed.
+Missing data packets in these application may cause noise in a video conference but harm of lives.
 
 \subsection{How to choose the right OS?}
 The class of a system always depends on its application. To meet the given requirements,
@@ -111,7 +129,7 @@ It is supported on many platforms, is freely available and already used in diffe
 Therefore, it is a good candidate to be used as reference.  
 The next point to consider is how to benchmark the \acp{OS}.
  
-\subsection{Benchmarking of RTOS}
+\subsection{Benchmarking RTOSes}
 There are quite many criteria which can be applied to benchmark \acp{OS}.
 Typical metrics are latency and jitter - the variance of latencies.
 For \ac{RTOS}, obviously, it is most important to consider features typically used in real-time applications.
@@ -137,7 +155,7 @@ The first attempt to developing a real-time benchmark was by Kar and Porter in 1
 This benchmark is based on six parameters (for details refer to \ref{ss_rhealstone_benchmark_for_deterministic_application_latency}) the resulting value is calculated from.
 The Rhealstone Performance Number is a weighted mean of all parameters. 
 They implemented the benchmark under iRMX.
-Recently, Timothy J. Boger applied the Rhealstone Benchmark to FreeRTOS on the zc702 Evaluation platform \cite{boger:rbofatxzepp}.
+Recently, Timothy J. Boger applied the Rhealstone Benchmark to FreeRTOS on the ZC702 Evaluation platform \cite{boger:rbofatxzepp}.
 His work does not contain measurements on the interrupt latency, though.
 \par
 Another comparison of operating systems was performed for a set of \ac{OS} suitable for small microcontrollers \cite{Anh:sapeortosfsm}. 
@@ -153,22 +171,27 @@ In both works, a sample program is run solely, with CPU and I/O load.
 Whereas in \cite{cereia:peoaemulatrp} the focus is mainly on the effect of real-time priorities, in \cite{betz:eeotlrpfrta} different period lengths and multi-processor effects are also investigated. 
 The results show a significant reduction in jitter when using LinuxRT.
 \par
-
+Although some investigation has already been done on LinuxRT, only few works deal with interrupt processing of the \ac{OS}.
+The complete Rhealstone benchmark has neither been implemented for LinuxRT nor for FreeRTOS.
+Generally, there is little work available on FreeRTOS.
 
 \section{Contribution}
-In this work, a guideline on the choice of an operating system for specific use cases is presented.
+This work presents deeper investigation on LinuxRT and FreeRTOS based on the Rhealstone benchmark.
+The goal is to provide a guideline on the choice of an operating system for specific use cases.
 Therefore, a set of benchmarks is defined based on the Rhealstone benchmark proposed by Kar and Porter \cite{kar:itrb} \cite{kar:artbp}. 
-These benchmark metrics are extended by the boot time and a detailed investigation on interrupt latency.
-A detailed instruction on how to implement the benchmark is provided.
-Further, a model is introduced on how to calculate OS latency from the obtained benchmark metrics. 
-A special focus is put on the operating systems LinuxRT and FreeRTOS. 
-FreeRTOS is the most important light-weight \ac{RTOS} nowadays.
-As there is a large interest in using more comfortable \ac{OS} like Linux, the goal is to clearly define the limits of LinuxRT.
-Moreover, the sources of OS jitter shall be detected and reduced as far as possible. 
-The optimum result is a LinuxRT configuration with comparable benchmark results as FreeRTOS. 
-
+These benchmark metrics are extended by the boot time and a detailed investigation on interrupt latency under load and idle condition and compared to the mainline kernel.
+They are implemented for both \acp{OS} on the ZC702 evaluation board which inherits a Zynq chip. 
+Instructions on how to implement the benchmarks are provided, so the tests can be performed for different \acp{OS} as well.
+Alternatively, the given sources can be used to benchmark different platforms after little modification.
+Further, a model is introduced on how to calculate OS latency from the obtained results. 
+It suggests how to detect and reduce the sources of OS jitter as much as possible. 
+The results show that the LinuxRT kernel performs well in terms of interrupt latency even with load for soft real-time requirements.
+Moreover, the benchmark results expose weaknesses in the Linux POSIX compliant \ac{API} which can be considered during application design. 
+%FreeRTOS is one of the most important light-weight \ac{RTOS} nowadays.
+%As there is a large interest in using more comfortable \acp{OS} like Linux, the goal is to clearly define the limits of LinuxRT.
+%The optimum result is a LinuxRT configuration with comparable benchmark results as FreeRTOS. 
 \par
-The remainder of the work is organized as follows. In chapter \ref{ch_background}, a detailed background on the topic is provided. 
-Chapter \ref{ch_measurements} describes the performed measurements in detail. 
+The remainder of the work is organized as follows. In chapter \ref{ch_background}, a detailed background on operating systems is provided. 
+Chapter \ref{ch_measurements} describes the performed algorithms and measurements in detail. 
 Further, in chapter \ref{ch_results} the results of the measurements are presented. 
-In the last chapter \ref{ch_conclusion} the contribution of this work is summarized.
+In the last chapter \ref{ch_conclusion} the contribution of this work is summarized and an outlook on future work is given.
