@@ -19,6 +19,10 @@ From the early eighties and the introduction of \ac{LSI} circuits, the developme
 
 \section{Why Operating Systems?}
 An operating system is a software program which provides access to the underlying hardware. 
+It depends on the hardware setup and the application whether \ac{OS} is needed or not.
+For simple \ac{I/O} control, e.g. running different color LED lights, no \ac{OS} is required.
+Such an application might not even have enough memory to host an \ac{OS}.
+\acp{OS} are useful when it comes to managing multiple, more complicated tasks and user \ac{I/O}, for instance in typical general purpose \acp{OS} like MicroSoft Windows.
 Its purpose is to manage hardware resources - for example \ac{CPU} time, memory or \ac{I/O} access - as well as system and user processes efficiently. 
 The \ac{OS} decides, when a process is allowed to run and access the resources.
 Further, \acp{OS} provide synchronization features for task management, for instance semaphores or message passing.
@@ -76,7 +80,7 @@ Another solution is one of the hard real-time extensions for Linux like \textit{
 Further, companies like ENEA \cite{stromblad:elfrtoemd} make an effort to improve the real-time performance of their proprietary ENEA Linux.  
 A hard real-time \ac{OS} is PikeOS \cite{sysgo:prt} which was developed by \textit{SYSGO Embedded Systems} and is not related to Linux.
 
-\subsubsection{The preferred RTOS}
+\subsection{The preferred RTOS}
 Obviously, the operating systems described above are not the optimum choice for developers. 
 But what is actually the optimum with time considered the most valuable resource?
 A system which provides all necessary drivers, requires as low configuration and modification as possible and can guarantee the right level of real-time capability. 
@@ -103,24 +107,24 @@ The results will not only show the total performance of the \ac{OS} but also bot
 The guideline should show when is is safe to utilize LinuxRT and when it is inevitable to use a light-weight \ac{OS};
 There are multiple \acp{RTOS} which could be used for a comparison. 
 One operating system which became very popular in the last years is FreeRTOS.
-
-
-In the past decade, FreeRTOS has grown to be a popular \ac{RTOS} solution.
-It is supported on many platforms, is freely available and already used in different market sectors, for example toys, aircraft navigation or engine control. 
+It is supported on many platforms, is freely available and already used in different market sectors, for example toys, aircraft navigation or engine control \cite{freertos}. 
 Therefore, it is a good candidate to be used as reference.  
-The next point to consider is how \acp{OS} can be compared to each other.
+The next point to consider is how to benchmark the \acp{OS}.
  
 \subsection{Benchmarking of RTOS}
 There are quite many criteria which can be applied to benchmark \acp{OS}.
+Typical metrics are latency and jitter - the variance of latencies.
 For \ac{RTOS}, obviously, it is most important to consider features typically used in real-time applications.
 Those are mainly task synchronization features, e.g. semaphores, message queues or signals.
 Moreover, interrupt latency is crucial because interrupts usually wake up important tasks in \ac{RTOS}.
 Another typical application is the periodic invocation of tasks. 
-As these tasks have to be scheduled as precisely as possible, the jitter is an interesting metric.
-More key features are preemption time of tasks and deadlock breaking time.
-These two metrics indicate the capability of the system to interrupt a low priority task by a task with higher priority. 
+More key features are preemption time of tasks and priority inheritance mechanisms to resolve deadlocks.
+These two metrics indicate the capability of the system to interrupt a low priority task to run a task with higher priority. 
 Boot time can also be important in real-time systems as it is not acceptable to wait 15 seconds for the engine to run after starting the car.
-Further, some systems support memory access supervision by a \ac{MMU}.
+Further, some systems support memory access supervision by a \ac{MMU} or power saving options.
+The use of an \ac{MMU} can be especially important in safety critical systems where not allowed memory access would cause a fatal system crash.
+Power saving options play an important role in mobile devices.
+The right \ac{OS} configuration can significantly increase the run time of such devices.
 As \ac{RTOS} are usually used on embedded devices, the memory footprint is also of large interest. 
 \par
 One challenge is to choose the right criteria from the ones mentioned above. 
@@ -131,9 +135,12 @@ Therefore, a way of time measurement has to be found, which can be applied on bo
 Performance evaluation has already been done on different platforms and with different \acp{OS}. 
 The first attempt to developing a real-time benchmark was by Kar and Porter in 1989 by introducing the \textit{Rhealstone Benchmark} \cite{kar:itrb} \cite{kar:artbp}. 
 This benchmark is based on six parameters (for details refer to \ref{ss_rhealstone_benchmark_for_deterministic_application_latency}) the resulting value is calculated from.
-The Rhealstone Performance Number is a weighted mean of all parameters. They implemented the benchmark under iRMX.
+The Rhealstone Performance Number is a weighted mean of all parameters. 
+They implemented the benchmark under iRMX.
+Recently, Timothy J. Boger applied the Rhealstone Benchmark to FreeRTOS on the zc702 Evaluation platform \cite{boger:rbofatxzepp}.
+His work does not contain measurements on the interrupt latency though.
 \par
-Another and more recent comparison of operating systems was performed for a set of \ac{OS} suitable for small microcontrollers in 2009 \cite{Anh:sapeortosfsm}. 
+Another comparison of operating systems was performed for a set of \ac{OS} suitable for small microcontrollers in 2009 \cite{Anh:sapeortosfsm}. 
 In this paper, several \ac{RTOS} are introduced, but only four of them are chosen to be investigated in detail.
 The choice is based on available support, documentation, scheduling type and more. 
 For the \acp{RTOS}, algorithms on how to compare task switching, message passing, semaphore passing and memory allocation are presented.  
@@ -146,12 +153,11 @@ In both works, a sample program is run solely, with CPU and I/O load.
 Whereas in \cite{cereia:peoaemulatrp} the focus is mainly on the effect of real-time priorities, in \cite{betz:eeotlrpfrta} different period lengths and multi-processor effects are also investigated. 
 The results show a significant reduction in jitter when using LinuxRT.
 \par
-[Related work on OS jitter]
 
 \section{Contribution}
 In this work, a guideline on the choice of an operating system for specific use cases is presented.
 Therefore, a set of benchmarks is defined based on the Rhealstone benchmark proposed by Kar and Porter \cite{kar:itrb} \cite{kar:artbp}. 
-These benchmark metrics are extended by the boot time and task periodicity jitter which are crucial for many applications.
+These benchmark metrics are extended by the boot time and a detailed investigation on interrupt latency.
 A detailed instruction on how to implement the benchmark is provided.
 Further, a model is introduced on how to calculate OS latency from the obtained benchmark metrics. 
 A special focus is put on the operating systems LinuxRT and FreeRTOS. 
