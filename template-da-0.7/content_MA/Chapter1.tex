@@ -471,7 +471,7 @@ Therefore, when an interrupt occurs, a working thread in started (or resumed) in
 As default, those threads have a real-time priority (refer to \ref{ss_scheduling_in_linux}) of 50 in the current implementation.
 This mechanism allows priority based regulation of the \ac{ISR} execution because priorities of real-time tasks can be changed dynamically. 
 Moreover, the delay caused by interrupts decreases significantly for high-priority real-time tasks.
-In case an \ac{IRQ} has to be serviced immediately, there is still the possibility to set the \textit{IRQ\_NODELAY} flag on initialization.
+In case an \ac{IRQ} has to be serviced immediately, there is still the possibility to set the \textit{IRQF\_NO\_THREAD} flag on initialization.
 As a result, the \ac{ISR} will not be threaded but proceeded in the original way.
 
 \subsubsection{Softirqs}

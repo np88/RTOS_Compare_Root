@@ -138,21 +138,22 @@ This benchmark is based on six parameters (for details refer to \ref{ss_rhealsto
 The Rhealstone Performance Number is a weighted mean of all parameters. 
 They implemented the benchmark under iRMX.
 Recently, Timothy J. Boger applied the Rhealstone Benchmark to FreeRTOS on the zc702 Evaluation platform \cite{boger:rbofatxzepp}.
-His work does not contain measurements on the interrupt latency though.
+His work does not contain measurements on the interrupt latency, though.
 \par
-Another comparison of operating systems was performed for a set of \ac{OS} suitable for small microcontrollers in 2009 \cite{Anh:sapeortosfsm}. 
+Another comparison of operating systems was performed for a set of \ac{OS} suitable for small microcontrollers \cite{Anh:sapeortosfsm}. 
 In this paper, several \ac{RTOS} are introduced, but only four of them are chosen to be investigated in detail.
 The choice is based on available support, documentation, scheduling type and more. 
 For the \acp{RTOS}, algorithms on how to compare task switching, message passing, semaphore passing and memory allocation are presented.  
-In \cite{gokhan:cstamfcoxamom}, memory footprint and context switching is compared between $\mu$COS and XilKernel\footnote{XilKernel \cite{xilinx:xilkernel} is an \ac{RTOS} developed by Xilinx.} on the softcore processor Microblaze.
+In \cite{gokhan:cstamfcoxamom}, memory footprint and context switching is compared between $\mu$COS and XilKernel\footnote{XilKernel \cite{xilinx:xilkernel} is an embedded \ac{OS} developed by Xilinx.} on the softcore processor Microblaze.
 Three different \acp{OS} - Xenomai, LinuxRT and eCos \cite{ecos} - are compared in \cite{Marieska:opokbaertosbaa}.
-The performance metrics are similar to the Rhealstone benchmark.
+The performance metrics are similar to the Rhealstone benchmark not including the interrupt latency.
 Depending on the application, eCos and LinuxRT perform better than Xenomai.
 The authors of \cite{cereia:peoaemulatrp} and \cite{betz:eeotlrpfrta} evaluate the real-time performance of LinuxRT compared to standard Linux.
 In both works, a sample program is run solely, with CPU and I/O load. 
 Whereas in \cite{cereia:peoaemulatrp} the focus is mainly on the effect of real-time priorities, in \cite{betz:eeotlrpfrta} different period lengths and multi-processor effects are also investigated. 
 The results show a significant reduction in jitter when using LinuxRT.
 \par
+
 
 \section{Contribution}
 In this work, a guideline on the choice of an operating system for specific use cases is presented.
