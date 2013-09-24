@@ -1,7 +1,7 @@
 \chapter{Measurements}\label{ch_measurements}
 This chapter describes the measurements performed for benchmarking the \acp{OS} FreeRTOS and LinuxRT.
 First, the conditions under which the experiments have taken place are described.
-This includes hardware platform, time measuring technique and setup of the operation systems under test.
+This includes hardware platform, time measuring technique and setup of the operating systems under test.
 After that, every measurement is described in detail beginning with the boot time.
 The results will be discussed in a separate chapter.
 
@@ -49,7 +49,7 @@ Both systems run on one \ac{CPU} because there is no official FreeRTOS version a
 As both systems shall be as equal as possible, Linux was also configured to run on one core only.
 
 \subsection{\ac{OS} Configuration}
-The operation systems under test are FreeRTOS and LinuxRT.
+The operating systems under test are FreeRTOS and LinuxRT.
 Both need to be configured such that the implemented interrupt generator can be utilized.
 
 \subsubsection{FreeRTOS}
@@ -114,7 +114,7 @@ However, the \ac{CPU} has to keep running at the same frequency during the compl
 \subsection{Application Design}
 This section provides a short overview over the general application design and execution.
 To prevent interruption by other tasks, the real-time tasks must have the highest priority in the system.
-Usually, 100000 measurements are collected per operation system per test.
+Usually, 100000 measurements are collected per operating system per test.
 If this is not valid for a special case, it will be mentioned in the benchmark description.
 The scheduling for both systems is configured to be round robing, hence both are using a preemptive scheduling algorithm.
  
@@ -152,7 +152,7 @@ The boot time is the time from powering on the hardware until the first (user) t
 On the ZC702 Evaluation platform, this time can be measured by utilizing user \acp{LED} on the board.  
 The default state of those \acp{LED} is on.
 By turning them off in the first executed task, the exact power up time of the system can be measured.  
-As already mentioned (see \ref{ss_boot_time_general}), the boot time depends on the complexity of the operation system and the hardware. 
+As already mentioned (see \ref{ss_boot_time_general}), the boot time depends on the complexity of the operating system and the hardware. 
 Further, the evaluation board provides three different ways of booting an \ac{OS}:
 \begin{enumerate}
 	\item Via \ac{JTAG}
@@ -477,7 +477,7 @@ The detailed execution flow is described in the following:
 	\label{tab_interrupt_latency}
 \end{table}
 
-The only difference between the two operation systems is the \ac{IRQ} handling.
+The only difference between the two operating systems is the \ac{IRQ} handling.
 Table \ref{tab_interrupt_latency} shows how much time is spent when the actions are performed in the \ac{ISR} directly. 
 Yet, there is often the case that a thread is resumed from within the \ac{ISR}.
 This case should be considered as well.

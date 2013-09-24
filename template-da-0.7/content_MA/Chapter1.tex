@@ -10,7 +10,7 @@ Moreover, the causes of \ac{OS} jitter are described, especially the timer inter
 Finally, the main design features of real-time programs are discussed and the benchmarking metrics for the two \ac{OS} are introduced. 
 
 \section{The Scheduler}\label{s_scheduler}
-Every task or process created by the kernel or a user, is managed by the operation system - more precisely the scheduler. 
+Every task or process created by the kernel or a user, is managed by the operating system - more precisely the scheduler. 
 It manages the tasks and decides which task is allowed to operate next. 
 The decision is based on the priority and the current state of the task. 
 
@@ -55,7 +55,7 @@ When no high resolution timer is available, the granularity of the system time d
 As the timer tick is implemented in an \ac{ISR}, it causes latency in the system by interrupting the currently executing code. 
 Some \acp{OS} provide a configuration called \textit{Tickless kernel} (see fig. \ref{fig_tick}).
 It disables the timer interrupt at all when there is no task runnable because rescheduling is not necessary.
-%Jitter in tasks caused by the operation system is called \textit{OS jitter}.
+%Jitter in tasks caused by the operating system is called \textit{OS jitter}.
 
 \begin{figure}[htb]
 	\begin{center}
@@ -175,7 +175,7 @@ The time between an interrupt being triggered and the first instruction of the c
 Typically, only urgent operations are performed in an \ac{ISR}. 
 For less critical work, e.g. handling incoming data from a network device, an extra routine is started which can be run later.
 This mechanism is referred to as division of the interrupt management in two halves: A \textit{top half} (\ac{ISR}) and a \textit{bottom half} (deferred work).
-The implementation of the bottom half is dependent on the operation system. 
+The implementation of the bottom half is dependent on the operating system. 
 \par
 Interrupts can occur any time and are serviced immediately.
 Consequently, any code currently running will be interrupted.
@@ -201,14 +201,14 @@ This delay also referred to as jitter.
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
 There are mainly four kind of delays and one kind of latency:
 \begin{enumerate}
-	\item Delays from the Operation System
+	\item Delays from the Operating System
 	\item Delays from interrupts (fig. \ref{fig_delay})
 	\item Delays from cache misses
 	\item Latencies from task execution and synchronization
 \end{enumerate}
 Moreover, the boot time can be crucial in special real-time application.
 
-\subsection{Delays from the Operation System}
+\subsection{Delays from the Operating System}
 The obvious kind of delay which is inevitable when using an \ac{OS} is the delay caused by the \ac{OS} itself.
 The most significant (and predictable) delay is caused by the timer tick.
 More delays can be produced by background daemons and other system services. 
@@ -254,7 +254,7 @@ The delays described in this section are \ac{CPU} bound delays compared to delay
 \subsection{Boot Time}\label{ss_boot_time_general}
 The boot time can be a relevant factor for the choice of a specific \ac{OS} if the system needs to start up very fast.
 When a car is started, the driver does not want to wait 15 seconds until the ignition starts running.
-Obviously, the boot time depends on the memory print of the operation system and on the medium from which the \ac{OS} is loaded.
+Obviously, the boot time depends on the memory print of the operating system and on the medium from which the \ac{OS} is loaded.
 Another important factor is the initialization of hardware structures, e.g \ac{FPGA} designs.
 Moreover, a file system may be needed for the \ac{OS} kernel to work properly which must be loaded besides the actual kernel. 
 A boot loader is necessary to start an application or an \ac{OS}.
@@ -388,7 +388,7 @@ Further, the priority of an element can be influenced using the \textit{nice} co
 It puts a weight on the according node which will change the priority relative to the other nice values.
 
 \subsection{Interrupts in Linux}\label{ss_interrupts_in_linux}
-The interrupts in Linux are integrated into the operation system.
+The interrupts in Linux are integrated into the operating system.
 Each hardware device needs a driver to communicate with the \ac{OS}.
 This driver provides \textit{open()}, \textit{read()} or \textit{write()} functions to access the device. 
 It has to be registered before the device can be used.
@@ -484,7 +484,7 @@ This has the advantage of keeping softirqs locally tied to the raising process.
 Obviously, this does not work for softirqs raised by hardware interrupts as they are not tied to a specific process.
 Those softirqs are still handled by the ksoftirqd thread.
 
-\section{Mathematical Quantification of Operation Systems}
+\section{Mathematical Quantification of Operating Systems}
 There are many different parameters to quantify \acp{RTOS}.
 Some important ones besides real-time capability are freedom of charge, memory footprint, available drivers, licensing, \ac{API} richness and support \cite{Anh:sapeortosfsm}.   
 Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates for the application in future projects.
@@ -608,7 +608,7 @@ Yet, there is still the possibility to remove unnecessary drivers and control th
 Cache misses depend on the hardware and cannot be controlled actively.
 The effectiveness of a cache is dependent on its size and the cache control algorithm.
 It tries to pre-fetch data by observing the system behavior and pre-calculating the next data access.
-As cache analysis is a very complex topic and does not directly apply to the analysis of operation systems, it will not be covered by this work.
+As cache analysis is a very complex topic and does not directly apply to the analysis of operating systems, it will not be covered by this work.
 Careful application design can minimize the memory foot print and therefore the number of cache misses.
 Logically, memory accesses from the \ac{OS} influence the cache behavior as well. 
 Therefore, \acp{OS} which do not make heavy use of large memory structures perform better. 
