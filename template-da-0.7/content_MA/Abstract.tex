@@ -14,6 +14,12 @@ The fast interrupt handling is particularly important for many real-time systems
 Therefore, the interrupt latency in LinuxRT is thoroughly tested in user and kernel mode, in idle state and by applying load to the system.
 Moreover, the boot time is used as an indicator.
 The results of this benchmark provide a guideline on the LinuxRT performance and give an insight on the weaknesses of the \ac{OS}.
-
+Especially the relative jitter is much higher than in FreeRTOS, the main jitter factor is the timer tick.
+Although LinuxRT can handle interrupts in kernel mode very fast, the handling in user mode is significantly slower.
+Yet, the jitter under load condition is only slightly worse than in idle mode.
+Another weakness of Linux is the POSIX priority inheritance implementation. 
+It degrades the performance significantly compared to the other benchmark values.
+Generally speaking, LinuxRT performs well for soft real-time applications, even when fast throughput is required. 
+This work shows where optimization would help to improve performance.
 
 \end{abstract}
