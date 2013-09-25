@@ -445,10 +445,10 @@ As interrupts are handled differently in the two \acp{OS}, the interrupt latency
 For this  experiment, the assumption is made that devices in real application are often connected as \acp{GPIO}.
 Therefore, the described pulse generator will be utilized.
 It has a 5ms period of which the positive pulse is 5 us and the remaining time is negative.
-The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt (see table \ref{tab_interrupt_latency}).
+The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt.
 It measures the time from the interrupt being triggered until the output of the \ac{ISR} is visible on the hardware.
 The latency in this experiment will be measured using an oscilloscope, not the \ac{CPU} clock cycle counter.
-The detailed execution flow is described in the following:
+The detailed execution flow is described in table \ref{tab_interrupt_latency}:
 
 \begin{table}[htbp]
 	\centering
@@ -481,8 +481,9 @@ The only difference between the two operating systems is the \ac{IRQ} handling.
 Table \ref{tab_interrupt_latency} shows how much time is spent when the actions are performed in the \ac{ISR} directly. 
 Yet, there is often the case that a thread is resumed from within the \ac{ISR}.
 This case should be considered as well.
-In table \ref{tab_interrupt_latency}, the entry \textit{Continuing user task} has to be added.
+In table \ref{tab_interrupt_latency}, the entry \textit{Continuing user task} has to be added to the top of the last row.
 The overhead for starting a separate task from an \ac{ISR} can be calculated from these two experiments.  
+The test is repeated 40000 times.
 %To calculate the exact interrupt latency, the time it takes to turn on the \ac{LED} has to be subtracted.
 %Consequently, this requires a further experiment:\\
 %The \ac{LED} will be toggled in a for-loop.
@@ -499,18 +500,17 @@ It is not designed to be exposed to unexpected conditions.
 \subsection{Interrupt Measurement LinuxRT}
 There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
 Dependent on the application, there is the possibility to implement the \ac{ISR} as a threaded interrupt (default in RT) or to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
-Both alternatives will be implemented.
-It is expected that the non-threaded handling is faster and more predictive.
-As this method of interrupt handling is the standard on the mainline kernel, the mainline kernel will be used to test the non-threaded interrupts.
+The threaded version is part of the kernel preemption and reduces the overall jitter on real-time applications as the threads are preemptable.
+For fast interrupt handling hard \acp{IRQ} are usually used and will be used in this experiment. 
 \par
 Interrupt service routines in Linux can only be installed in kernel modules. 
 This means that the only way to be notified of an interrupt occurrence is to perform e.g. a read command to the driver of a hardware device and be blocked until the interrupt occurs.
-It is always the easier way and therefore preferred by a developer to write a program running in user mode than an own driver.
+It is always the easier way and therefore preferred by a developer to write a program running in user mode than writing a kernel driver.
 Further, some programs might need to use the \ac{FPU} what should be avoided in kernel mode (\cite{love:lkd}).
 The \ac{FPU} registers have to be manually saved and restored inside the kernel.
 Moreover, floating point instructions are complex and decrease the runtime of the particular kernel code. 
 \par
-Further, it is part of the test to see how stable the Linux RT system works under load conditions.
+Further, it is part of the test to see how stable the LinuxRT system works under load conditions - for both kernel and user thread handling.
 Load conditions can be either \ac{CPU} bound or ac{I/O} bound. 
 \ac{CPU} bound conditions are for example many working threads running concurrently on the system.
 This can be simulated running the \textit{Stress} \cite{stress} program.
@@ -521,6 +521,7 @@ Ethernet is a good choice because it will be most likely used in real applicatio
 The load can be created by constantly transferring data to the system under test.
 This can be done for example by using the \ac{SSH} protocol \cite{tlip:tsspa}.
 To prevent the system from being overload by one large file, a small file is sent over and over again. 
+The effect of the interrupt threading only becomes visible when LinuxRT is compared to the mainline kernel, therefore the experiments will also be repeated for standard Linux.
 
 \section{Preemption Time}
 \begin{table}[htbp]
@@ -551,5 +552,6 @@ From the \ac{ISR}, the signal is triggered to wake up B, consequently, a context
 When B is activated, it measures the ending time and yields.
 This reactivates A and the test starts over (compare table \ref{tab_preemption}).
 The test is repeated 40000 times.
-For the LinuxRT test, it is important to set the priority of the \ac{ISR} between the priority of the two other tasks. 
+In Linux, the non-threaded interrupt configuration is used for this experiment. 
+
 %\section{Test program}
