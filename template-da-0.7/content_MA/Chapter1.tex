@@ -79,7 +79,7 @@ Examples for cooperative scheduling are the \textit{\ac{FIFO}} or the \textit{\a
 \ac{RR} or priority based scheduling (\ac{EDF} and \ac{SRTF}) are examples of preemptive scheduling.
 The scheduling policy is crucial for \acp{RTOS} because it determines the handling of real-time tasks.
 Obviously, real-time tasks usually have the highest priority and should not be preempted by tasks with lower priority.
-For details on scheduling in Linux and FreeRTOS refer to the corresponding sections (\ref{ss_scheduling_in_linux}) and \ref{ss_scheduling_in_freertos}.
+For details on scheduling in Linux and FreeRTOS refer to the corresponding sections (\ref{ss_scheduling_in_linux} and \ref{ss_scheduling_in_freertos}).
 
 \section{Intertask Communication and Synchronization}\label{s_intertask_communication}
 In \acp{OS} usually not only one but many different tasks are active.
@@ -288,7 +288,7 @@ In case there are multiple tasks in one list, the \ac{RR} algorithm is used to p
 	\begin{center}
 		\includegraphics[scale=0.8]{inputs/pictures_ch1/freertos_ready_queue}
 	\end{center}
-	\caption[FreeRTOS Ready queue]{FreeRTOS Ready queue} \label{fig_freertos_ready_queue}
+	\caption[FreeRTOS Ready queue]{FreeRTOS Ready queue \cite{dev:taoosa}} \label{fig_freertos_ready_queue}
 \end{figure}
 
 \subsection{Interrupts in FreeRTOS}\label{ss_interrupts_in_freertos}
@@ -355,7 +355,7 @@ General purpose tasks are using the sched\_fair class and the remaining class is
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=1]{inputs/pictures_ch1/linux_scheduling_classes}
+		\includegraphics[scale=0.65]{inputs/pictures_ch1/linux_scheduling_classes}
 	\end{center}
 	\caption[Linux scheduling classes]{Linux scheduling classes \cite{jones:itlcfss}} \label{fig_linux_scheduling_classes}
 \end{figure}
@@ -376,7 +376,7 @@ An element of the tree can be accessed in in O(log n), where n is the total numb
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=1]{inputs/pictures_ch1/linux_red_black_tree}
+		\includegraphics[scale=0.85]{inputs/pictures_ch1/linux_red_black_tree}
 	\end{center}
 	\caption[Example of an red black tree]{Example of an red black tree \cite{jones:itlcfss}} \label{fig_linux_red_black_tree}
 \end{figure}
