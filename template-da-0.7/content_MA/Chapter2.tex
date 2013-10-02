@@ -137,7 +137,7 @@ For all system calls, the FreeRTOS \ac{API} is used.
 %This function is not supported by the used port.
 
 \subsubsection{LinuxRT}\label{ss_linuxRT_application_design}
-In Linux, multi-tasking applications are realized using pthreads.
+In Linux, multi-tasking applications are realized using pthreads because inter-thread communication is more efficient than inter-process communication (compare section \ref{}).
 The development of an application should be kept as simple as possible, therefore all applications will be implemented in user space.
 All real-time threads in Linux get the highest possible priority using the preemptive \ac{RR} \ac{RT} scheduling class.
 As the parent process and its child threads are scheduled individually, the parent has to have a higher priority than the children while creating the child threads.
@@ -155,6 +155,7 @@ Daemons can be actively enabled and disabled.
 Moreover, their priority is usually below the one of real-time applications.
 Still, problems can occur when daemons are highly \ac{I/O} bound.
 The daemons available in the used Linux distribution were reduced to an \ac{SSH} and an \ac{FTP} client.
+Although they are running in the background, they are not actively disturbing the executed tests.
 By considering this, $t_{daemon}$, $ t_{swap} $ and $ t_{int} $ can be set to zero for the Linux system.
  
 \section{Boot time}\label{s_boot_time}
@@ -452,8 +453,7 @@ Now A will be scheduled and the test can run again.
 \section{Interrupt Latency}
 Interrupt latency is defined as the time which passes from triggering an interrupt until the first instruction of the interrupt service routine. 
 As interrupts are handled differently in the two \acp{OS}, the interrupt latency can be a crucial factor when fast interrupt handling is important.
-For this  experiment, the assumption is made that devices in real application are often connected as \acp{GPIO}.
-Therefore, the described pulse generator will be utilized.
+To generate interrupts, the described pulse generator will be utilized (see section \ref{s_test_environments_and_tools}).
 It has a 5ms period of which the positive pulse is 5 us and the remaining time is negative.
 The interrupt latency measured here does not correspond to the time the \ac{CPU} is actually handling the interrupt.
 It measures the time from the interrupt being triggered until the output of the \ac{ISR} is visible on the hardware.
@@ -508,9 +508,10 @@ For FreeRTOS, no experiments under load conditions are necessary because the sys
 It is not designed to be exposed to unexpected conditions. 
 
 \subsection{Interrupt Measurement LinuxRT}
-There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
-Dependent on the application, there is the possibility to implement the \ac{ISR} as a threaded interrupt (default in RT) or to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
-The threaded version is part of the kernel preemption and reduces the overall jitter on real-time applications as the threads are preemptable.
+%There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
+As already mentioned, \acp{ISR} are processed as threads in LinuxRT.
+Dependent on the application, there is also the possibility to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
+The threaded version is part of the kernel preemption and reduces the overall jitter on real-time applications as the threads are preemptive.
 For fast interrupt handling hard \acp{IRQ} are usually used and will be used in this experiment. 
 \par
 Interrupt service routines in Linux can only be installed in kernel modules. 

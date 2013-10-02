@@ -418,14 +418,16 @@ Moreover, they can be created dynamically during run time.
 The last option to defer work is to use to a work queue.
 Work queues schedule kernel threads and can sleep if necessary compared to the other two options
 
-\subsection{Synchronization Features in Linux}
+\subsection{Synchronization Features in Linux}\label{ss_sync_features_in_linux}
 Linux provides multiple \acp{API} with a variety of task synchronization features. 
 \ac{POSIX} compliant features are most common because of their compatibility across many platforms.
 \subsubsection{Processes and Pthreads}
 A program which runs in Linux is called a process. 
 Each process has an own process ID and maintains its own stack. 
 The usual way to create multi-tasking systems in Linux is by using so called \textit{pthreads}.
-pthreads are light-weight tasks which have their own stack but share the parent's virtual memory and environment.
+pthreads are light-weight processes which have their own stack but share the parent's virtual memory and environment \cite{barney:pthreads}.
+A thread can be created with less cost compared to a process.
+Moreover, inter-thread communication is more efficient and is often easier to use than inter-process communication.
 They can be prioritized and scheduled individually. 
 \subsubsection{Semaphores}
 In Linux, there are similar kind of semaphores compared to FreeRTOS.
