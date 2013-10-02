@@ -2,17 +2,24 @@
 Nowadays, operating systems can be found almost everywhere in the world of embedded systems.
 Especially \acp{RTOS} have become popular for the efficient management of hardware resources and complex user tasks.
 Dependant on the real-time requirements, it can be a challenge to choose the right \ac{OS}.
-Although light-weight \acp{OS} like FreeRTOS provide the best real-time performance, they do neither include additional hardware driver, the ability to flexibly load applications nor features for performance supervision. 
+Although light-weight \acp{OS} like FreeRTOS provide the best real-time performance, they include neither additional hardware driver, the ability to flexibly load applications nor features for performance supervision. 
+\par
 An open-source alternative is embedded Linux with RT patch (LinuxRT).
 Linux provides a large number of drivers and is already widely used in embedded systems, but due to its complexity, real-time capability is an issue. 
 Yet, as a promising candidate for real-time systems, the real-time capability of LinuxRT is benchmarked in this work.
-FreeRTOS which is considered to have a good real-time performance, is used as reference system.     
-Both operating systems are compared using tests related to the Rhealstone benchmark.
+FreeRTOS which is considered to have a good real-time performance, is used as a reference system. 
+\par
+The comparison of the \acp{OS} is done by modeling the latency of user applications.
+This latency contains a deterministic part which is set up from the application code itself and synchronization mechanisms provided by the \ac{OS}.
+The other part is set up from non-deterministic latencies like the timer tick or delays caused by system daemons.  
+Using the resulting formula, mean and worst-case latencies can be estimated.
+Parameters for this formula are obtained using tests related to the Rhealstone benchmark.
 The benchmark is set up of typical parameters which classify the behavior of \acp{RTOS}.
 These parameters are interrupt latency, task switching, the time it takes to preempt a low priority task by a high-priority task, task synchronization features (semaphores, message passing, event signaling) and the time it takes to resolve priority inversion conflicts.
 The fast interrupt handling is particularly important for many real-time systems.
 Therefore, the interrupt latency in LinuxRT is thoroughly tested in user and kernel mode, in idle state and by applying load to the system.
 Moreover, the boot time is used as an indicator.
+\par
 The results of this benchmark provide a guideline on the LinuxRT performance and give an insight on the weaknesses of the \ac{OS}.
 Especially the relative jitter is much higher than in FreeRTOS, the main jitter factor is the timer tick.
 Although LinuxRT can handle interrupts in kernel mode very fast, the handling in user mode is significantly slower.

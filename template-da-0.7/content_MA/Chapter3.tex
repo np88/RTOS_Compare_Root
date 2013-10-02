@@ -1,6 +1,6 @@
 \chapter{Results}\label{ch_results}
 In this chapter, the results from the previously described experiments are presented.
-Moreover, the indeterministic aspects of the are further investigated for both operating systems. 
+Moreover, the non-deterministic aspects of the are further investigated for both operating systems. 
 The main observation is - as expected - that LinuxRT is usually slower than FreeRTOS and has a higher jitter. 
 This is especially recognizable when the benchmarks become more complex, for example for the deadlock breaking time or for the preemption time.
 To create the same initial situation for every benchmark, the Linux operating system was rebooted every time before performing a test.
@@ -140,7 +140,7 @@ Here, FreeRTOS is 3.01 times faster than Linux.
 	\centering
 		\begin{tabular}{|l||l|l|l|}
 			\hline
-				Test 											& Single 		& Shuffle 	& Binary 	  \\
+				Test 											& Single 		& Shuffle 	& Condition Var.\\
 				\hline 
 				Mean  										& 252 ns		& 6.342 us	& 2.554 us  \\
 			  \hline
@@ -239,7 +239,7 @@ The standard deviation for this experiment is 41.01 ns (4.39 \%) and the maximum
 		\includegraphics[scale=0.5] 
 		{inputs/pictures_ch3/isr_free}
 	\end{center}
-	\caption[Interrupt latency FreeRTOS]{Interrupt latency FreeRTOS, resolution: 1 us} \label{fig_interrupt_latency_freertos}
+	\caption[Interrupt latency FreeRTOS]{Interrupt latency FreeRTOS, resolution: 500 ns} \label{fig_interrupt_latency_freertos}
 \end{figure}
 
 \subsection{Interrupt Latency Results in Linux}\label{ss_interrupt_latency_results_in_linux}
@@ -282,11 +282,11 @@ The results were recorded by an oscilloscope.
 In the figures (\ref{fig_interrupt_latency_linuxrt} - \ref{fig_interrupt_latency_linux_load}), the upper channel shows the pulse generator which triggers the interrupt.
 The lower channel shows the reaction of the \ac{OS}.  
 
-The mean value measured for the user task when using LinuxRT is 12.303 us. 
-The standard deviation is 1.349 us (10.96 \%). 
+The mean value measured for the user task when using LinuxRT is 12.921 us. 
+The standard deviation is 1.345 us (10.41 \%). 
 In figure \ref{fig_interrupt_latency_linuxrt}, the latencies for the experiment are shown.
 Evidently, there is a high jitter although no load was put on the system. 
-The maximum latency is 27.369 us. 
+The maximum latency is 28.990 us. 
 
 \begin{figure}[htb]
 	\begin{center}
@@ -493,7 +493,7 @@ In the final right column, the factor between the mean FreeRTOS and mean LinuxRT
 			  \hline
 			  Interrupt Latency (fast)						& 727.71 ns	 & 0.66 \% 			 & 1.783 us		& 24.77 \%		&	2.45  \\
 			  \hline
-			  Interrupt Latency (user)						& 933.66 ns	 & 4.39 \% 			 & 12.303 us  & 10.96 \%		&	13.18 \\
+			  Interrupt Latency (user)						& 933.66 ns	 & 4.39 \% 			 & 12.921 us  & 10.41 \%		&	13.84 \\
 			  %\hline
 			  %Linux mainline kernel								& 					 &  			 			 & 12.350 us	& 10.12 \%		&	13.23 \\
 			  \hline

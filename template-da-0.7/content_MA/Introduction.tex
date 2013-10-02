@@ -34,10 +34,11 @@ Further, the time sharing principle for multiple users was invented later on.
 This and the boom of minicomputers influenced the development of the UNIX operating system.
 From the early eighties and the introduction of \ac{LSI} circuits, the development of the personal computer dominated and \textit{General Purpose \acp{OS}} like \ac{DOS} and later MicroSoft Windows, Apple's \ac{MAC} and Linux became popular until today. 
 Nowadays, very large scale integration circuits allow millions of transistors on one die (fig. \ref{fig_zynq}). 
+A new trend is the development of special mobile \acp{OS} for portable devices like smartphones and tablet computers. 
 
-\section{Why Operating Systems?}
+\section{Purpose of Operating Systems}
 An operating system is a software program which provides access to the underlying hardware. 
-It depends on the hardware setup and the application whether \ac{OS} is needed or not.
+It depends on the hardware setup and the application whether an \ac{OS} is needed.
 For simple \ac{I/O} control, e.g. running different color LED lights, no \ac{OS} is required.
 Such an application might not even have enough memory to host an \ac{OS}.
 \acp{OS} are useful when it comes to managing multiple, more complicated tasks and user \ac{I/O}, for instance in typical general purpose \acp{OS} like MicroSoft Windows.
@@ -46,18 +47,18 @@ The \ac{OS} decides, when a process is allowed to run and access the resources.
 Further, \acp{OS} provide synchronization features for task management, for instance semaphores or message passing.
 Many \acp{OS} also inherit a set of drivers for different hardware platforms.
 This shortens the development process of a new product and therefore the time-to-market.
-Depending on the application there are different kinds of \acp{OS}. 
-In General Purpose \acp{OS} the main goal is to maintain fairness between different users or processes. 
+Depending on the application, there are different kinds of \acp{OS}. 
+In General Purpose \acp{OS}, the main goal is to maintain fairness between different users or processes. 
 Consequently, every user or process should get an equal time slice of the available \ac{CPU} time or other shared resources like \ac{RAM}. 
 \acp{OS} are also used in embedded systems. 
 In contrast to General Purpose \acp{OS}, operating systems for embedded devices often have to run under special conditions, e.g. limited memory size or low power consumption. 
 Some examples are embedded Linux, FreeRTOS or $\mu$COS.
 
 \subsection{Real-Time Systems}
-A special kind of embedded systems are \acp{RTOS} which are designed to meet specific deadlines. 
-The main property of an \ac{RTOS} is determinism (and not necessarily high-speed performance).  
+A special kind of embedded systems are \acp{RTOS} which are designed to meet specific timing requirements. 
+The main property of an \ac{RTOS} is determinism rather than high-speed performance.  
 Further, real-time does not mean that the system is safety critical as this usually implies more safety arrangements, for instance redundancy.
-Real-time systems are commonly divided into two classes \cite{stromblad:elfrtoemd}, depending of the consequence caused by missing a deadline:
+Real-time systems are commonly divided into two classes \cite{stromblad:elfrtoemd}, depending on the consequence caused by missing a deadline:
 \begin{itemize}
 	\item Hard
 	%\item Firm
@@ -70,12 +71,12 @@ It has to be triggered immediately when a crash happens, any delay could cause t
 More applications are found in medical systems or industry processing control.  
 %In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
-These kind of systems are usually used for application with a continuous data flow like multimedia streaming applications or on-line reservation systems.
-Missing data packets in these application may cause noise in a video conference but harm of lives.
+These kind of systems are usually used for applications with a continuous data flow like multimedia streaming applications or on-line reservation systems.
+Missing data packets in these application may cause noise in a video conference but no harm of lives.
 
-\subsection{How to choose the right OS?}
+\subsection{Choosing the right OS}
 The class of a system always depends on its application. To meet the given requirements,
-the underlying hardware and - often - an OS have to be chosen appropriately. 
+the underlying hardware and - often - the OS have to be chosen appropriately. 
 Assuming that the hardware is capable of running more than a light-weight OS, the choice of the operating
 system always depends on the real-time requirements of the system. 
 Systems which have to provide hard real-time usually must be verified and certified. 
@@ -88,36 +89,36 @@ Yet, resulting from its structure and complexity, the downside of mainline Linux
 \par
 To achieve hard real-time performance, usually special \acp{OS} are used. 
 Those can be based on a real-time kernel design or light-weight \acp{OS} like for example \textit{$\mu$COS} \cite{micrium:microcos} or \textit{FreeRTOS} \cite{freertos}.
-They have very small memory footprint, fast boot time and no background services (deamons) which could unexpectedly disturb the execution of real-time tasks. 
+They have a very small memory footprint, fast boot time and no background services (deamons) which could unexpectedly disturb the execution of real-time tasks. 
 Therefore the execution time of tasks and interrupt processing is highly predictable.
 The jitter (variance of execution time) is very low compared to a general purpose \ac{OS}.
 Yet, those systems have multiple disadvantages:
 In light-weight \acp{OS}, every change in the underlying hardware requires a reconfiguration of the OS.
 Furthermore, a high-level communication (e.g. terminal) with the system is not provided and has to be implemented if needed. 
 Another solution is one of the hard real-time extensions for Linux like \textit{\ac{RTAI}} (based on a micro kernel) \cite{rtai} or \textit{Xenomai} (real-time development framework) \cite{xenomai}.
-Further, companies like ENEA \cite{stromblad:elfrtoemd} make an effort to improve the real-time performance of their proprietary ENEA Linux.  
-A hard real-time \ac{OS} is PikeOS \cite{sysgo:prt} which was developed by \textit{SYSGO Embedded Systems} and is not related to Linux.
+Furthermore, companies like ENEA \cite{stromblad:elfrtoemd} make an effort to improve the real-time performance of their proprietary ENEA Linux.  
+A hard real-time \ac{OS} is for example PikeOS \cite{sysgo:prt} which was developed by \textit{SYSGO Embedded Systems} and is not related to Linux.
 
 \subsection{The preferred RTOS}
-Obviously, the operating systems described above are not the optimum choice for developers. 
-But what is actually the optimum with time considered the most valuable resource?
-A system which provides all necessary drivers, requires as low configuration and modification as possible and can guarantee the right level of real-time capability. 
-Further, it should be free of charge, have a high level of support and run real-time and best-effort tasks concurrently.
-This sounds rather impossible. 
+The operation systems described above are not the optimum choice for developers because their either their configuration consumes a lot of time or they cannot be configured to meet the needed real-time requirements.
+The optimum system provides all necessary drivers, requires as low configuration and modification as possible and can guarantee the right level of real-time capability. 
+Further, it should be free of charge, have a high level of support and run real-time and best-effort \footnote{Best-effort tasks are tasks which do not need to meet any timings.} tasks concurrently.
 Most of the systems are either proprietary and therefore not free of charge for development or light-weight systems which barely provide any drivers.
 The Linux real-time extension \ac{RTAI} is hard to install and has a complex \ac{API} what makes the use of it unattractive \cite{mitschang:heulfrvr}.
-Further, the current \ac{RTAI} version supports only Linux kernel version 2.6.38.8 \cite{rtai} whereas the current mainline kernel is already at version 3.12. 
+Further, the current \ac{RTAI} version supports only the old Linux kernel version 2.6.38.8 \cite{rtai} whereas the current mainline kernel is already at version 3.12. 
 The Xenomai framework uses a microkernel and a hardware abstraction layer to provide hard real-time. 
 It already supports the Linux kernel version 3.5.
 \par
-An open-source alternative which is easy to set up and is the Linux PREEMT\_RT patch (further: \textit{LinuxRT}).
-In the past years, a lot of effort was made to improve it in the matter of low-latency and predictability.
+An open-source alternative which is easy to set up is the Linux PREEMT\_RT patch (further: \textit{LinuxRT}).
+In the past years, a lot of effort was made to improve low-latency and predictability.
 It is currently available for up to Kernel 3.10.
-Moreover, it provides all advantages of Linux which is widely used in embedded systems (ports for many platforms, large community, high driver support).
+Moreover, it provides all advantages of Linux which is widely used in embedded systems because is supports many hardware platforms, has a large community and high driver support.
 The downside of LinuxRT is that it also inherits some disadvantages of mainline Linux, for instance it is not mathematically provable.
 Yet, LinuxRT has already been used on computers which have gone into space and it is favored by musicians as ``jitter from mainline Linux would cause a scratching sound'' \cite{clark:itrtlfed}.
 LinuxRT sounds very promising for future applications.
-To estimate the possibilities and limitations of LinuxRT, a guideline of the \ac {OS} performance is desirable.
+\par
+Developers want to know before starting the implementation whether an \ac{OS} is suitable for their purposes.
+This work aims to provide a guideline which helps to estimate the possibilities and limitations of LinuxRT. 
 It should provide information on the overall performance of the system and the real-time capability with maximum latencies.  
 To evaluate the results of such a test, it is necessary to compare them to a reference. 
 As the main goal is to provide low and deterministic timings, a light-weight \ac{OS} can be used.
@@ -130,14 +131,15 @@ Therefore, it is a good candidate to be used as reference.
 The next point to consider is how to benchmark the \acp{OS}.
  
 \subsection{Benchmarking RTOSes}
-There are quite many criteria which can be applied to benchmark \acp{OS}.
+There are many criteria which can be applied to benchmark \acp{OS}, in this case FreeRTOS and LinuxRT.
 Typical metrics are latency and jitter - the variance of latencies.
-For \ac{RTOS}, obviously, it is most important to consider features typically used in real-time applications.
-Those are mainly task synchronization features, e.g. semaphores, message queues or signals.
+For \ac{RTOS}, it is most important to consider features typically used in real-time applications.
+Those are mainly task synchronization features, e.g. semaphores, message queues or signals (see section \ref{s_intertask_communication} for details).
 Moreover, interrupt latency is crucial because interrupts usually wake up important tasks in \ac{RTOS}.
 Another typical application is the periodic invocation of tasks. 
-More key features are preemption time of tasks and priority inheritance mechanisms to resolve deadlocks.
+More aspects are preemption time of tasks and priority inheritance mechanisms to resolve deadlocks.
 These two metrics indicate the capability of the system to interrupt a low priority task to run a task with higher priority. 
+The performance of all these features depends on the implementation of the \ac{OS}.
 Boot time can also be important in real-time systems as it is not acceptable to wait 15 seconds for the engine to run after starting the car.
 Further, some systems support memory access supervision by a \ac{MMU} or power saving options.
 The use of an \ac{MMU} can be especially important in safety critical systems where not allowed memory access would cause a fatal system crash.
@@ -151,7 +153,7 @@ Therefore, a way of time measurement has to be found, which can be applied on bo
 
 \section{Related work}
 Performance evaluation has already been done on different platforms and with different \acp{OS}. 
-The first attempt to developing a real-time benchmark was by Kar and Porter in 1989 by introducing the \textit{Rhealstone Benchmark} \cite{kar:itrb} \cite{kar:artbp}. 
+The first attempt to develop a real-time benchmark was by Kar and Porter in 1989 by introducing the \textit{Rhealstone Benchmark} \cite{kar:itrb} \cite{kar:artbp}. 
 This benchmark is based on six parameters (for details refer to \ref{ss_rhealstone_benchmark_for_deterministic_application_latency}) the resulting value is calculated from.
 The Rhealstone Performance Number is a weighted mean of all parameters. 
 They implemented the benchmark under iRMX.
@@ -173,6 +175,7 @@ The results show a significant reduction in jitter when using LinuxRT.
 \par
 Although some investigation has already been done on LinuxRT, only few works deal with interrupt processing of the \ac{OS}.
 The complete Rhealstone benchmark has neither been implemented for LinuxRT nor for FreeRTOS.
+Further, none of the works try to model the application latency using the results they obtained.
 Generally, there is little work available on FreeRTOS.
 
 \section{Contribution}

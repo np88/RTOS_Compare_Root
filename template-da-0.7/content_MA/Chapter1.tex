@@ -533,7 +533,7 @@ Based on the introduced delays in section \ref{s_hardware_delays_and_os_jitter},
 						occurs during the application
 						$ t_{isr} = \sum\limits_{i=1}^{n_{isr}} {x_{isr}^{i} * t_{isr}^{i}} $						
 		\end{enumerate}	
-  \item Indeterministic part, jitter 
+  \item Non-deterministic part, jitter 
   \begin{equation}
    t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{swap} + t_{daem} 		
    \label{eq_indet_app}
@@ -602,7 +602,7 @@ Interrupts usually occur infrequently and hence cause undefined delays.
 In FreeRTOS, the only interrupt always available in the system is the timer tick.
 Whenever other interrupts are added to the system, they are not considered jitter.
 In LinuxRT, the number of interrupts depends on the drivers loaded. 
-Yet, there is still the possibility to remove unnecessary drivers and control the inputs of the system to avoid indeterministic jitter.
+Yet, there is still the possibility to remove unnecessary drivers and control the inputs of the system to avoid non-deterministic jitter.
 
 \paragraph{Cache Misses}
 Cache misses depend on the hardware and cannot be controlled actively.
