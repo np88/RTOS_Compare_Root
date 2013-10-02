@@ -5,7 +5,7 @@ This includes hardware platform, time measuring technique and setup of the opera
 After that, every measurement is described in detail beginning with the boot time.
 The results will be discussed in a separate chapter.
 
-\section{Test Environment and tools}
+\section{Test Environment and tools}\label{s_test_environments_and_tools}
 This section contains a description of the test environment - the hardware platform, the development tools and the configuration of the used \acp{OS}.
 \subsection{Hardware Platform}
 The underlying hardware platform is a Xilinx ZC702 Evaluation Board \cite{xilinx:zc702_ev_board} with an Zynq-7000 XC7Z020 \cite{xilinx:zynq7000} (see figure \ref{fig_zynq_block_diagram}).
@@ -106,10 +106,20 @@ The final configuration reduces the kernel size from 2.8 MB to 1.9 MB.
 The time measurement should be as accurate as possible.
 High measuring overheads could falsify the results, so software timers should be avoided. 
 One elegant way is to access the \ac{CPU} cycle counter register of the ARM Cortex-A9 processor using inline-assembly code \cite{arm:aarmaaae}.
-This code is compiled into four assembly instructions [ref to appendix] when copying the register value to an array.
+This code is compiled into very few assembly instructions [ref to appendix] when copying the register value to an array.
 The advantages of this method is not only low overhead but also the \ac{OS} independence of the assembly code.
 Hence this method can be used for both FreeRTOS and LinuxRT.
 However, the \ac{CPU} has to keep running at the same frequency during the complete test run, otherwise the results will be wrong.
+\par
+The following has to be done to obtain the time:
+\begin{enumerate}
+	\item Retrieve the start $t_{start\_cycles}$ and stop time $t_{stop\_cycles}$ in \ac{CPU} cycles
+	\item Subtract $t_{start\_cycles}$ from $t_{stop\_cycles}$ to get the absolute time $t_{abs\_cycles}$
+	\item Convert $t_{abs\_cycles}$ to seconds by multiplying it with the reciprocal value of the \ac{CPU} frequency (666 MHz): $t_{latency} = t_{abs\_cycles} * 1/666666688$
+\end{enumerate}
+The \ac{CPU} cycle counter is stored in a 32 bit register.
+Therefore, maximum time which can be measured is $t_{latency\_max} = (2^{32}-1) * 1/666666688 $.
+Overruns can be easily detected and treated appropriately. 
 
 \subsection{Application Design}
 This section provides a short overview over the general application design and execution.

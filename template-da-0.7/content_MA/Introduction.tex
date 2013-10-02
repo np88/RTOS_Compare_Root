@@ -109,11 +109,11 @@ Further, the current \ac{RTAI} version supports only the old Linux kernel versio
 The Xenomai framework uses a microkernel and a hardware abstraction layer to provide hard real-time. 
 It already supports the Linux kernel version 3.5.
 \par
-An open-source alternative which is easy to set up is the Linux PREEMT\_RT patch (further: \textit{LinuxRT}).
+An open-source alternative which is easy to set up is the Linux PREEMT\_RT patch (further: \textit{LinuxRT})\footnote{From now on, aspects related to both LinuxRT and mainline Linux will be referred to as Linux only.}.
 In the past years, a lot of effort was made to improve low-latency and predictability.
 It is currently available for up to Kernel 3.10.
-Moreover, it provides all advantages of Linux which is widely used in embedded systems because is supports many hardware platforms, has a large community and high driver support.
-The downside of LinuxRT is that it also inherits some disadvantages of mainline Linux, for instance it is not mathematically provable.
+Moreover, it provides all advantages of mainline Linux which is widely used in embedded systems because is supports many hardware platforms, has a large community and high driver support.
+The downside of LinuxRT is that it also inherits some disadvantages of mainline Linux, for instance it is not mathematically provable \cite{clark:itrtlfed}.
 Yet, LinuxRT has already been used on computers which have gone into space and it is favored by musicians as ``jitter from mainline Linux would cause a scratching sound'' \cite{clark:itrtlfed}.
 LinuxRT sounds very promising for future applications.
 \par
@@ -181,20 +181,25 @@ Generally, there is little work available on FreeRTOS.
 \section{Contribution}
 This work presents deeper investigation on LinuxRT and FreeRTOS based on the Rhealstone benchmark.
 The goal is to provide a guideline on the choice of an operating system for specific use cases.
-Therefore, a set of benchmarks is defined based on the Rhealstone benchmark proposed by Kar and Porter \cite{kar:itrb} \cite{kar:artbp}. 
-These benchmark metrics are extended by the boot time and a detailed investigation on interrupt latency under load and idle condition and compared to the mainline kernel.
-They are implemented for both \acp{OS} on the ZC702 evaluation board which inherits a Zynq chip. 
+This is accomplished by
+	\begin{itemize}
+		\item Introducing a model for application latency including \ac{OS} depending aspects
+		\item Filling the parameters of this model for LinuxRT and FreeRTOS by implementing tests based on the Rhealstone benchmark proposed by Kar and Porter \cite{kar:itrb} \cite{kar:artbp} 
+		\item Utilizing the model to calculate the latency for a synthetic application 
+		\item Deriving some application design guidelines for Linux in general based on the results
+	\end{itemize} 
+The Rhealstone benchmark metrics are extended by the boot time and a detailed investigation on interrupt latency under load and idle condition and compared to the mainline kernel.
+They are implemented for both \acp{OS} on the ZC702 evaluation board which inherits a Zynq chip (for details on the platform refer to section \ref{s_test_environments_and_tools}). 
 Instructions on how to implement the benchmarks are provided, so the tests can be performed for different \acp{OS} as well.
 Alternatively, the given sources can be used to benchmark different platforms after little modification.
-Further, a model is introduced on how to calculate OS latency from the obtained results. 
-It suggests how to detect and reduce the sources of OS jitter as much as possible. 
+\par
 The results show that the LinuxRT kernel performs well in terms of interrupt latency even with load for soft real-time requirements.
 Moreover, the benchmark results expose weaknesses in the Linux POSIX compliant \ac{API} which can be considered during application design. 
 %FreeRTOS is one of the most important light-weight \ac{RTOS} nowadays.
 %As there is a large interest in using more comfortable \acp{OS} like Linux, the goal is to clearly define the limits of LinuxRT.
 %The optimum result is a LinuxRT configuration with comparable benchmark results as FreeRTOS. 
 \par
-The remainder of the work is organized as follows. In chapter \ref{ch_background}, a detailed background on operating systems is provided. 
+The remainder of the work is organized as follows. In chapter \ref{ch_background}, a detailed background on operating systems and an application latency model is provided. 
 Chapter \ref{ch_measurements} describes the performed algorithms and measurements in detail. 
 Further, in chapter \ref{ch_results} the results of the measurements are presented. 
 In the last chapter \ref{ch_conclusion} the contribution of this work is summarized and an outlook on future work is given.

@@ -4,7 +4,7 @@ Dependent on its level of functionalities, \acp{OS} have different levels of com
 While a system like FreeRTOS has a limited number of features, Linux offers a variety of services which run in the background. 
 \par
 
-This chapter provides an deeper insight into the background of the topic. 
+This chapter provides a deeper insight into the background of the topic. 
 It gives details on \acp{RTOS} in general, on scheduling in FreeRTOS and LinuxRT, and the RT patch. 
 Moreover, the causes of \ac{OS} jitter are described, especially the timer interrupt. 
 Finally, the main design features of real-time programs are discussed and the benchmarking metrics for the two \ac{OS} are introduced. 
@@ -27,11 +27,11 @@ The state flow in Linux is related, but extended by other states which are not o
 \end{figure}
 
 \paragraph{Ready}
-When a task is schedulable, it is in the \textit{Ready} state  
+When a task is schedulable, it is in the \textit{Ready} state.  
 A process enters this state when it is first created, has been unblocked by an \ac{ISR} or another task or when resources it was waiting for become available.
 
 \paragraph{Running}
-Tasks in this state get access to the \ac{CPU}, they are currently being executed.
+Tasks in this state get access to the \ac{CPU} as they are currently being executed.
 This state can only be entered from tasks in the Ready state.
 
 \paragraph{Blocked}
@@ -46,7 +46,7 @@ This task cannot wake up on an event but has to be explicitly unsuspended to ree
 The timer tick invokes the scheduler.
 Its frequency can be programmed in FreeRTOS as well as in Linux.
 The tick is triggered by a timer interrupt a definite number of times per second - the standard on both systems is 100 times. 
-Therefore, processor time might be wasted.
+On the one hand, processor time might be wasted if a task finishes its execution before the next tick and no context switch is performed.
 On the other hand, the \ac{OS} overhead in the system grows if the tick period is too high.
 There are no instructions on how to determine the optimum tick period, this is dependent on the specific applications running on that system. 
 Programmers can influence the scheduling by calling the \textit{yield} function which invokes the scheduler.
@@ -54,7 +54,7 @@ Moreover, the timer \ac{ISR} is usually used to update the internal system time.
 When no high resolution timer is available, the granularity of the system time depends on the tick.
 As the timer tick is implemented in an \ac{ISR}, it causes latency in the system by interrupting the currently executing code. 
 Some \acp{OS} provide a configuration called \textit{Tickless kernel} (see fig. \ref{fig_tick}).
-It disables the timer interrupt at all when there is no task runnable because rescheduling is not necessary.
+It disables the timer interrupt completely when there is no task runnable because rescheduling is not necessary.
 %Jitter in tasks caused by the operating system is called \textit{OS jitter}.
 
 \begin{figure}[htb]
@@ -65,7 +65,7 @@ It disables the timer interrupt at all when there is no task runnable because re
 \end{figure}
 
 \subsection{Idle Task}
-The \textit{Idle Task} is scheduled when no other tasks are present in the Ready queue because the processor is not allowed to run out of work.
+The \textit{Idle Task} is scheduled when no other tasks are present in the Ready queue.
 It usually has the lowest possible priority.
 This task is often used to put the \ac{CPU} in a low-power mode, e.g. scaling down frequency or executing the \textit{halt} instruction. 
 Moreover, it can be used to perform background processes or as indicator for capacity utilization.  

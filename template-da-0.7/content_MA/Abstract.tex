@@ -5,7 +5,7 @@ Dependant on the real-time requirements, it can be a challenge to choose the rig
 Although light-weight \acp{OS} like FreeRTOS provide the best real-time performance, they include neither additional hardware driver, the ability to flexibly load applications nor features for performance supervision. 
 \par
 An open-source alternative is embedded Linux with RT patch (LinuxRT).
-Linux provides a large number of drivers and is already widely used in embedded systems, but due to its complexity, real-time capability is an issue. 
+LinuxRT provides a large number of drivers and is already widely used in embedded systems, but due to its complexity, real-time capability is an issue. 
 Yet, as a promising candidate for real-time systems, the real-time capability of LinuxRT is benchmarked in this work.
 FreeRTOS which is considered to have a good real-time performance, is used as a reference system. 
 \par
@@ -24,7 +24,7 @@ The results of this benchmark provide a guideline on the LinuxRT performance and
 Especially the relative jitter is much higher than in FreeRTOS, the main jitter factor is the timer tick.
 Although LinuxRT can handle interrupts in kernel mode very fast, the handling in user mode is significantly slower.
 Yet, the jitter under load condition is only slightly worse than in idle mode.
-Another weakness of Linux is the POSIX priority inheritance implementation. 
+Another weakness of LinuxRT is the POSIX priority inheritance implementation. 
 It degrades the performance significantly compared to the other benchmark values.
 Generally speaking, LinuxRT performs well for soft real-time applications, even when fast throughput is required. 
 This work shows where optimization would help to improve performance.
