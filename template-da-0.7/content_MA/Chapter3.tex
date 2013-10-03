@@ -45,7 +45,7 @@ Details on the results are provided in the following sections.
 				\hline 
 				Mean  										& 238 ns		& 1.46 us  \\
 			  \hline
-			  Std. deviation (total)	  & 3.8 ns (1.6 \%)		& 131 ns (9.0 \%)		  \\
+			  Std. deviation 	  & 3.8 ns (1.6 \%)		& 131 ns (9.0 \%)		  \\
 			\hline
 		\end{tabular}
 	\caption{Result summary of the task switching latency}
@@ -207,7 +207,7 @@ Therefore, task 2 does not block but retrieves the message immediately what take
 				\hline 
 				Mean  										& 901 ns		& 5.135 us  \\
 			  \hline
-			  Std. deviation (total)	  & 24.9 ns (2.76 \%)		& 268 ns (5.22 \%)		  \\
+			  Std. deviation 	  & 24.9 ns (2.76 \%)		& 268 ns (5.22 \%)		  \\
 			\hline
 		\end{tabular}
 	\caption{Result summary of the message passing latency}
@@ -236,6 +236,7 @@ The mean message passing latency in FreeRTOS is 5.7 times faster than in LinuxRT
 	\end{center}
 	\caption{Deadlock breaking time LinuxRT} \label{fig_deadlock_result_linux}
 \end{figure}
+
 The detailed algorithm to obtain the deadlock breaking time is described in table \ref{tab_deadlock}.
 This time gives an orientation on the time the operating system needs to resolve a priority inversion by the implemented priority inheritance algorithm.
 As usually only one active task is running in this experiment, the timer tick causes an unnecessary context switch which results in the same task being continued.
@@ -250,7 +251,7 @@ Table \ref{tab_summary_deadlock} summarizes the results for deadlock breaking ti
 				\hline 
 				Mean  										& 2.113 ns		&  20.68 us \\
 			  \hline
-			  Std. deviation (total)	  & 34.5 ns (1.63 \%)		& 643 ns (3.11 \%)		  \\
+			  Std. deviation	  & 34.5 ns (1.63 \%)		& 643 ns (3.11 \%)		  \\
 			\hline
 		\end{tabular}
 	\caption{Result summary of the deadlock breaking time}
@@ -276,10 +277,34 @@ The LinuxRT implementation is 9.79 times slower than the same implementation in 
  
 \section{Interrupt Latency}\label{s_interrup_latency} 
 The interrupt latency depends not only on the underlying hardware but also on the handling by the operating system.
-While the only interrupt which is being handled directly by FreeRTOS is the timer tick, Linux supports more advanced handling of interrupts. 
-Therefore, the analysis of the interrupt latency in Linux is more complex (see section \ref{ss_interrupt_latency_results_in_linux}).
+In the test, a pulse generator triggers an interrupt which is processed by the system.
+A \ac{LED} which is turned off indicates that the processing has been completed. 
+The \ac{LED} is explicitly turned off to capture the occurrence of multiple latencies in one picture without capturing the rise time of the \ac{LED}.
+While the only interrupt which is being handled directly by FreeRTOS is the timer tick, Linux supports more advanced handling of interrupts.
+Therefore, the analysis of the interrupt latency in Linux is more complex (see section \ref{ss_interrupt_latency_results_in_linux}). 
+In the first test, the \ac{LED} is turned off directly in the \ac{ISR}.
+In the second test, the interrupt triggers a task in the user space which disables the \ac{LED}. 
+Both tests are repeated under network load.
+The results for interrupt latency without load are summarized in table \ref{tab_summary_interrupts}
 
-
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{|l||l|l|}
+			\hline
+			Setup & Mean  & Std. deviation \\
+			\hline
+			  FreeRTOS (fast)	&  727.71 ns	& 4.775 ns (0.66 \%) \\
+			  \hline
+			  LinuxRT (fast) 	&  1.783 us & 441.63 ns (24.77 \%) \\
+			  \hline
+			  FreeRTOS (user)	& 933.66 ns & 41.01 ns (4.39 \% ) \\
+			  \hline
+			  LinuxRT (user)	& 12.921 us	& 1.345 ns (10.41 \%)\\
+			  \hline
+		\end{tabular}
+	\caption{Result summary of the interrupt latency}
+	\label{tab_summary_interrupts}
+\end{table}
 
 \subsection{Interrupt Latency Results in FreeRTOS}
 As there is no \ac{OS} overhead in the interrupt handling in FreeRTOS, it is very fast and predictive.
@@ -323,7 +348,7 @@ In this experiment already can be seen that the maximum value, the jitter, decre
 \subsubsection{Interrupt Handling and User Processes in LinuxRT}
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=0.5]{inputs/pictures_ch3/rt_isr_user}
+		\includegraphics[scale=0.63]{inputs/pictures_ch3/rt_isr_user}
 	\end{center}
 	\caption[Interrupt latency LinuxRT]{Interrupt latency LinuxRT, resolution 5 us} 	\label{fig_interrupt_latency_linuxrt}
 \end{figure}
@@ -343,7 +368,7 @@ The maximum latency is 28.990 us.
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=0.5] 
+		\includegraphics[scale=0.63] 
 		{inputs/pictures_ch3/rt_isr_user_load}
 	\end{center}
 	\caption[Interrupt latency LinuxRT with load]{Interrupt latency LinuxRT with load, resolution 15 us} \label{fig_interrupt_latency_linuxrt_load}
@@ -363,7 +388,7 @@ The maximum value is at 26.47 us.
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=0.5] 
+		\includegraphics[scale=0.63] 
 		{inputs/pictures_ch3/linux_isr_user}
 	\end{center}
 	\caption[Interrupt latency standard Linux]{Interrupt latency standard Linux, resolution 5 us} \label{fig_interrupt_latency_linux}
@@ -371,7 +396,7 @@ The maximum value is at 26.47 us.
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=0.5] 
+		\includegraphics[scale=0.63] 
 		{inputs/pictures_ch3/linux_isr_user_load}
 	\end{center}
 	\caption[Interrupt latency standard Linux with load]{Interrupt latency standard Linux with load, resolution 15 us} \label{fig_interrupt_latency_linux_load}
@@ -468,7 +493,7 @@ Table \ref{tab_results_ram_lock} shows a comparison for both benchmarks with and
 
 \begin{table}[htbp]
 	\centering
-		\begin{tabular}{|l||l||l||l|l|}
+		\begin{tabular}{|l||l|l||l|l|}
 			\hline
 				Test 											& Shuffle lock & Shuffle no lock & Deadlock lock & Deadlock no lock \\
 				\hline 
