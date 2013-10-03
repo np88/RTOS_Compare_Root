@@ -358,7 +358,9 @@ A thread is waiting for an interrupt to occur and then issues a write command to
 Both experiments were repeated for mainline Linux and LinuxRT. 
 The results were recorded by an oscilloscope.
 In the figures (\ref{fig_interrupt_latency_linuxrt} - \ref{fig_interrupt_latency_linux_load}), the upper channel shows the pulse generator which triggers the interrupt.
-The lower channel shows the reaction of the \ac{OS}.  
+This signal was visualized using an \ac{LED} and then measured by an oscilloscope. 
+The lower channel shows the reaction of the \ac{OS} which turns off an \ac{LED}. 
+This graph shows 50000 samples recorded over time. 
 
 The mean value measured for the user task when using LinuxRT is 12.921 us. 
 The standard deviation is 1.345 us (10.41 \%). 
@@ -442,6 +444,7 @@ The only difference are the really high peaks occurring constantly throughout th
 The maximum value is 125.922 us.
 This results in a total maximum overhead of 118.789 us which is one of the highest measured in all tests. 
 The source of this high jitter could not be further localized as the tracing possibilities were limited and the installation of proper tracing tools would extend the limits of this work. 
+It cannot be excluded that the test application is not setup correctly. 
 
 The mean time is 3.38 times higher than in FreeRTOS.
  
@@ -503,7 +506,7 @@ Table \ref{tab_results_ram_lock} shows a comparison for both benchmarks with and
 			  \hline 
 			  Std. deviation (\%)  			& 4.51 \%			 & 8.17 \% 				 & 3.11 \% 			 & 4.40 \%					\\ 
 			  \hline
-			  Max. tick delay	(total)		& 27.084 us	 	 & 30.542 us 			 & 37.146 us		 & 60.473 				\\
+			  Max. tick delay	(total)		& 27.084 us	 	 & 30.542 us 			 & 37.146 us		 & 60.473 us				\\
 			\hline
 		\end{tabular}
 	\caption{RAM lock effect on Deadlock breaking time and semaphore shuffling time}
@@ -588,24 +591,25 @@ In the final right column, the factor between the mean FreeRTOS and mean LinuxRT
 
 The results point out the strengths and weaknesses of LinuxRT compared to FreeRTOS.
 Therefore, it becomes clear which kind of applications can be served by a LinuxRT system and where it gets to its limits.
-Linux suffers especially from long interrupt latency times due to its complex interrupt handling and the seperaton between user and kernel device access.
+\par
+Linux suffers especially from long interrupt latency times due to its complex interrupt handling and the separation between user and kernel device access.
 Still, when using the non-threaded interrupt handling for LinuxRT, it is possible to handle \ac{I/O} inputs from user space at a mean time of 12.303 us. Considering the worst case time for interrupt handling, an interrupt could be processed within 30 us.
 Even with load, an interrupt can be processed within 40 us. 
 This is more than twice as fast than the mainline kernel worst-case time.
 This means that the jitter arising from putting the system under network load is only about 10 us.
-Yet, the preemption test the delays are very high, up to 125 us.
-As the origin of this them could not be detected, these delays should be handled with care.
+Yet, the delays are very high in the preemption test, up to 125 us.
+As the origin of this could not be detected, these delays should be handled with care.
 Practically, user space programs should be written when the processing of sensor data needs complex calculations which for example include usage of an \ac{FPU}.
 Simple sensor-actor applications can be processed directly in the \ac{ISR}.
 The worst-case time of 3 us without additional interrupt load is very fast and barely slower than in FreeRTOS. 
 Obviously, the maximum latency of the application $t_{app}$ has to be considered as well.
 \par
-Besides the interrupt handling, the other Rhealstone benchmarks give an idea about the overall performance of LinuxRT compared to FreeRTOS and correspond to $t_{os}$. 
-The performance of an application can be estimated by calculating $t_{det}$ for the given algorithm.
+Besides the interrupt handling, the other Rhealstone benchmarks give an idea of the overall performance of LinuxRT compared to FreeRTOS and correspond to $t_{os}$. 
+The performance of an application can be estimated by calculating $t_{det}$ (compare to section \ref{ss_applications_and_realtime_tasks}) for the given algorithm.
 Especially task switching, message passing and deadlock breaking causes significantly larger delays in LinuxRT.
 Applications with a high number of tasks and many task switches suffer from slow context switching in Linux. 
-This is a point where code optimization could increase performance as Linux and FreeRTOS are using the same scheduling algorithm for real-time tasks.  
-The other aspect in which LinuxRT performs really bad is resolving deadlock situations by using priority inheritance.
+This is a point where code optimization in the Linux kernel could increase performance as Linux and FreeRTOS are using the same scheduling algorithm for real-time tasks.  
+The other aspect where Linux performs really bad is resolving deadlock situations by using priority inheritance.
 The complexity of the POSIX compliant \ac{API} is particularly recognizable at this point.
 One solution to this problem is preventing shared resources between high and low priority tasks while designing the application. 
 Yet, mistakes or inattention during the design phase can quickly lead to unexpected program behavior.
@@ -613,26 +617,26 @@ Depending on the real-time requirements, LinuxRT can fail because it needs about
 A better solution to this problem would be the design of a light-weight synchronization \ac{API} for real-time applications.
 As semaphores and mutexes are a very common memory access synchronization technique, this would cause some significant performance improvement.
 It would also reduce the standard deviation which is in general higher in LinuxRT than in FreeRTOS.
-The downside of this approach is a higher memory footprint of the operating system.
+%The downside of this approach is a higher memory footprint of the operating system.
 Further, it was shown that event signaling is twice as fast than message passing in LinuxRT for the used \acp{API}.
 Because both methods implement similar functions, it is faster to use event signaling and shared memory between two threads than passing messages.
 In FreeRTOS, the related \acp{API} calls perform almost the same.
 This shows the correctness of the results as the semaphore implementation in FreeRTOS is completely based on message queues.
 \par
 One more aspect is that LinuxRT has a large boot time compared to FreeRTOS. 
-Still, 5.5 us is acceptable for most real-time applications if it is possible to run the file system in read-only mode.
+Still, 5.5 s is acceptable for most real-time applications if it is possible to run the file system in read-only mode.
 An option is to boot the \ac{OS} in read-write mode only when diagnostics or system updates have to be done.
-The disadvantage of this method is that software cannot be update on-the-fly, but in real-time systems updates should not be made while the system is running anyway.
+%The disadvantage of this method is that software cannot be updated on-the-fly, but in real-time systems updates should not be made while the system is running anyway.
 The current boot configuration could be even further improved e.g. by loading drivers as modules and not as part of the kernel.
 \par
 Besides the application design, the system has to be set up carefully to minimize $t_{jitter}$. 
-It is naive to assume, a complex \ac{OS} like LinuxRT would work for real-time applications without being tuned or restrictions although this would the most desirable situation.
+A complex \ac{OS} like LinuxRT will not work for real-time applications without being tuned or without restrictions although this would the most desirable situation.
 Consequently, the jitter has to be either considered during application design or removed before running the real-time application.
 The possible alternatives strongly depend on the underlying hardware.
 The current single core configuration does not allow the unlimited usage of \ac{I/O} devices because this has a strong impact on the real-time performance. 
 Still, it has to be pointed out that the worst case value of $t_{int}$ is only about 10 us larger than in the idle case when putting the LinuxRT system under network load. 
 This time is acceptable for a large group of soft real-time applications.
-Still, there is some insecurity because if the not explained preemption time jitter. 
+Still, there is some insecurity because the source of the preemption time jitter was not found. 
 It is a positive result for the RT patch, but the programmer still needs to be aware that this worst-case value is only valid for the current system configuration. 
 The configuration does include the hardware, the \ac{OS} setup, the interrupts generated by the pulse generator and the network load as stress factor.
 Other jitter factors like $t_{swap}$ and unnecessary daemons were eliminated if possible.
@@ -642,6 +646,7 @@ Linux has the advantage of assigning \ac{CPU} affinity to special \acp{IRQ}.
 This means that $t_{tick}$ and $t_{int}$ can be completely moved to another \ac{CPU}, so that time-critical tasks can run on one specific \ac{CPU} without being disturbed.
 By doing this, $t_{jitter}$ is nearly eliminated so that mainly $t_{det}$ remains as execution time.
 The downside of this method is that one \ac{CPU} is heavily loaded by communicating with \ac{I/O} devices while the other one can only run preemptable, \ac{CPU} bound processes.
+\par
 Although $t_{jitter}$ can be minimized in the introduced method, LinuxRT is barely used for real-time applications in industry.
 This is mainly due to the complexity of the operating system which makes it hard to meet necessary verification demands.
 \par

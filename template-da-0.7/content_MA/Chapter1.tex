@@ -510,7 +510,7 @@ The boot time $ t_{boot} $ can be calculated straight forward from the already d
 The complexity of the boot process is dependent on the \ac{OS} and the underlying hardware setup.
 For Linux, the boot time consists of all steps listed above whereas FreeRTOS only needs the first three steps. 
   
-\subsection{Applications and Real-Time Tasks}
+\subsection{Applications and Real-Time Tasks}\label{ss_applications_and_realtime_tasks}
 The mean execution time of a task is referred to as latency.
 It depends mainly on the executed application code, the underlying hardware and the latencies caused by calls to synchronizing mechanisms of the \ac{OS}. 
 For real-time tasks, the latency should be as deterministic as possible.
