@@ -11,6 +11,8 @@ This section mainly shows the possible decrease of the boot time in Linux as the
 \subsection{Boot Time of FreeRTOS}
 The boot time of FreeRTOS has been quantified by formula \ref{eq_t_boot_free}.
 As mentioned before, there is no need to optimize the FreeRTOS boot time, so the final $ t_{boot}^{free} $ is 1,1 s.
+Nevertheless, the boot time can change for different configurations.
+An important factor is $t_{fpga}$ as the boot time highly depends on the size of the bit stream.
 
 \subsection{Boot Time of Linux}
 The boot time in Linux $ t_{boot}^{linux} $ was initially 20 seconds when using the boot configuration with a custom kernel from Xilinx (see \ref{ss_booting_in_linux}). 
@@ -27,19 +29,37 @@ The result of this experiment is a boot time which was decreased by 55 \% in rea
 \section{Task Switching Results}\label{s_task_switching_results}
 The measurements are presented in two different graphs. 
 The upper one always shows the number of the occurrence of one latency over time. 
+Both axes are scaled logarithmically. 
 This curve gives a good overview over the statistic and deviation of the measurement.
 The lower picture shows the latencies plotted over time. 
 This curve shows time dependent events like the timer tick.  
 %Further, this presentation of the results is not only valid for the task switching time but for all results presented in the following.
+Table \ref{tab_summary_task_switching} summarizes the results for the task switching latency.
+Details on the results are provided in the following sections.
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l||l|l|}
+			\hline
+				OS 											& FreeRTOS	& LinuxRT  \\
+				\hline 
+				Mean  										& 238 ns		& 1.46 us  \\
+			  \hline
+			  Std. deviation (total)	  & 3.8 ns (1.6 \%)		& 131 ns (9.0 \%)		  \\
+			\hline
+		\end{tabular}
+	\caption{Result summary of the task switching latency}
+	\label{tab_summary_task_switching}
+\end{table}
 
 \subsection{Task Switching Results FreeRTOS} \label{ss_task_switching_results_freertos}
 \begin{figure}[hbt]
 	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_debug_FreeRTOS_start_end}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_debug_FreeRTOS_start_end}
 	\end{center}
 	\caption{Task switching result FreeRTOS} \label{fig_tast_switching_result_free}
 \end{figure}
-As the red color in figure \ref{fig_tast_switching_result_free} shows, the mean value for FreeRTOS task switching is 238 ns. 
+As the blue color in figure \ref{fig_tast_switching_result_free} shows, the mean value for FreeRTOS task switching is 238 ns. 
 The standard deviation for the test set is 3.8 ns (1.6 \%).
 The peaks at the time of 0.1 and 0.2 us are showing the active timer tick. 
 The probability to capture the timer tick in this experiment is very high because a large density of the test program code is included into the time measurement.
@@ -74,7 +94,7 @@ Because of the higher noise, they do not become as apparent as in the FreeRTOS m
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_results_measurements_cfg6_int_saves}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_results_measurements_cfg6_int_saves}
 	\end{center}
 	\caption{Task switching result LinuxRT} \label{fig_tast_switching_result_linux}
 \end{figure}
@@ -99,6 +119,7 @@ All semaphore functions in FreeRTOS are based on message queues.
 Mutexes support priority inheritance compared to the other kind of semaphores provided in FreeRTOS.
 Therefore, the overhead when working with mutexes is slightly higher. 
 The results of this measurement are presented in table \ref{tab_results_semaphores_freertos}. 
+As already mentioned, the causes of delays are summarized in section \ref{ss_task_switching_results_freertos}.
 
 \begin{table}[htbp]
 	\centering
@@ -120,8 +141,6 @@ The results of this measurement are presented in table \ref{tab_results_semaphor
 	\caption{Results of the semaphore benchmarking in FreeRTOS}
 	\label{tab_results_semaphores_freertos}
 \end{table}
-
-As already mentioned, the causes of delays are summarized in section \ref{ss_task_switching_results_freertos}.
 
 \subsection{Semaphore Results LinuxRT}
 The Linux implementation of the tests uses the POSIX \ac{API}.
@@ -162,85 +181,119 @@ Message passing is another mechanism of task synchronization.
 The algorithm (see table \ref{tab_message_passing}) also provides some points where a task switch can cause faulty results.
 One possible error is that the execution is interrupt between line 2 and 3.
 This causes one additional task switching delay because task 2 is not schedulable, so task 1 will be rescheduled.
-Another error can happen when task 2 is interrupted before blocking on the queue. 
-This causes the message to be already available in the queue after task 1 yields the processor. 
-Therefore, task 2 does not block but retrieves the message immediately what takes less time than the original procedure.
+Another error can happen when task 2 is interrupted before blocking on the queue.
+This causes the message to be already available in the queue after task 1 yields the processor.
+Therefore, task 2 does not block but retrieves the message immediately what takes less time than the original procedure.Table \ref{tab_summary_message_passing} summarizes the results for the message passing latency.
+
+\begin{figure}[htb!]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_FreeRTOS_start_end}
+	\end{center}
+	\caption{Message passing result FreeRTOS} \label{fig_message_passing_free}
+\end{figure}
+
+\begin{figure}[htb!]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 		{inputs/pictures_ch3/message_passing_latency_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Message passing result LinuxRT} \label{fig_message_passing_linux}
+\end{figure}
+
+\begin{table}[htbp!]
+	\centering
+		\begin{tabular}{|l||l|l|}
+			\hline
+				OS 											& FreeRTOS	& LinuxRT  \\
+				\hline 
+				Mean  										& 901 ns		& 5.135 us  \\
+			  \hline
+			  Std. deviation (total)	  & 24.9 ns (2.76 \%)		& 268 ns (5.22 \%)		  \\
+			\hline
+		\end{tabular}
+	\caption{Result summary of the message passing latency}
+	\label{tab_summary_message_passing}
+\end{table}
 
 \subsection{Message Passing in FreeRTOS}
-\begin{figure}[htb]
-	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_FreeRTOS_start_end}
-	\end{center}
-	\caption{Binary semaphore result FreeRTOS} \label{fig_message_passing_free}
-\end{figure}
 The mean time for passing one message with the content of one byte is 901 ns. 
 The standard deviation is 24.9 ns (2.76 \%) and the maximum peak occuring while the timer interrupt is active is 2.531 us.
 This makes a total overhead of 1,63 us. 
-The lower graph (figure \ref{fig_message_passing_free}) clearly shows the error cases discussed above.  
+The lower graph (figure \ref{fig_message_passing_free}) clearly shows the error cases discussed above. 
+The upper graph only shows the values which are centered around the mean. 
+This is done for all upper plots shown in the rest of the document. 
 
 \subsection{Message Passing in LinuxRT}
-\begin{figure}[htb]
-	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_measurements_cfg6_int_saves}
-	\end{center}
-	\caption{Condition variable result LinuxRT} \label{fig_message_passing_linux}
-\end{figure}
-
-As already mentioned, the SysV \ac{API} was used for this experiment, not the POSIX \ac{API} as it is not supported by the platform.
+ was used for this experiment, not the POSIX \ac{API} as it is not supported by the platform.
 The mean time for passing one message in LinuxRT with the content of one byte is 5.135 us (see figure \ref{fig_message_passing_linux}). 
 The standard deviation is 268 ns (5.22 \%) and the maximum peak occuring while the timer interrupt is active is 18.657 us.
 This makes a total overhead of 13.522 us. 
 The mean message passing latency in FreeRTOS is 5.7 times faster than in LinuxRT.
 
 \section{Deadlock Breaking Time}
+\begin{figure}[htb!]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/deadlock_results_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Deadlock breaking time LinuxRT} \label{fig_deadlock_result_linux}
+\end{figure}
 The detailed algorithm to obtain the deadlock breaking time is described in table \ref{tab_deadlock}.
 This time gives an orientation on the time the operating system needs to resolve a priority inversion by the implemented priority inheritance algorithm.
 As usually only one active task is running in this experiment, the timer tick causes an unnecessary context switch which results in the same task being continued.
 This experiment has similarities to the semaphore shuffling but also includes the priority inheritance component.
+Table \ref{tab_summary_deadlock} summarizes the results for deadlock breaking time.
+
+\begin{table}[htb]
+	\centering
+		\begin{tabular}{|l||l|l|}
+			\hline
+				OS 											& FreeRTOS	& LinuxRT  \\
+				\hline 
+				Mean  										& 2.113 ns		&  20.68 us \\
+			  \hline
+			  Std. deviation (total)	  & 34.5 ns (1.63 \%)		& 643 ns (3.11 \%)		  \\
+			\hline
+		\end{tabular}
+	\caption{Result summary of the deadlock breaking time}
+	\label{tab_summary_deadlock}
+\end{table}
 
 \subsection{Deadlock Breaking Time in FreeRTOS}
-\begin{figure}[htb]
-	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/deadlock_results_FreeRTOS_start_end}
-	\end{center}
-	\caption{Deadlock breaking time FreeRTOS} \label{fig_deadlock_result_free}
-\end{figure}
 The mean time for the deadlock breaking time in FreeRTOS is 2.113 us. 
 The standard deviation is 34.5 ns (1.63 \%) and the maximum peak occuring while the timer interrupt is active is 3.854 us.
 This makes a total overhead of 1,74 us. 
+\begin{figure}[htb!]
+	\begin{center}
+	\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] {inputs/pictures_ch3/deadlock_results_FreeRTOS_start_end}
+	\end{center}
+	\caption{Deadlock breaking time FreeRTOS} \label{fig_deadlock_result_free}
+\end{figure}
 
 \subsection{Deadlock Breaking Time in LinuxRT}
-\begin{figure}[htb]
-	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/deadlock_results_measurements_cfg6_int_saves}
-	\end{center}
-	\caption{Deadlock breaking time LinuxRT} \label{fig_deadlock_result_linux}
-\end{figure}
 The mean time for the deadlock breaking time in LinuxRT is 20.68 us. 
 The standard deviation is 643 ns (3.11 \%) and the maximum peak occuring while the timer interrupt is active is 37.146 us.
 This makes a total overhead of 16.466 us.
 The LinuxRT implementation is 9.79 times slower than the same implementation in FreeRTOS.
-[results from give].
  
 \section{Interrupt Latency}\label{s_interrup_latency} 
 The interrupt latency depends not only on the underlying hardware but also on the handling by the operating system.
 While the only interrupt which is being handled directly by FreeRTOS is the timer tick, Linux supports more advanced handling of interrupts. 
 Therefore, the analysis of the interrupt latency in Linux is more complex (see section \ref{ss_interrupt_latency_results_in_linux}).
 
+
+
 \subsection{Interrupt Latency Results in FreeRTOS}
 As there is no \ac{OS} overhead in the interrupt handling in FreeRTOS, it is very fast and predictive.
-The time to handle the interrupt internally and turn on an \ac{LED} from the \ac{ISR} takes no more than 750 ns (see figure \ref{fig_interrupt_latency_freertos}). 
+The time to handle the interrupt internally and turn on an \ac{LED} from the \ac{ISR} takes no more than 750 ns. 
 The mean value is 727.71 ns and the standard deviation 4.775 ns (0.66 \%). 
 When the \ac{LED} is turned on from a user task which is unblocked by the \ac{ISR}, the mean time increases to 933.66 ns.
 The standard deviation for this experiment is 41.01 ns (4.39 \%) and the maximum measured value is 1.163 us.
   
-\begin{figure}[htb]
-	\begin{center}
-		\includegraphics[scale=0.5] 
-		{inputs/pictures_ch3/isr_free}
-	\end{center}
-	\caption[Interrupt latency FreeRTOS]{Interrupt latency FreeRTOS, resolution: 500 ns} \label{fig_interrupt_latency_freertos}
-\end{figure}
+%\begin{figure}[htb]
+%	\begin{center}
+%		\includegraphics[scale=0.5]{inputs/pictures_ch3/isr_free}
+%	\end{center}
+%	\caption[Interrupt latency FreeRTOS]{Interrupt latency FreeRTOS, resolution: 500 ns} %\label{fig_interrupt_latency_freertos}
+%\end{figure}
 
 \subsection{Interrupt Latency Results in Linux}\label{ss_interrupt_latency_results_in_linux}
 The interrupt handling in Linux is quiet complex and many different cases have to be considered. 
