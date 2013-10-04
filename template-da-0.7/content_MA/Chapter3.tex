@@ -275,7 +275,7 @@ The standard deviation is 643 ns (3.11 \%) and the maximum peak occuring while t
 This makes a total overhead of 16.466 us.
 The LinuxRT implementation is 9.79 times slower than the same implementation in FreeRTOS.
  
-\section{Interrupt Latency}\label{s_interrup_latency} 
+\section{Interrupt Latency}\label{s_interrupt_latency} 
 The interrupt latency depends not only on the underlying hardware but also on the handling by the operating system.
 In the test, a pulse generator triggers an interrupt which is processed by the system.
 A \ac{LED} which is turned off indicates that the processing has been completed. 
@@ -345,7 +345,7 @@ As expected, the values are comparable to mainline Linux.
 After stressing the system, the mean value stays almost constant at 1.982 us, but the standard deviation rises to 1.212 us (61.15 \%) and the maximum recorded value to 10.835 us.
 In this experiment already can be seen that the maximum value, the jitter, decreases by about 60 \%.
 
-\subsubsection{Interrupt Handling and User Processes in LinuxRT}
+\subsubsection{Interrupt Handling and User Processes in LinuxRT}\label{sss_interrupt_handling_user_rt}
 \begin{figure}[htb]
 	\begin{center}
 		\includegraphics[scale=0.63]{inputs/pictures_ch3/rt_isr_user}
@@ -519,7 +519,7 @@ Further, the maximum tick delay highly increases for this configuration.
 \subsubsection{Daemons}
 The number of daemons in Linux can be controlled actively, especially in embedded distributions, the number of daemons is limited by default.
 The daemons available in the custom system are an \ac{SSH} and an \ac{FTP} daemon.
-Both require an Ethernet connection and as shown in section \ref{s_interrup_latency}, this is not acceptable for a real-time application.
+Both require an Ethernet connection and as shown in section \ref{s_interrupt_latency}, this is not acceptable for a real-time application.
 Consequently, both daemons are not allowed to actively communicate via network while a critical application is running.
 
 \subsubsection{CPU Bound Load}
@@ -660,8 +660,8 @@ The advantages are still overwhelming: Driver support for a wide range of hardwa
 
 \section{Estimation of Application Run Time}
 The run time of an application can be defined by a deterministic and a non-deterministic part (see section \ref{ss_applications_and_realtime_tasks}). 
-The deterministic part (formula \ref{eq_det_app}) is set up of the application code and optionally used synchronization mechanisms and interrupt handling.
-The non-deterministic part (formula \ref{eq_indet_app}) contains all aspects which do not belong to the application but occur while the application is executed, for instance the timer tick or other interrupts.  
+The deterministic part $t_{det}$ (formula \ref{eq_det_app}) is set up of the application code and optionally used synchronization mechanisms and interrupt handling.
+The non-deterministic part $t_{jitter}$ (formula \ref{eq_indet_app}) contains all aspects which do not belong to the application but occur while the application is executed, for instance the timer tick or other interrupts.  
 \par
 Utilizing the above formulas, the application run time which is influenced by the \ac{OS} (synchronization mechanisms) and the hardware setup (interrupts) can be estimated. 
 A precondition for a correct estimation is that $t_{app}$ is equal for all operating systems which are compared to each other. 
@@ -670,7 +670,79 @@ Therefore, no \ac{OS} specific \acp{API} should be used here.
 An application latency estimation is usually done before the application is implemented. 
 This means that $t_{app}$ can only be estimated. 
 Further, the formula can be used to calculate how much time is left to execute application specific code if a deadline has to be met. 
+Two examples show the utilization of the application latency estimation.
+These examples are synthetic examples and were not tested as real applications because this goes beyond the limits of this work.
+A reference implementation on the existing hardware will be part of future work.
+This will show the precision of this technique.
+The estimation can be performed with mean values if no hard timing requirements are necessary. 
+Further, pessimistic values can be used to get a worst-case timing estimation.
 
+\subsection{Example 1: Copying and Processing Data}
+The first example is a typical scenario which can be found often in real applications. 
+A peripheral device copies data to a buffer which is then processed by an application. 
+The detailed process is described in the following:
+\begin{enumerate}
+	\item Peripheral device copies data to buffer
+	\item	Peripheral device triggers interrupt to inform OS ($t_{isr}$)
+	\item User application is woken up by interrupt ($t_{isr}$)
+	\item Data is pre-processed (formatting of raw data, copying) ($t_{app}$)
+	\item Application signals device that data has been retrieved ($t_{isr}$)
+	\item Wake up new thread to process formatted data ($t_{sync}$)
+\end{enumerate}
+The value in the parentheses indicates to which parameter of $t_{det}$ the execution step belongs to.
+The run time estimation will be performed for FreeRTOS, LinuxRT and LinuxRT with load.
+For the first to cases $t_{jitter}$ equals $t_{tick}$.
+It is assumed that no other disturbing factors are present in the system.
+In the last test, a network daemon is added to the system which also uses interrupts. 
+This is the same daemon which has already been used in the interrupt latency benchmark (see section \ref{s_interrupt_latency}). 
+Therefore, the system is constantly put under network load by sending data via \ac{SSH}.
+\par
+In the current example, the data is processed in a user process which later signals the underlying hardware that it is done. 
+This can be estimated by the interrupt latency measured in the experiments. 
+Event signaling is used as synchronization mechanism to wake up a processing thread.
+All measured times can be used as parameters for the two formulas.
+
+\subsubsection{Mean Latency Estimation}
+The mean latency is of interest when no hard real-time requirements are necessary. 
+It can be used for general estimation or for soft real-time.
+The deterministic part $t_{det}$ is calculated by adding $t_{sync}$ and $t_{isr}$, $t_{app}$ will not be considered. 
+The non-deterministic part $t_{jitter}$ is calculated by adding $t_{tick}$ and $t_{daem}$ if available.
+It is not of importance as the main goal is to determine all timings caused by the \ac{OS}.
+For the mean latency estimation the measured mean values (see table \ref{tab_summary}) are inserted in the formula.
+For the third test, the mean value from the interrupt latency test under load was taken (see section \ref{sss_interrupt_handling_user_rt}).
+Moreover, the delay caused by the daemon has to be considered for $t_{app}$ and $t_{sync}$.
+This can only be done accurately if the number of interrupts per second and their execution time is known.
+As this is not the case, the value has to be estimated as well.
+The only timing which is known both with and without load is the interrupt latency.
+The factor between both is $15.678 us / 12.921 us = 1.2134 $.   
+This factor will be used to calculate the delay for $t_{app}$ and $t_{sync}$ when a network daemon is available.
+The result is shown in table \ref{tab_example1_mean}:
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|l|}
+			\hline
+				Setup					& FreeRTOS 								& LinuxRT 							& LinuxRT load  \\
+				\hline 
+				$t_{isr}$ 		& 933.66 ns 							& 12.921 us 						& 15.678 us			\\
+			  %\hline
+			  $t_{sync}$		& 846 ns	  							& 2.544 us 				 			& 2.544 us			\\
+			  \hline 
+			  $t_{det}$			& 1.780 us  							& 15.465 us 				 		& 18.222 us			\\ 
+			  \hline
+			  \hline
+			  $t_{tick}$		& 4.312 us								& 28.892 us 					  & 28.892 us											\\
+				%\hline 
+			  $t_{deam}$		& -				  							& - 				 						& $t_{sync}$*0.2134							\\ 
+				\hline 
+			  $t_{jitter}$	& 4.312 us  							& 28.892 us						  & 29.435 us											\\ 
+			  \hline
+			  \hline 
+			  $t_{total}$		& 6.092 us + $t_{app}$	 & 44.357 us + $t_{app}$  &	47.657 us + $t_{app}$*1.2134 	\\ 
+			\hline
+		\end{tabular}
+	\caption{Mean latency estimation for example 1}
+	\label{tab_example1_mean}
+\end{table}
 
 %\subsection{Single Mutex Results}
 

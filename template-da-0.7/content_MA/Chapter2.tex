@@ -137,7 +137,7 @@ For all system calls, the FreeRTOS \ac{API} is used.
 %This function is not supported by the used port.
 
 \subsubsection{LinuxRT}\label{ss_linuxRT_application_design}
-In Linux, multi-tasking applications are realized using pthreads because inter-thread communication is more efficient than inter-process communication (compare section \ref{}).
+In Linux, multi-tasking applications are realized using pthreads because inter-thread communication is more efficient than inter-process communication (compare section \ref{sss_processes_and_pthreads}).
 The development of an application should be kept as simple as possible, therefore all applications will be implemented in user space.
 All real-time threads in Linux get the highest possible priority using the preemptive \ac{RR} \ac{RT} scheduling class.
 As the parent process and its child threads are scheduled individually, the parent has to have a higher priority than the children while creating the child threads.
