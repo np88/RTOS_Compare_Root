@@ -716,7 +716,7 @@ As this is not the case, the value has to be estimated as well.
 The only timing which is known both with and without load is the interrupt latency.
 The factor between both is $15.678 us / 12.921 us = 1.2134 $.   
 This factor will be used to calculate the delay for $t_{app}$ and $t_{sync}$ when a network daemon is available.
-The result is shown in table \ref{tab_example1_mean}:
+The results are shown in table \ref{tab_example1_mean}:
 \begin{table}[htbp]
 	\centering
 		\begin{tabular}{|l|l|l|l|}
@@ -724,15 +724,13 @@ The result is shown in table \ref{tab_example1_mean}:
 				Setup					& FreeRTOS 								& LinuxRT 							& LinuxRT load  \\
 				\hline 
 				$t_{isr}$ 		& 933.66 ns 							& 12.921 us 						& 15.678 us			\\
-			  %\hline
 			  $t_{sync}$		& 846 ns	  							& 2.544 us 				 			& 2.544 us			\\
 			  \hline 
 			  $t_{det}$			& 1.780 us  							& 15.465 us 				 		& 18.222 us			\\ 
 			  \hline
 			  \hline
 			  $t_{tick}$		& 4.312 us								& 28.892 us 					  & 28.892 us											\\
-				%\hline 
-			  $t_{deam}$		& -				  							& - 				 						& $t_{sync}$*0.2134							\\ 
+			  $t_{deam}$		& -				  							& - 				 						& ($t_{sync}$+$t_{app}$)*0.2134	 	\\ 
 				\hline 
 			  $t_{jitter}$	& 4.312 us  							& 28.892 us						  & 29.435 us											\\ 
 			  \hline
@@ -744,6 +742,13 @@ The result is shown in table \ref{tab_example1_mean}:
 	\label{tab_example1_mean}
 \end{table}
 
+As expected, the result for FreeRTOS is very low. 
+Depending on $t_{app}$, the \ac{OS} overhead can be more or less significant. 
+For small $t_{app}$, the difference between the \ac{OS} overhead for LinuxRT and LinuxRT with load is very small. 
+For larger $t_{app}$, it would increase significantly. 
+The accuracy of this estimation has not yet been verified by an implementation.
+Yet, it can be assumed that the mean value estimation without load is very accurate as there is no jitter except the timer tick.
+The estimation for $t_{daem}$ in the last test could be improved and therefore makes the result less accurate.   
 %\subsection{Single Mutex Results}
 
 %\begin{figure}[htb]
