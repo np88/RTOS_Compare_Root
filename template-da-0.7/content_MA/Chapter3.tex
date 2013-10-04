@@ -702,7 +702,7 @@ This can be estimated by the interrupt latency measured in the experiments.
 Event signaling is used as synchronization mechanism to wake up a processing thread.
 All measured times can be used as parameters for the two formulas.
 
-\subsubsection{Mean Latency Estimation}
+\subsubsection{Mean Latency Estimation}\label{sss_mean_latency_estimation}
 The mean latency is of interest when no hard real-time requirements are necessary. 
 It can be used for general estimation or for soft real-time.
 The deterministic part $t_{det}$ is calculated by adding $t_{sync}$ and $t_{isr}$, $t_{app}$ will not be considered. 
@@ -716,6 +716,7 @@ As this is not the case, the value has to be estimated as well.
 The only timing which is known both with and without load is the interrupt latency.
 The factor between both is $15.678 us / 12.921 us = 1.2134 $.   
 This factor will be used to calculate the delay for $t_{app}$ and $t_{sync}$ when a network daemon is available.
+As there is no mean value for $t_{tick}$, the worst-case value is used here. 
 The results are shown in table \ref{tab_example1_mean}:
 \begin{table}[htbp]
 	\centering
@@ -726,11 +727,11 @@ The results are shown in table \ref{tab_example1_mean}:
 				$t_{isr}$ 		& 933.66 ns 							& 12.921 us 						& 15.678 us			\\
 			  $t_{sync}$		& 846 ns	  							& 2.544 us 				 			& 2.544 us			\\
 			  \hline 
-			  $t_{det}$			& 1.780 us  							& 15.465 us 				 		& 18.222 us			\\ 
+			  $t_{det}$			& 1.780 us  							& 15.465 us 				 		& 18.222 us	+ $t_{app}$		\\ 
 			  \hline
 			  \hline
 			  $t_{tick}$		& 4.312 us								& 28.892 us 					  & 28.892 us											\\
-			  $t_{deam}$		& -				  							& - 				 						& ($t_{sync}$+$t_{app}$)*0.2134	 	\\ 
+			  $t_{deam}$		& -				  							& - 				 						& ($t_{sync}$ + $t_{app}$) * 0.2134 \\ 
 				\hline 
 			  $t_{jitter}$	& 4.312 us  							& 28.892 us						  & 29.435 us											\\ 
 			  \hline
@@ -748,7 +749,40 @@ For small $t_{app}$, the difference between the \ac{OS} overhead for LinuxRT and
 For larger $t_{app}$, it would increase significantly. 
 The accuracy of this estimation has not yet been verified by an implementation.
 Yet, it can be assumed that the mean value estimation without load is very accurate as there is no jitter except the timer tick.
-The estimation for $t_{daem}$ in the last test could be improved and therefore makes the result less accurate.   
+The estimation for $t_{daem}$ in the last test could be improved and therefore makes the result less accurate.
+   
+\subsubsection{Pessimistic Latency Estimation}
+The pessimistic latency estimation is performed for hard real-time requirements. 
+It is set up similar to the mean latency estimation (see section \ref{sss_mean_latency_estimation}), but uses worst-case values instead of mean values. 
+The worst-case values are calculated from the mean value adding the mean value multiplied with the standard deviation.
+The worst-case value for the LinuxRT interrupts does not need to be calculated but can be used directly from the corresponding benchmark (see section \ref{sss_interrupt_handling_user_rt}). 
+The results for this estimation are shown in table \ref{tab_example1_pessimistic}.  
+ \begin{table}[htbp]
+	\centering
+		\begin{tabular}{|l|l|l|l|}
+			\hline
+				Setup					& FreeRTOS 								& LinuxRT 							& LinuxRT load  \\
+				\hline 
+				$t_{isr}$ 		& 1.163 ns 								& 28.990  us 						& 15.678 us			\\
+			  $t_{sync}$		& 849.98 ns	  						& 2.724 us 				 			& 2.724 us			\\
+			  \hline 
+			  $t_{det}$			& 2.013 us  							& 31.714 us 				 		& 41.163 us	+ $t_{app}$		\\ 
+			  \hline
+			  \hline
+			  $t_{tick}$		& 4.312 us								& 28.892 us 					  & 28.892 us											\\
+			  $t_{deam}$		& -				  							& - 				 						& ($t_{sync}$+$t_{app}$) * 0.2134	\\ 
+				\hline 
+			  $t_{jitter}$	& 4.312 us  							& 28.892 us						  & 29.473 us	+ $t_{app}$ * 0.2134	\\ 
+			  \hline
+			  \hline 
+			  $t_{total}$		& 6.325 us + $t_{app}$	 & 60.606 us + $t_{app}$  &	70.636 us + $t_{app}$ * 1.2134 	\\ 
+			\hline
+		\end{tabular}
+	\caption{Pessimistic latency estimation for example 1}
+	\label{tab_example1_pessimistic}
+\end{table}
+
+   
 %\subsection{Single Mutex Results}
 
 %\begin{figure}[htb]
