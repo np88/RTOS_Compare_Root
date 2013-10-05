@@ -1,17 +1,17 @@
 \chapter{Background on Operating Systems}\label{ch_background}
 \acp{OS} manage the hardware resources - \ac{CPU} time, \ac{I/O} and memory access  - for different tasks and process. 
-Dependent on its level of functionalities, \acp{OS} have different levels of complexity.
+Dependent on the level of functionalities, \acp{OS} have different levels of complexity.
 While a system like FreeRTOS has a limited number of features, Linux offers a variety of services which run in the background. 
 \par
-
 This chapter provides a deeper insight into the background of the topic. 
 It gives details on \acp{RTOS} in general, on scheduling in FreeRTOS and LinuxRT, and the RT patch. 
 Moreover, the causes of \ac{OS} jitter are described, especially the timer interrupt. 
-Finally, the main design features of real-time programs are discussed and the benchmarking metrics for the two \ac{OS} are introduced. 
+The main design features of real-time programs are discussed and the benchmarking metrics for the two \ac{OS} are introduced. 
+Finally, a technique for the estimation of application latency is derived.
 
 \section{The Scheduler}\label{s_scheduler}
 Every task or process created by the kernel or a user, is managed by the operating system - more precisely the scheduler. 
-It manages the tasks and decides which task is allowed to operate next. 
+It manages all tasks and decides which one is allowed to operate next. 
 The decision is based on the priority and the current state of the task. 
 
 \subsection{Task States}\label{ss_task_states}
@@ -28,7 +28,7 @@ The state flow in Linux is related, but extended by other states which are not o
 
 \paragraph{Ready}
 When a task is schedulable, it is in the \textit{Ready} state.  
-A process enters this state when it is first created, has been unblocked by an \ac{ISR} or another task or when resources it was waiting for become available.
+A process enters this state when it is first created, has been unblocked by an \ac{ISR} or another task, or when resources it was waiting for become available.
 
 \paragraph{Running}
 Tasks in this state get access to the \ac{CPU} as they are currently being executed.
@@ -50,11 +50,11 @@ On the one hand, processor time might be wasted if a task finishes its execution
 On the other hand, the \ac{OS} overhead in the system grows if the tick period is too high.
 There are no instructions on how to determine the optimum tick period, this is dependent on the specific applications running on that system. 
 Programmers can influence the scheduling by calling the \textit{yield} function which invokes the scheduler.
-Moreover, the timer \ac{ISR} is usually used to update the internal system time. 
+Further, the timer \ac{ISR} is usually used to update the internal system time. 
 When no high resolution timer is available, the granularity of the system time depends on the tick.
-As the timer tick is implemented in an \ac{ISR}, it causes latency in the system by interrupting the currently executing code. 
+As the timer tick is implemented in an \ac{ISR}, it causes delays in the system by interrupting the currently executing code. 
 Some \acp{OS} provide a configuration called \textit{Tickless kernel} (see fig. \ref{fig_tick}).
-It disables the timer interrupt completely when there is no task runnable because rescheduling is not necessary.
+It disables the timer interrupt completely when there is no runnable task available to save power as rescheduling is not necessary.
 %Jitter in tasks caused by the operating system is called \textit{OS jitter}.
 
 \begin{figure}[htb]
@@ -71,20 +71,20 @@ This task is often used to put the \ac{CPU} in a low-power mode, e.g. scaling do
 Moreover, it can be used to perform background processes or as indicator for capacity utilization.  
   
 \subsection{Scheduling Policies}\label{ss_scheduling_policy} 
-The scheduler decides which task will run next (is allowed to enter the Running state). 
+The scheduler decides which task will run next by entering the Running state. 
 The decision is based on the scheduling policy of the \ac{OS}.
 There are mainly two different types of scheduling: \textit{Preemptive} and \textit{cooperative} scheduling.
 In cooperative scheduling, tasks cannot be interrupted, they have to release the processor voluntarily. 
 Examples for cooperative scheduling are the \textit{\ac{FIFO}} or the \textit{\ac{LIFO}} algorithms.
-\ac{RR} or priority based scheduling (\ac{EDF} and \ac{SRTF}) are examples of preemptive scheduling.
+\ac{RR} or priority based scheduling (\ac{EDF} or \ac{SRTF} algorithm) are examples of preemptive scheduling.
 The scheduling policy is crucial for \acp{RTOS} because it determines the handling of real-time tasks.
 Obviously, real-time tasks usually have the highest priority and should not be preempted by tasks with lower priority.
 For details on scheduling in Linux and FreeRTOS refer to the corresponding sections (\ref{ss_scheduling_in_linux} and \ref{ss_scheduling_in_freertos}).
 
 \section{Intertask Communication and Synchronization}\label{s_intertask_communication}
-In \acp{OS} usually not only one but many different tasks are active.
+In \acp{OS}, not only one but many different tasks are usually active.
 These tasks need ways to be synchronized with each other.
-Moreover, race conditions on critical resources, e.g. concurrent memory access, need to be prohibited.
+Race conditions on critical resources, e.g. concurrent memory access, need to be prohibited.
 
 \subsection{Events}
 In many cases, tasks need to wait until another task completes execution.
@@ -104,7 +104,7 @@ Such synchronization points are called barriers.
 
 \subsection{Memory access}\label{ss_memory_access}
 Concurrent memory access of multiple tasks can have undesired results as illustrated in the following example (see table \ref{tab_example_concurrent_memory_access}) :\\
-Person A and person B want to withdraw money from the same bank account (both 500 Euros) from a bank account via ATM at the same time.
+Person A and person B want to withdraw money from the same bank account (both 500 Euros) via an ATM at the same time.
 
 \begin{table}[htbp]
 	\centering
@@ -128,7 +128,7 @@ Person A and person B want to withdraw money from the same bank account (both 50
 Task A starts processing the request of person A.
 It reads the currently saved value X from memory and subtracts 500 Euros.
 At this point, it may run out of time, so task B is scheduled.
-Task B also reads the currently stored value X from memory (which has not yet been updated) and subtracts 500 Euros.
+Task B also reads the currently stored value X from memory (which has not been updated yet) and subtracts 500 Euros.
 Like A before, task B is interrupted at this point and A is scheduled.
 Task A writes back the new value X and finishes execution.
 Then, B also writes back its value X.
@@ -145,13 +145,14 @@ Semaphores allow a definite number of tasks to access a particular resource, for
 A problem which may occur while synchronizing memory access for tasks with different priorities is unbounded priority inversion.
 This means starving a high priority task by locking specific resources for an indefinite amount of time.
 An example is the following situation \cite{rostedt:iotrtp}:
-Task A to C have different priorities, where A has the lowest and C has the highest.
+Task A, B and C have different priorities where A has the lowest, B the medium and C the highest priority.
 Task A takes mutex M and then is preempted by task B.
-Task C attempts to access M as well but blocks as it is already taken.
-Now C is indirectly blocked by B an undefined amount of time, maybe forever.
+Task C attempts to access M as well but is blocked as M is already taken.
+Now C is indirectly blocked by B an undefined amount of time, maybe forever, depending on the execution time of B.
 \par
 This situation can be resolved by priority inheritance.
 With priority inheritance, task A gets a priority boost when C tries to access the semaphore.
+A inherits the priority of C.
 Therefore, task B is preempted by A and A can leave the critical section.
 As soon as A releases mutex M, the priority level is set back to normal.
 Now C is woken up and can finish its work before B is scheduled again.
@@ -160,11 +161,11 @@ Now C is woken up and can finish its work before B is scheduled again.
 One way to exchange information between different tasks is passing messages between each other. 
 Usually, one task blocks on a message queue until another task puts a message in this queue.
 This event wakes up the blocking task, so it can retrieve the message.
-The mechanism is a mix of signaling event and synchronizing shared memory access.
+The mechanism is a mix of signaling event and synchronizing shared memory accesses.
 It is available in Linux as well as in FreeRTOS.
 
 \section{Interrupt Handling}\label{s_interrupt_handling}
-Interrupts signals provide an important method for the processor to communicate with peripheral devices.
+Interrupt signals provide an important method for the processor to communicate with peripheral devices.
 The devices range from mice and keyboards to Ethernet or hard drive controllers.
 The interrupt signal from a hardware device is connected to the interrupt controller of the processor. 
 This controller signals the processor that an \ac{IRQ} has arrived.
@@ -189,7 +190,7 @@ This causes high priority interrupts to disturb the execution of lower prioritiz
 \section{Hardware Delays and \ac{OS} jitter}\label{s_hardware_delays_and_os_jitter}
 Different delays caused by the underlying hardware or the \ac{OS} are crucial in real-time applications.
 In this work, the term \textit{delay} refers to unexpected events which extend the mean execution time of a real-time task.
-This delay also referred to as jitter.  
+The maximum delay is also referred to as jitter.  
 
 \begin{figure}[htb]
 	\begin{center}
@@ -215,8 +216,8 @@ More delays can be produced by background daemons and other system services.
 
 \subsection{Delays from Interrupts}
 The second kind of delays (for details refer to \ref{s_interrupt_handling}) can only be prevented by introducing critical sections. 
-However, this may cause higher interrupt latencies and is counterproductive in applications which rely on a fast interrupt response time.
-Critical sections are found inside of the kernel.
+However, this may cause higher interrupt latencies and is counterproductive in applications which rely on fast interrupt response times.
+In Linux, critical sections can only be found inside of the kernel.
 If interrupts should be disabled in user mode, this is only possible by calling a device driver routine which implements the disabling and enabling of interrupts.  
 As interrupts are mainly caused by \ac{I/O} devices, the delays from interrupts will increase when the system heavily communicates with a large number of peripherals. 
 
@@ -225,7 +226,7 @@ The last cause of delays is caching.
 Caches are fast buffers which allow faster data access to data currently cached.
 They are often built up hierarchical (level 1, level 2, ...) and divided into data and instruction caches.
 A typical set up are separate level 1 data and instruction caches for each \ac{CPU} and a shared level 2 cache for both data and instructions for all \acp{CPU}.
-On one hand, caches increase the performance of an application significantly by reducing slower memory accesses to the \ac{RAM}. 
+On the one hand, caches increase the performance of an application significantly by reducing slower memory accesses to the \ac{RAM}. 
 On the other hand, the cache is used by every process on the system.
 This can cause data currently needed by a real-time application not to be present in the cache, a cache miss occurs.
 The reload of the data to the cache causes a delay.
@@ -233,35 +234,38 @@ The delay is hardware dependent.
 
 \subsection{Latencies from Task Execution and Synchronization}
 The last aspect is more correctly defined as latency, not as delay.
-It specifies the time which is caused by using several synchronization methods provided by the \ac{OS}. 
-These latencies are implementation specific and can be measured.
+It specifies the time which is caused by using the synchronization methods provided by the \ac{OS}. 
+These latencies are implementation specific.
+Their execution time can be measured.
 \par
 The obvious one is the task switching time when a context switch occurs.
 This is not avoidable and happens either when the timer tick occurs (refer to \ref{ss_timer_tick}), a task blocks, finishes or voluntarily releases the \ac{CPU}.
 Another latency related to scheduling is the preemption time.
 This is the time which it takes the \ac{OS} to interrupt a low priority task and schedule a high priority task.
-The rescheduling can be caused by giving a semaphore, sending a message or waking up the task from an \ac{ISR}.
+The rescheduling can be caused by giving a semaphore, sending a message or waking up a high-priority task from an \ac{ISR}.
 \par
-Besides, task synchronization causes latencies in a \ac{OS}.
+Moreover, task synchronization causes latencies in a \ac{OS}.
 Examples are semaphores, mutexes, message passing or signals. 
 When a mutex is released, other tasks may be unblocked.
 This means, that whenever this action happens, the \ac{OS} has to check whether tasks can be moved from the Blocked state to the Ready state.
 If a task with higher priority has been woken up, the current task is preempted and a context switch takes place.
 Dependent on the application and the right synchronization mechanism, the overall system latency can be reduced.
 \par
-The delays described in this section are \ac{CPU} bound delays compared to delays caused by \ac{I/O} interrupts.
+The latencies described in this section are \ac{CPU} bound compared to \ac{I/O} bound delays which are caused by interrupts.
  
 \subsection{Boot Time}\label{ss_boot_time_general}
 The boot time can be a relevant factor for the choice of a specific \ac{OS} if the system needs to start up very fast.
 When a car is started, the driver does not want to wait 15 seconds until the ignition starts running.
-Obviously, the boot time depends on the memory print of the operating system and on the medium from which the \ac{OS} is loaded.
+\par
+The boot time depends on the memory print of the operating system and the medium from which the \ac{OS} is loaded.
 Another important factor is the initialization of hardware structures, e.g \ac{FPGA} designs.
 Moreover, a file system may be needed for the \ac{OS} kernel to work properly which must be loaded besides the actual kernel. 
 A boot loader is necessary to start an application or an \ac{OS}.
+\par
 For simple programs or light-weight \ac{OS} like FreeRTOS a \ac{FSBL} is usually sufficient.
 This can as well optionally load an \ac{FPGA} design.
 For more complex systems like Linux \cite{jones:itlbp}, the \ac{FSBL} is used to load a more sophisticated \ac{SSBL}.
-Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image and a hardware initialization file into memory (device tree).
+Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image and a hardware initialization file (device tree) into memory.
 After those steps, the kernel can be decompressed and finally boot.
 While booting, it initializes the file system with the previously loaded image as well as peripheral devices and finally starts the user space application. 
 \par
