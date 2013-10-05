@@ -267,12 +267,12 @@ This can as well optionally load an \ac{FPGA} design.
 For more complex systems like Linux \cite{jones:itlbp}, the \ac{FSBL} is used to load a more sophisticated \ac{SSBL}.
 Then the \ac{SSBL} loads the kernel and optionally the initial RAM disk image and a hardware initialization file (device tree) into memory.
 After those steps, the kernel can be decompressed and finally boot.
-While booting, it initializes the file system with the previously loaded image as well as peripheral devices and finally starts the user space application. 
+While booting, it initializes the file system with the previously loaded image, the peripheral devices and finally starts the user space applications. 
 \par
 Ways to optimize this process will be discussed later (refer to section \ref{s_boot_time}).
 
 \section{FreeRTOS}
-This section describes the FreeRTOS \ac{OS} in more detail.
+This section describes the \ac{OS} FreeRTOS in more detail.
 The focus is on the scheduling algorithm, interrupt handling and synchronization features.
 
 \subsection{Scheduling in FreeRTOS}\label{ss_scheduling_in_freertos}
@@ -281,12 +281,12 @@ The maximum priority can be defined by the user.
 The memory footprint grows with increasing priority number, so it is recommended to choose only as many priority levels as needed.
 The task with the highest priority which is in the Ready state will be scheduled. 
 Tasks can have the same priority if desired.
-Priorities can be changed in runtime.
+Priorities can be changed during runtime.
 \par
 All tasks are managed in doubly linked lists dependent on their state (see fig. \ref{fig_freertos_ready_queue}). 
 The Ready state is implemented as a list array indexed by the priority level. 
 When the scheduler is invoked, it first updates the Ready lists and then schedules the next task.
-In case there are multiple tasks in one list, the \ac{RR} algorithm is used to pick the one.
+In case there are multiple tasks in one list, the \ac{RR} algorithm is used to pick the next one.
 
 \begin{figure}[htb]
 	\begin{center}
@@ -296,16 +296,16 @@ In case there are multiple tasks in one list, the \ac{RR} algorithm is used to p
 \end{figure}
 
 \subsection{Interrupts in FreeRTOS}\label{ss_interrupts_in_freertos}
-FreeRTOS itself contains only one interrupt: The timer tick (refer to section \ref{ss_timer_tick}.
+FreeRTOS itself contains only one interrupt: The timer tick (refer to section \ref{ss_timer_tick}).
 Other devices and interrupts may be installed on demand, but they are not handled by the OS. 
 It is only in charge of task managing and inter-task communication.
 For the application development, it means that an interrupt handler has to be written and registered in the interrupt controller.
 As all interrupt handling is up to the programmer, it is easy to keep track of the number of interrupts in the system.
 
 \subsection{Synchronization Features in FreeRTOS}
-In this section a short overview of the FreeRTOS \ac{API} is given.
+In this section, a short overview of the FreeRTOS \ac{API} features is given.
 Most \ac{API} functions are implemented for the usage in tasks as well as in \acp{ISR}.
-\ac{ISR} functions have the suffix \textit{FromISR}.
+FreeRTOS uses different kind of semaphores and message queues as synchronization features.
 
 \subsubsection{Tasks and Co-routines}
 Every FreeRTOS application is structured as a set of tasks and/or co-routines.
@@ -326,17 +326,17 @@ The implementation is based on message queues.
 Mutexes and counting semaphores correspond to the memory access synchronization tools mentioned above (see section \ref{ss_memory_access}). 
 These semaphores need to be given back once taken.
 Binary semaphores are used as signals for event synchronization.
-In contrary to counting semaphores and mutexes, binary semaphores are taken by the task which is waiting for an event and given by the signaling task. 
+In contrast to counting semaphores and mutexes, binary semaphores are taken by the task which is waiting for an event and given by the signaling task. 
 
 \subsection{Booting in FreeRTOS}\label{ss_booting_in_freertos}
-The booting process of FreeRTOS consists of booting the \ac{ROM} file, loading and running the \ac{FSBL}, optionally loading the bitstream and finally loading and running the application (compare to figure \ref{fig_boot_freertos}).
+The booting process of FreeRTOS consists of booting the \ac{ROM} file, loading and running the \ac{FSBL}, optionally loading a bitstream and finally loading and running the application (compare to figure \ref{fig_boot_freertos}).
 There is barely room for optimization in the first two steps of the booting process. 
 However, the last two steps are dependent on the size of the bitstream and the size of the application respectively.
 
 \section{LinuxRT}
 This section describes the Linux \ac{OS} in more detail.
 The focus is on memory management, the scheduling algorithm, interrupt handling and synchronization features.
-Moreover, the differences between the standard Linux Kernel and the RT patch.
+Moreover, the differences between the mainline Linux kernel and the RT patch are explained.
 
 \subsection{Memory Management}
 %The Linux \ac{OS} uses a quite complex system 
