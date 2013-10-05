@@ -57,7 +57,7 @@ Details on the results are provided in the following sections.
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_debug_FreeRTOS_start_end}
 	\end{center}
-	\caption{Task switching result FreeRTOS} \label{fig_tast_switching_result_free}
+	\caption{Task Switching Result FreeRTOS} \label{fig_tast_switching_result_free}
 \end{figure}
 As the blue color in figure \ref{fig_tast_switching_result_free} shows, the mean value for FreeRTOS task switching is 238 ns. 
 The standard deviation for the test set is 3.8 ns (1.6 \%).
@@ -96,7 +96,7 @@ Because of the higher noise, they do not become as apparent as in the FreeRTOS m
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/task_switching_results_measurements_cfg6_int_saves}
 	\end{center}
-	\caption{Task switching result LinuxRT} \label{fig_tast_switching_result_linux}
+	\caption{Task Switching Result LinuxRT} \label{fig_tast_switching_result_linux}
 \end{figure}
 
 The mean task switching latency in LinuxRT is 6.1 times higher than in FreeRTOS.
@@ -189,14 +189,14 @@ Therefore, task 2 does not block but retrieves the message immediately what take
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_FreeRTOS_start_end}
 	\end{center}
-	\caption{Message passing result FreeRTOS} \label{fig_message_passing_free}
+	\caption{Message Passing Result FreeRTOS} \label{fig_message_passing_free}
 \end{figure}
 
 \begin{figure}[htb!]
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 		{inputs/pictures_ch3/message_passing_latency_measurements_cfg6_int_saves}
 	\end{center}
-	\caption{Message passing result LinuxRT} \label{fig_message_passing_linux}
+	\caption{Message Passing Result LinuxRT} \label{fig_message_passing_linux}
 \end{figure}
 
 \begin{table}[htbp!]
@@ -234,7 +234,7 @@ The mean message passing latency in FreeRTOS is 5.7 times faster than in LinuxRT
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/deadlock_results_measurements_cfg6_int_saves}
 	\end{center}
-	\caption{Deadlock breaking time LinuxRT} \label{fig_deadlock_result_linux}
+	\caption{Deadlock Breaking Time LinuxRT} \label{fig_deadlock_result_linux}
 \end{figure}
 
 The detailed algorithm to obtain the deadlock breaking time is described in table \ref{tab_deadlock}.
@@ -266,7 +266,7 @@ This makes a total overhead of 1,74 us.
 	\begin{center}
 	\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] {inputs/pictures_ch3/deadlock_results_FreeRTOS_start_end}
 	\end{center}
-	\caption{Deadlock breaking time FreeRTOS} \label{fig_deadlock_result_free}
+	\caption{Deadlock Breaking Time FreeRTOS} \label{fig_deadlock_result_free}
 \end{figure}
 
 \subsection{Deadlock Breaking Time in LinuxRT}
@@ -350,7 +350,7 @@ In this experiment already can be seen that the maximum value, the jitter, decre
 	\begin{center}
 		\includegraphics[scale=0.63]{inputs/pictures_ch3/rt_isr_user}
 	\end{center}
-	\caption[Interrupt latency LinuxRT]{Interrupt latency LinuxRT, resolution 5 us} 	\label{fig_interrupt_latency_linuxrt}
+	\caption[Interrupt Latency LinuxRT]{Interrupt Latency LinuxRT, Resolution 5 us} 	\label{fig_interrupt_latency_linuxrt}
 \end{figure}
 Usually, programmer prefer to write programs in user space and not kernel modules. 
 Therefore, in this test a typical user thread scenario is simulated.
@@ -373,7 +373,7 @@ The maximum latency is 28.990 us.
 		\includegraphics[scale=0.63] 
 		{inputs/pictures_ch3/rt_isr_user_load}
 	\end{center}
-	\caption[Interrupt latency LinuxRT with load]{Interrupt latency LinuxRT with load, resolution 15 us} \label{fig_interrupt_latency_linuxrt_load}
+	\caption[Interrupt Latency LinuxRT with Load]{Interrupt Latency LinuxRT with Load, Resolution 15 us} \label{fig_interrupt_latency_linuxrt_load}
 \end{figure}
 
 Figure \ref{fig_interrupt_latency_linuxrt_load} shows the same experiment when the system was stressed with network load. 
@@ -393,7 +393,7 @@ The maximum value is at 26.47 us.
 		\includegraphics[scale=0.63] 
 		{inputs/pictures_ch3/linux_isr_user}
 	\end{center}
-	\caption[Interrupt latency standard Linux]{Interrupt latency standard Linux, resolution 5 us} \label{fig_interrupt_latency_linux}
+	\caption[Interrupt Latency mainline Linux]{Interrupt Latency mainline Linux, resolution 5 us} \label{fig_interrupt_latency_linux}
 \end{figure}
 
 \begin{figure}[htb]
@@ -401,7 +401,7 @@ The maximum value is at 26.47 us.
 		\includegraphics[scale=0.63] 
 		{inputs/pictures_ch3/linux_isr_user_load}
 	\end{center}
-	\caption[Interrupt latency standard Linux with load]{Interrupt latency standard Linux with load, resolution 15 us} \label{fig_interrupt_latency_linux_load}
+	\caption[Interrupt Latency mainline Linux with Load]{Interrupt Latency mainline Linux with Load, resolution 15 us} \label{fig_interrupt_latency_linux_load}
 \end{figure}
 Figure \ref{fig_interrupt_latency_linux_load} shows the same experiment stressed with \ac{I/O} load.  
 As in LinuxRT, the maximum registered value is unacceptably large: 90.92 us and more than three times higher than without load.
@@ -420,7 +420,7 @@ The \ac{GPIO} interrupt is triggered by the interrupt generator every 5 ms.
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/preemption_time_FreeRTOS_start_end}
 	\end{center}
-	\caption{Preemption result FreeRTOS} \label{fig_preemption_result_free}
+	\caption{Preemption Result FreeRTOS} \label{fig_preemption_result_free}
 \end{figure}
 
 The mean value measured for the preemption time is 2.111 us. 
@@ -435,7 +435,7 @@ The other peak results from the uninterrupted measurement.
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.7] 			{inputs/pictures_ch3/preemption_time_measurements_cfg6_int_saves}
 	\end{center}
-	\caption{Preemption result LinuxRT} \label{fig_preemption_result_linux}
+	\caption{Preemption Result LinuxRT} \label{fig_preemption_result_linux}
 \end{figure}
 The mean value measured for the preemption time in LinuxRT is 7.133 us and the standard deviation is 7.156 us (100.32 \%). 
 In figure \ref{fig_preemption_result_linux}, the results of the experiment are shown.
@@ -478,7 +478,7 @@ As described in section \ref{ss_linuxRT_application_design}, some significant ji
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 1.5cm, scale=0.6] 			{inputs/pictures_ch3/mutex_shuffle_measurements_cfg2_linux_printf_release}
 	\end{center}
-	\caption{Mutex shuffling results without applying RAM lock} \label{fig_no_mlock_mutex_shuffling}
+	\caption{Mutex Shuffling Results without applying RAM Lock} \label{fig_no_mlock_mutex_shuffling}
 \end{figure}
 \begin{figure}[htb]
 

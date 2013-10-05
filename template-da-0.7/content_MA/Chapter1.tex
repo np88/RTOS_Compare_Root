@@ -60,7 +60,7 @@ It disables the timer interrupt completely when there is no runnable task availa
 \begin{figure}[htb]
 	\begin{center}
 		\includegraphics[scale=0.48]{inputs/pictures_ch1/tick}
-		\caption[Standard and tickless kernel]{Standard tick (left), tickless kernel (right) \cite{barry:ftssp}} \label{fig_tick}
+		\caption[Standard Tick and tickless Kernel]{Standard Tick (left), tickless Kernel (right) \cite{barry:ftssp}} \label{fig_tick}
 	\end{center}
 \end{figure}
 
@@ -196,7 +196,7 @@ The maximum delay is also referred to as jitter.
 	\begin{center}
 		\includegraphics[scale=0.8]{inputs/pictures_ch1/delay}
 	\end{center}
-	\caption[Delay in task caused by interrupt]{Delay in task caused by interrupt} \label{fig_delay}
+	\caption[Delay in Task caused by Interrupt]{Delay in Task caused by Interrupt} \label{fig_delay}
 \end{figure}
 
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
@@ -292,7 +292,7 @@ In case there are multiple tasks in one list, the \ac{RR} algorithm is used to p
 	\begin{center}
 		\includegraphics[scale=0.8]{inputs/pictures_ch1/freertos_ready_queue}
 	\end{center}
-	\caption[FreeRTOS Ready queue]{FreeRTOS Ready queue \cite{dev:taoosa}} \label{fig_freertos_ready_queue}
+	\caption[FreeRTOS Ready Queue]{FreeRTOS Ready Queue \cite{dev:taoosa}} \label{fig_freertos_ready_queue}
 \end{figure}
 
 \subsection{Interrupts in FreeRTOS}\label{ss_interrupts_in_freertos}
@@ -342,14 +342,14 @@ Moreover, the differences between the mainline Linux kernel and the RT patch are
 %The Linux \ac{OS} uses a quite complex system 
 Linux uses a file system to store user programs and system data. 
 This file system is usually larger than the available \ac{RAM}, therefore it is provided on an other medium.
-The medium can be either located on a removable flash disk like an \ac{SD} card, a \ac{QSPI} flash or another medium.
+The medium can be for instance a removable flash disk like an \ac{SD} card, a \ac{QSPI} flash or a hard drive.
 Because it provides much faster data access, the \ac{RAM} is much more expensive and usually smaller than the other medium. 
-For faster data access, program data stored in the file system is loaded from hard disk into \ac{RAM} on run time.
+For faster data access, program data stored in the file system is loaded dynamically from hard disk into \ac{RAM} during run time.
 This is called mapping physical memory (from the file system) to virtual memory (\ac{RAM}).
 Because of efficiency considerations, the data blocks are managed in pages of consequent data which usually consist of several kBs.
-The pages used by the real-time application could be flushed from the \ac{RAM} which causes hardly predicable delays by reloading of pages.
-Yet, there is the possibility to lock specific pages for critical data or applications in \ac{RAM}.
-This feature should be used carefully because it might increase the run time of one application but decrease the over-all system performance.   
+The pages used by a real-time application could be flushed from the \ac{RAM} which causes hardly predicable delays when reloading the pages.
+Yet, there is the possibility to lock specific pages for critical applications in \ac{RAM}.
+This feature should be used carefully because it might increase the run time of one application but decrease the over-all system performance by blocking the \ac{RAM}.   
 
 \subsection{Scheduling in Linux}\label{ss_scheduling_in_linux} 
 Scheduling in Linux \cite{love:lkd} \cite{jones:itlcfss} is more complex than in FreeRTOS.
@@ -359,9 +359,9 @@ General purpose tasks are using the sched\_fair class and the remaining class is
 
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=0.65]{inputs/pictures_ch1/linux_scheduling_classes}
+		\includegraphics[scale=0.6]{inputs/pictures_ch1/linux_scheduling_classes}
 	\end{center}
-	\caption[Linux scheduling classes]{Linux scheduling classes \cite{jones:itlcfss}} \label{fig_linux_scheduling_classes}
+	\caption[Linux Scheduling Classes]{Linux Scheduling Classes \cite{jones:itlcfss}} \label{fig_linux_scheduling_classes}
 \end{figure}
 
 \subsubsection{sched\_rt} 
@@ -377,50 +377,49 @@ Linux was originally developed as a General Purpose \ac{OS}, so its scheduling a
 The current scheduler is called \textit{\ac{CFS}} and was introduced in Linux kernel 2.6.23.
 It is implemented as a Red-Black tree (see fig. \ref{fig_linux_red_black_tree}), which is self-balancing (no path is more than twice as long as any other).
 An element of the tree can be accessed in in O(log n), where n is the total number of nodes in the tree.
-
 \begin{figure}[htb]
 	\begin{center}
-		\includegraphics[scale=0.85]{inputs/pictures_ch1/linux_red_black_tree}
+		\includegraphics[scale=0.88]{inputs/pictures_ch1/linux_red_black_tree}
 	\end{center}
-	\caption[Example of an red black tree]{Example of an red black tree \cite{jones:itlcfss}} \label{fig_linux_red_black_tree}
+	\caption[Example of a Red Black Tree]{Example of a Red Black Tree \cite{jones:itlcfss}} \label{fig_linux_red_black_tree}
 \end{figure}
-
 The prioritization of the \ac{CFS} is based on the time the tasks have already been executed. 
-The lesser the time compared to the other task, the higher the chance to get \ac{CPU} access.
+The lesser the time compared to the other tasks, the higher the chance to get \ac{CPU} access.
 The most-left node is scheduled on a context switch.
 Further, the priority of an element can be influenced using the \textit{nice} command. 
 It puts a weight on the according node which will change the priority relative to the other nice values.
 
 \subsection{Interrupts in Linux}\label{ss_interrupts_in_linux}
-The interrupts in Linux are integrated into the operating system.
+The interrupt handling in Linux is integrated into the operating system.
 Each hardware device needs a driver to communicate with the \ac{OS}.
 This driver provides \textit{open()}, \textit{read()} or \textit{write()} functions to access the device. 
 It has to be registered before the device can be used.
 Drivers can be started at boot time or dynamically be loaded as modules during runtime.
 The interrupt handler is part of the driver and has to be registered in the kernel by calling the function \textit{irq\_request()} and deregistered by calling \textit{irq\_free()}.
-When an interrupt occurs (compare figure \ref{fig_irq_path_linux}), the \textit{do\_IRQ()} kernel function occurs which takes care of all \acp{ISR}. 
+When an interrupt occurs (compare figure \ref{fig_irq_path_linux}), the \textit{do\_IRQ()} kernel function is called which takes care of all \acp{ISR}. 
 Interrupt handler cannot be implemented by a user application.
-Application run in user mode have to use read, write or \ac{I/O} control functions to access the specific device.
-
+Applications running in user mode have to use read, write or \ac{I/O} control functions to access the specific device.
 \begin{figure}[htb]
 	\begin{center}
 		\includegraphics[scale=0.3]{inputs/pictures_ch1/irq_path_linux}
 	\end{center}
-	\caption[Path of an interrupt from hardware through the kernel]{Path of an interrupt from hardware through the kernel \cite{love:lkd}} \label{fig_irq_path_linux}
+	\caption[Path of an Interrupt from Hardware through the Kernel]{Path of an Interrupt from Hardware through the Kernel \cite{love:lkd}} \label{fig_irq_path_linux}
 \end{figure}
 
 Further, it is typical in Linux to defer non-critical work from the \ac{ISR} to a bottom half.
-There are multiple types of bottom halves in Linux, the most important are \textit{softirqs} and \textit{Tasklets} \cite{love:lkd}.
+There are multiple types of bottom halves in Linux, the most important are \textit{softirqs} and \textit{tasklets} \cite{love:lkd}.
 Softirqs are statically registered in the kernel during compile time and are only interruptible by \acp{IRQ}.
 Their number is limited by the \ac{OS}.
 In standard Linux they are invoked when the system is returning from a hardware interrupt, in the \textit{ksoftirqd} thread or by an explicit function call to \textit{do\_softirq()}.
 Softirqs - even the same type - can run concurrently on multiple \acp{CPU} but cannot interrupt other softirqs.
-Usually, all raised softirqs are handled by the do\_softirq function, but when too many softirqs are pending to be executed, they are moved to the ksoftirqd thread which is scheduled when the \ac{OS} is not busy.
+Usually, all raised softirqs are handled by the do\_softirq function, but when too many softirqs are pending, they are moved to the ksoftirqd thread which is scheduled when the \ac{OS} is not busy.
+\par
 Tasklets are built on top of softirqs and are not related to tasks as the name may suggest. 
 Compared to softirqs, tasklets have a lighter interface.
 Further, tasklets of the same type cannot run concurrently, even on different \acp{CPU}.
 Moreover, they can be created dynamically during run time.
-The last option to defer work is to use to a work queue.
+\par
+Another option to defer work is to use to a work queue.
 Work queues schedule kernel threads and can sleep if necessary compared to the other two options
 
 \subsection{Synchronization Features in Linux}\label{ss_sync_features_in_linux}
@@ -433,28 +432,30 @@ The usual way to create multi-tasking systems in Linux is by using so called \te
 pthreads are light-weight processes which have their own stack but share the parent's virtual memory and environment \cite{barney:pthreads}.
 A thread can be created with less cost compared to a process.
 Moreover, inter-thread communication is more efficient and is often easier to use than inter-process communication.
-They can be prioritized and scheduled individually. 
+pthreads can be prioritized and scheduled individually. 
+
 \subsubsection{Semaphores}
 In Linux, there are similar kind of semaphores compared to FreeRTOS.
 The \ac{POSIX} \ac{API} provides access to counting semaphores which are referred to simply as semaphores.
 Further, mutexes can be used on their own and in combination with condition variables.
-Condition variables provide a way to notify a specific thread when a special event has occurred. 
+Condition variables provide a way to notify a specific thread when an event has occurred. 
 On initialization, attributes can be passed to semaphores and mutexes.
 The attribute determines for example whether a mutex supports priority inheritance or not.
+
 \subsubsection{Barriers}
 Barriers are a very convenient and powerful way of synchronizing threads. 
 The \ac{API} provides conventional barriers as described above (see \ref{ss_barriers}) and the \textit{join} function.
-The difference between the two is that the barrier synchronizes multiple running threads but the join function allows one thread to wait for the termination of other threads.
-Only one thread can call the join function for another thread, the result of multiple calls is undefined.
+The difference between the two is that the barrier synchronizes multiple running threads but the join function allows only one thread to wait for the termination of another.
+The result of join is undefined when multiple threads call the join function on the same thread.
 
 \subsection{Booting in Linux}
-Obviously, the Linux booting process is more complex than the FreeRTOS one (see figure \ref{s_boot_time}). 
+The Linux booting process is more complex than the FreeRTOS one (see figure \ref{s_boot_time}). 
 Linux uses not only an \ac{FSBL} but also a \ac{SSBL}.
-Moreover, Linux needs a file system to run properly and a device tree.
-The device tree has to be loaded during booting as well and provides information on hardware initialization.
-If an \ac{FPGA} design is included in the system, this has to be loaded as well.
+Moreover, Linux needs a file system and a device tree to run.
+The device tree has to be loaded during booting and provides information on hardware initialization.
+If an \ac{FPGA} design is included in the system, it has to be loaded as well.
 \par
-All these factors have an impact on the boot time and there are different configuration alternatives for example to initialize the \ac{FPGA} or to load the file systems (see \ref{ss_booting_in_linux} for more details). 
+All these factors have an impact on the boot time and there are different configuration alternatives to initialize the \ac{FPGA} or to load the file systems (see \ref{ss_booting_in_linux} for more details). 
 
 \subsection{RT patch vs. standard kernel}
 The Linux RT patch aims to make the Linux kernel more preemptive and therefore, significant changes in the kernel structure were made.
@@ -462,27 +463,27 @@ The most important ones are removing large critical sections, reducing interrupt
 
 \subsubsection{Spin Locks}
 As discussed before, large critical sections reduce the responsibility of a system.
-On single \ac{CPU} systems, it is enough to disable interrupts in a critical section, but in multicore systems, concurrent access from multiple \acp{CPU} must be prevented as well.
+On single \ac{CPU} systems, it is enough to disable interrupts in a critical section, but in multicore systems, concurrent accesses from multiple \acp{CPU} must be prevented as well.
 Therefore, so called spin locks were implemented. 
 When a spin lock is acquired by one task, another task which tries to take the same spin lock starts spinning in a busy loop.
 The purpose of this is to protect very short critical sections where a context switch takes more time than waiting for the other task to finish.
-Yet, spin locks were also used to protect large sections in the kernel and caused big delays.
+Yet, spin locks were also used to protect large sections in the kernel and caused large delays.
 To solve this problem, spin locks were replaced by mutexes when possible which allow the preemption of critical sections.   
 
 \subsubsection{Threaded Interrupts}\label{ss_threaded_interrupts}
-One other big factor to reduce latencies was the introduction of threaded interrupts in the RT patch.
+One other important factor to reduce latencies is the introduction of threaded interrupts in the RT patch.
 Originally, interrupt service requests were handled completely in interrupt context.
-This means that high priority tasks had to wait for low priority interrupts to complete, e.g. disk \ac{I/O}.
+This means that high priority tasks had to wait for low priority interrupts to complete when the processor does not allow interrupt nesting, e.g. disk \ac{I/O}.
 A solution to this is moving the work from the interrupt context to an interruptible thread.
 Therefore, when an interrupt occurs, this thread is unblocked by the \ac{ISR}.
-As default, those threads have a real-time priority (refer to \ref{ss_scheduling_in_linux}) of 50 in the current implementation.
+As default, those threads have a real-time priority of 50 in the current kernel implementation (refer to \ref{ss_scheduling_in_linux}).
 This mechanism allows priority based regulation of the \ac{ISR} execution because priorities of real-time tasks can be changed dynamically. 
 Moreover, the delay caused by interrupts decreases significantly for high-priority real-time tasks.
 In case an \ac{IRQ} has to be serviced immediately, there is still the possibility to set the \textit{IRQF\_NO\_THREAD} flag on initialization.
 As a result, the \ac{ISR} will not be threaded but proceeded in the original way.
 
 \subsubsection{Softirqs}
-The softirq mechanism has changed through various \ac{RT} patch versions.
+The softirq mechanism has changed through various RT patch versions.
 Starting with the first release of the patch, softirqs were treated similar to hardware interrupts, as threads \cite{rostedt:iotrtp}.
 In version 3.0 though, the handling of softirqs was changed to the same setting as in the mainline kernel. \cite{corbet:siar}.
 As this raises problems for the real-time behavior of the kernel, there was another change in version 3.6.1.
@@ -494,8 +495,9 @@ Those softirqs are still handled by the ksoftirqd thread.
 \section{Mathematical Quantification of Operating Systems}
 There are many different parameters to quantify \acp{RTOS}.
 Some important ones besides real-time capability are freedom of charge, memory footprint, available drivers, licensing, \ac{API} richness and support \cite{Anh:sapeortosfsm}.   
-Based on these categories, FreeRTOS and LinuxRT were decided to be the most promising candidates for the application in future projects.
-To determine which of the two is suitable for what kind of real-time projects, a set of tests has to be defined and performed.
+Based on these categories, LinuxRT was decided to be a promising candidate for future projects.
+As a reference, FreeRTOS is compared to LinuxRT.
+To determine which of the two is suitable for what kind of real-time applications, a set of tests has to be defined and performed.
 Consequently, the parameters which have an influence on the execution time have to be determined and analyzed.
 In the following, the boot time and the real-time task or application run time are described mathematically.
 This formula will later be used to evaluate the \acp{OS}.
@@ -507,7 +509,7 @@ The boot time $ t_{boot} $ can be calculated straight forward from the already d
 	\item Time to load the \ac{FSBL} $ t_{fsbl} $
 	\item Time to program the \ac{FPGA} $ t_{fpga} $
 	\item Time to load the \ac{OS} $ t_{osload} $
-	\item Time to load the \ac{SSBL}$ t_{ssbl} $ 
+	\item Time to load the \ac{SSBL} $ t_{ssbl} $ 
 	\item Time to load device tree $t_{tree} $
 	\item Time to load the file system $ t_{filesys}$
 	\item Time to boot the \ac{OS} $ t_{boot} $
@@ -569,7 +571,10 @@ On the contrary, in Linux all of these delays have to be considered or eliminate
 To compare the two \acp{OS} and to decide which is suitable for a specific application, the parameters described in the previous section have to be determined.
 Only features available in both \acp{OS} will be considered.
 The goal is to determine worst case times for all of the single parameters and determine the influence of the jitter factors.
-The needed benchmarks for the deterministic and non-deterministic part will be briefly discussed in the following:
+The needed benchmarks for the deterministic and non-deterministic part will be briefly discussed in the following.
+There are definitely more aspects which can be compared to each other than the ones presented. 
+Yet, adding more aspects would extend the scope of this thesis but can be considered for future work.
+ 
 \subsection{Rhealstone Benchmark for deterministic Application Latency} \label{ss_rhealstone_benchmark_for_deterministic_application_latency}
 The application code is not available at the time where the times are measured, so $ t_{app} $ has to be estimated. As the two \ac{OS} are running on the same hardware platform, $ t_{app} $ is equal for both \acp{OS}.
 \par
