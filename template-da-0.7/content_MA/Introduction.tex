@@ -55,7 +55,7 @@ In contrast to General Purpose \acp{OS}, operating systems for embedded devices 
 Some examples are embedded Linux, FreeRTOS or $\mu$COS.
 
 \subsection{Real-Time Systems}
-A special kind of embedded systems are \acp{RTOS} which are designed to meet specific timing requirements. 
+\acp{RTOS} are a special kind of embedded \ac{OS} which are designed to meet specific timing requirements. 
 The main property of an \ac{RTOS} is determinism rather than high-speed performance.  
 Further, real-time does not mean that the system is safety critical as this usually implies more safety arrangements, for instance redundancy.
 Real-time systems are commonly divided into two classes \cite{stromblad:elfrtoemd}, depending on the consequence caused by missing a deadline:
@@ -68,7 +68,7 @@ In hard real-time systems, missing a deadline causes system failure and is not t
 An example is the engine control system of a car which can be damaged or cause an accident because of delayed signals.
 Another example is the release of an airbag in a car. 
 It has to be triggered immediately when a crash happens, any delay could cause the loss of lives. 
-More applications are found in medical systems or industry processing control.  
+More applications can be found in medical systems or industry processing control.  
 %In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
 These kind of systems are usually used for applications with a continuous data flow like multimedia streaming applications or on-line reservation systems.
@@ -87,17 +87,17 @@ In embedded systems, Linux is widely used because it is free of charge, has a la
 Moreover, it is comfortable to use as it embeds features like a command terminal, flexible module integration and a large number of available hardware drivers.
 Yet, resulting from its structure and complexity, the downside of mainline Linux is still the lack of real-time capability.
 \par
-To achieve hard real-time performance, usually special \acp{OS} are used. 
-Those can be based on a real-time kernel design or light-weight \acp{OS} like for example \textit{$\mu$COS} \cite{micrium:microcos} or \textit{FreeRTOS} \cite{freertos}.
-They have a very small memory footprint, fast boot time and no background services (deamons) which could unexpectedly disturb the execution of real-time tasks. 
-Therefore the execution time of tasks and interrupt processing is highly predictable.
-The jitter (variance of execution time) is very low compared to a general purpose \ac{OS}.
+To achieve hard real-time performance, usually specific \acp{OS} are used. 
+Those can be based on a micro kernel like PikeOS \cite{sysgo:prt} or be designed as light-weight \acp{OS}, for example \textit{$\mu$COS} \cite{micrium:microcos} or \textit{FreeRTOS} \cite{freertos}.
+Latter have a very small memory footprint, fast boot times and no background services (deamons) which could unexpectedly disturb the execution of real-time tasks. 
+Therefore, the execution time of tasks and interrupt processing is highly predictable.
+The jitter (maximum deviation from mean execution time) is very low compared to general purpose \acp{OS}.
 Yet, those systems have multiple disadvantages:
 In light-weight \acp{OS}, every change in the underlying hardware requires a reconfiguration of the OS.
 Furthermore, a high-level communication (e.g. terminal) with the system is not provided and has to be implemented if needed. 
-Another solution is one of the hard real-time extensions for Linux like \textit{\ac{RTAI}} (based on a micro kernel) \cite{rtai} or \textit{Xenomai} (real-time development framework) \cite{xenomai}.
+Another solution is one of the hard real-time extensions for Linux like \textit{\ac{RTAI}} \cite{rtai} or \textit{Xenomai} \cite{xenomai}.
 Furthermore, companies like ENEA \cite{stromblad:elfrtoemd} make an effort to improve the real-time performance of their proprietary ENEA Linux.  
-A hard real-time \ac{OS} is for example PikeOS \cite{sysgo:prt} which was developed by \textit{SYSGO Embedded Systems} and is not related to Linux.
+A hard real-time \ac{OS} not related to Linux is for example PikeOS which was developed by \textit{SYSGO Embedded Systems}.
 
 \subsection{The preferred RTOS}
 The operation systems described above are not the optimum choice for developers because either their configuration consumes a lot of time or they cannot be configured to meet the needed real-time requirements.
@@ -111,7 +111,7 @@ It already supports the Linux kernel version 3.5.
 \par
 An open-source alternative which is easy to set up is the Linux PREEMT\_RT patch (further: \textit{LinuxRT})\footnote{From now on, aspects related to both LinuxRT and mainline Linux will be referred to as Linux only.}.
 In the past years, a lot of effort was made to improve low-latency and predictability.
-It is currently available for up to Kernel 3.10.
+It is currently available up to Kernel 3.10.
 Moreover, it provides all advantages of mainline Linux which is widely used in embedded systems because it supports many hardware platforms, has a large community and high driver support.
 The downside of LinuxRT is that it also inherits some disadvantages of mainline Linux, for instance it is not mathematically provable \cite{clark:itrtlfed}.
 Yet, LinuxRT has already been used on computers which have gone into space and it is favored by musicians as ``jitter from mainline Linux would cause a scratching sound'' \cite{clark:itrtlfed}.
@@ -123,7 +123,7 @@ It should provide information on the overall performance of the system and the r
 To evaluate the results of such a test, it is necessary to compare them to a reference. 
 As the main goal is to provide low and deterministic timings, a light-weight \ac{OS} can be used.
 The results will not only show the total performance of the \ac{OS} but also bottlenecks which are worth optimizing. 
-The guideline should show when is is safe to utilize LinuxRT and when it is inevitable to use a light-weight \ac{OS};
+The guideline should show when is is safe to utilize LinuxRT and when it is inevitable to use a light-weight \ac{OS}.
 There are multiple \acp{RTOS} which could be used for a comparison. 
 One operating system which became very popular in the last years is FreeRTOS.
 It is supported on many platforms, is freely available and already used in different market sectors, for example toys, aircraft navigation or engine control \cite{freertos}. 
@@ -132,29 +132,29 @@ The next point to consider is how to benchmark the \acp{OS}.
  
 \subsection{Benchmarking RTOSes}
 There are many criteria which can be applied to benchmark \acp{OS}, in this case FreeRTOS and LinuxRT.
-Typical metrics are latency and jitter - the variance of latencies.
+Typical metrics are latency and jitter - the maximum deviation from mean latency.
 For \ac{RTOS}, it is most important to consider features typically used in real-time applications.
 Those are mainly task synchronization features, e.g. semaphores, message queues or signals (see section \ref{s_intertask_communication} for details).
 Moreover, interrupt latency is crucial because interrupts usually wake up important tasks in \ac{RTOS}.
 Another typical application is the periodic invocation of tasks. 
-More aspects are preemption time of tasks and priority inheritance mechanisms to resolve deadlocks.
+More aspects are the preemption time of tasks and priority inheritance mechanisms to resolve deadlocks.
 These two metrics indicate the capability of the system to interrupt a low priority task to run a task with higher priority. 
 The performance of all these features depends on the implementation of the \ac{OS}.
 Boot time can also be important in real-time systems as it is not acceptable to wait 15 seconds for the engine to run after starting the car.
 Further, some systems support memory access supervision by a \ac{MMU} or power saving options.
-The use of an \ac{MMU} can be especially important in safety critical systems where not allowed memory access would cause a fatal system crash.
+The use of an \ac{MMU} can be especially important in safety critical systems where not allowed memory accesses can cause a fatal system crash.
 Power saving options play an important role in mobile devices.
 The right \ac{OS} configuration can significantly increase the run time of such devices.
 As \ac{RTOS} are usually used on embedded devices, the memory footprint is also of large interest. 
 \par
 One challenge is to choose the right criteria from the ones mentioned above. 
-Another one is to measure values which are as accurate and comparable as possible.
+Another one is to obtain values which are as accurate and comparable as possible.
 Therefore, a way of time measurement has to be found, which can be applied on both systems with the least possible interference on the system.
 
 \section{Related work}
 Performance evaluation has already been done on different platforms and with different \acp{OS}. 
 The first attempt to develop a real-time benchmark was by Kar and Porter in 1989 by introducing the \textit{Rhealstone Benchmark} \cite{kar:itrb} \cite{kar:artbp}. 
-This benchmark is based on six parameters (for details refer to \ref{ss_rhealstone_benchmark_for_deterministic_application_latency}) the resulting value is calculated from.
+This benchmark is based on six parameters the resulting value is calculated from (for details refer to \ref{ss_rhealstone_benchmark_for_deterministic_application_latency}).
 The Rhealstone Performance Number is a weighted mean of all parameters. 
 They implemented the benchmark under iRMX.
 Recently, Timothy J. Boger applied the Rhealstone Benchmark to FreeRTOS on the ZC702 Evaluation platform \cite{boger:rbofatxzepp}.
@@ -175,7 +175,7 @@ The results show a significant reduction in jitter when using LinuxRT.
 \par
 Although some investigation has already been done on LinuxRT, only few works deal with interrupt processing of the \ac{OS}.
 The complete Rhealstone benchmark has neither been implemented for LinuxRT nor for FreeRTOS.
-Further, none of the works try to model the application latency using the results they obtained.
+Further, none of the works tries to model the effect on application latency using the results they obtained.
 Generally, there is little work available on FreeRTOS.
 
 \section{Contribution}
@@ -186,21 +186,22 @@ This is accomplished by
 		\item Introducing a model for application latency including \ac{OS} depending aspects
 		\item Filling the parameters of this model for LinuxRT and FreeRTOS by implementing tests based on the Rhealstone benchmark proposed by Kar and Porter \cite{kar:itrb} \cite{kar:artbp} 
 		\item Utilizing the model to calculate the latency for a synthetic application 
-		\item Deriving some application design guidelines for Linux in general based on the results
+		\item Deriving application design guidelines for Linux in general based on the results
 	\end{itemize} 
-The Rhealstone benchmark metrics are extended by the boot time and a detailed investigation on interrupt latency under load and idle condition and compared to the mainline kernel.
-They are implemented for both \acp{OS} on the ZC702 evaluation board which inherits a Zynq chip (for details on the platform refer to section \ref{s_test_environments_and_tools}). 
+The Rhealstone benchmark metrics are extended by the boot time and a detailed investigation on interrupt latency for LinuxRT. 
+It is performed under load and in idle condition and further compared to the mainline kernel.
+The benchmark is implemented for both \acp{OS} on the ZC702 evaluation board which inherits a Zynq chip (for details on the platform refer to section \ref{s_test_environments_and_tools}). 
 Instructions on how to implement the benchmarks are provided, so the tests can be performed for different \acp{OS} as well.
 Alternatively, the given sources can be used to benchmark different platforms after little modification.
 \par
-The results show that the LinuxRT kernel performs well in terms of interrupt latency even with load for soft real-time requirements.
+The results show that the LinuxRT kernel performs well in terms of interrupt latency for soft real-time requirements, even with load.
 Moreover, the benchmark results expose weaknesses in the Linux POSIX compliant \ac{API} which can be considered during application design. 
 %FreeRTOS is one of the most important light-weight \ac{RTOS} nowadays.
 %As there is a large interest in using more comfortable \acp{OS} like Linux, the goal is to clearly define the limits of LinuxRT.
 %The optimum result is a LinuxRT configuration with comparable benchmark results as FreeRTOS. 
 \par
-The remainder of the work is organized as follows. In chapter \ref{ch_background}, a detailed background on operating systems and an application latency model is provided. 
+The remainder of the work is organized as follows. In chapter \ref{ch_background}, a detailed background on operating systems and an application latency model are provided. 
 Chapter \ref{ch_measurements} describes the performed algorithms and measurements in detail. 
 Further, in chapter \ref{ch_results} the results of the measurements are presented. 
 In chapter \ref{ch_estimation_of_application_run_time}, the application latency model and the results from chapter \ref{ch_results} are used to estimate the run time of two theoretic applications.  
-The last chapter \ref{ch_conclusion} summarizes the contribution of this work and gives an outlook on future work.
+The last chapter summarizes the contribution of this work and gives an outlook on future work.
