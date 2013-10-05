@@ -79,13 +79,13 @@ The results are shown in table \ref{tab_example1_mean}:
 			  $t_{tick}$		& 4.312 us								& 28.892 us 					  & 28.892 us											\\
 			  $t_{deam}$		& -				  							& - 				 						& ($t_{sync}$ + $t_{app}$) * 0.2134 \\ 
 				\hline 
-			  $t_{jitter}$	& 4.312 us  							& 28.892 us						  & 29.435 us											\\ 
+			  $t_{jitter}$	& 4.312 us  							& 28.892 us						  & 29.435 us	+ $t_{app}$ * 0.2134	\\ 
 			  \hline
 			  \hline 
 			  $t_{total}$		& 6.092 us + $t_{app}$	 & 44.357 us + $t_{app}$  &	47.657 us + $t_{app}$*1.2134 	\\ 
 			\hline
 		\end{tabular}
-	\caption{Mean latency estimation for example 1}
+	\caption{Mean Latency Estimation for Example 1}
 	\label{tab_example1_mean}
 \end{table}
 
@@ -124,7 +124,7 @@ The results for this estimation are shown in table \ref{tab_example1_pessimistic
 			  $t_{total}$		& 6.325 us + $t_{app}$	 & 60.606 us + $t_{app}$  &	70.636 us + $t_{app}$ * 1.2134 	\\ 
 			\hline
 		\end{tabular}
-	\caption{Pessimistic latency estimation for example 1}
+	\caption{Pessimistic Latency Estimation for Example 1}
 	\label{tab_example1_pessimistic}
 \end{table}
 The results of this estimation are very high as the highest value possible is assumed for every parameter. 
@@ -186,7 +186,7 @@ The results are shown in table \ref{tab_example2_mean}:
 			  $t_{total}$		& 2.959 us + $t_{app}$	 & 23.224 us + $t_{app}$  &	28.18 us + $t_{app}$ * 1.2134 	\\ 
 			\hline
 		\end{tabular}
-	\caption{Mean latency estimation for example 2}
+	\caption{Mean Latency Estimation for Example 2}
 	\label{tab_example2_mean}
 \end{table}
 The first two test cases are very accurate as the jitter has been eliminated completely.
@@ -218,7 +218,7 @@ The results are shown in table \ref{tab_example2_pessimistic}:
 			  $t_{total}$		& 2.997 us + $t_{app}$	 & 24.044 us + $t_{app}$  &	29.174 us + $t_{app}$ * 1.2134 	\\ 
 			\hline
 		\end{tabular}
-	\caption{Pessimistic latency estimation for example 2}
+	\caption{Pessimistic Latency Estimation for Example 2}
 	\label{tab_example2_pessimistic}
 \end{table}
 The jitter in this example is much lower than for the other example where interrupts were used and the timer tick was present.

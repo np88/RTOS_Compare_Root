@@ -113,15 +113,15 @@ Person A and person B want to withdraw money from the same bank account (both 50
 				Task A 							& Task B 							& Memory  \\
 				\hline 
 				-- 									& -- 									& X 			\\
-			  get X 							& -- 									& X				\\
-			  increment X by 500 	& --									& X				\\
-			  --									& get X								& X				\\
-		 		--		 							& increment X by 500	& X				\\
-			  write back X			 	& --									& X	+ 500	\\
-			  --									& write back X				& X + 500	\\				   
+			  Get X 							& -- 									& X				\\
+			  Increment X by 500 	& --									& X				\\
+			  --									& Get X								& X				\\
+		 		--		 							& Increment X by 500	& X				\\
+			  Write back X			 	& --									& X	+ 500	\\
+			  --									& Write back X				& X + 500	\\				   
 			\hline
 		\end{tabular}
-	\caption{Example for concurrent memory access}
+	\caption{Example for concurrent Memory Accesses}
 	\label{tab_example_concurrent_memory_access}
 \end{table}
 
@@ -577,6 +577,7 @@ Yet, adding more aspects would extend the scope of this thesis but can be consid
  
 \subsection{Rhealstone Benchmark for deterministic Application Latency} \label{ss_rhealstone_benchmark_for_deterministic_application_latency}
 The application code is not available at the time where the times are measured, so $ t_{app} $ has to be estimated. As the two \ac{OS} are running on the same hardware platform, $ t_{app} $ is equal for both \acp{OS}.
+It is assumed that no \ac{OS} specific \ac{API} calls are used during $ t_{app} $.
 \par
 For the latencies related to the \ac{OS} and the interrupt latency the Rhealstone benchmark can be utilized. 
 As already mentioned, it was introduced by Kar and Porter in 1989 \cite{kar:artbp} and was further modified and published by Kar in 1990 \cite{kar:itrb}.
@@ -602,11 +603,11 @@ Therefore, all causes of delays are briefly examined whether they can possibly b
 The timer tick occurs at a predefined frequency and cannot be eliminated without radical changes to the kernel.
 One benefit is that this delay is deterministic and can be included into the application design. 
 Further, one possibility to remove delays caused by the timer tick (and other interrupts) is to put time critical code into a critical section.
-This is possible in FreeRTOS and in Linux kernel mode.
-Still it is important to be aware of the timer interrupt delay, especially in Linux where programs which are running in user mode cannot turn off interrupts. 
+This is possible in FreeRTOS as well as in Linux kernel mode.
+Still, it is important to be aware of the timer interrupt delay, especially in Linux where programs which are running in user mode cannot turn off interrupts. 
 This latency is also important in systems where nested interrupts are enabled because the timer tick usually has the highest priority and can occur when handling other time critical interrupts. 
-Still, it is worth knowing whether the system behavior decreases the performance of the application in an unacceptable way or if the delay can be tolerated.
-Obviously, it is preferable not to influence the \ac{OS}' behavior as little as possible.         
+Therefore, it has to be determined whether the system behavior decreases the performance of the application in an unacceptable way or if the delay can be tolerated.
+Usually, it is preferable to influence the \ac{OS}' behavior as little as possible.         
 
 \paragraph{Interrupts}
 Interrupts usually occur infrequently and hence cause undefined delays. 
@@ -625,15 +626,15 @@ Logically, memory accesses from the \ac{OS} influence the cache behavior as well
 Therefore, \acp{OS} which do not make heavy use of large memory structures perform better. 
 
 \paragraph{Page Swapping}
-If the \ac{OS} uses virtual memory space, page swapping can cause delays during the execution of a real-time task.
+If the \ac{OS} uses virtual memory space, page swapping can cause delays during the execution of real-time tasks.
 To prevent this issue, Linux provides a function to lock specific memory pages in \ac{RAM}.
-This function was specifically designed to be used to support deterministic behavior in real-time applications.
+This function was specifically designed to support deterministic behavior in real-time applications.
 Nevertheless, the programmer is in charge of using this function correctly.
 
 \paragraph{Daemons}
 Daemons are background processes which may not only cause jitter but also slow down the boot process. 
-They do not exist in FreeRTOS.
+They do not exist in FreeRTOS except when explicitly loaded.
 Unnecessary daemons in Linux can be detected and removed from the system.
-This is especially important for daemons which make a large use of \ac{I/O} accesses.
+This is especially important for daemons which make large use of \ac{I/O} accesses.
 
 %\subsection{Test Application}
