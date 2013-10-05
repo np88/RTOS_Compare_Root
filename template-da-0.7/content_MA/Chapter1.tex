@@ -103,7 +103,7 @@ Before the tasks can continue their work, all data has to be available.
 Such synchronization points are called barriers.
 
 \subsection{Memory access}\label{ss_memory_access}
-Concurrent memory access of multiple tasks can have undesired results as illustrated in the following example(see table \ref{tab_example_concurrent_memory_access}) :\\
+Concurrent memory access of multiple tasks can have undesired results as illustrated in the following example (see table \ref{tab_example_concurrent_memory_access}) :\\
 Person A and person B want to withdraw money from the same bank account (both 500 Euros) from a bank account via ATM at the same time.
 
 \begin{table}[htbp]
@@ -159,7 +159,7 @@ Now C is woken up and can finish its work before B is scheduled again.
 \subsection{Message Passing}
 One way to exchange information between different tasks is passing messages between each other. 
 Usually, one task blocks on a message queue until another task puts a message in this queue.
-This event wakes up the blocking task,so it can retrieve the message.
+This event wakes up the blocking task, so it can retrieve the message.
 The mechanism is a mix of signaling event and synchronizing shared memory access.
 It is available in Linux as well as in FreeRTOS.
 
@@ -179,7 +179,7 @@ The implementation of the bottom half is dependent on the operating system.
 \par
 Interrupts can occur any time and are serviced immediately.
 Consequently, any code currently running will be interrupted.
-Some sections in the kernel code have to be run atomically to prevent critical errors in the systems.
+Some sections in the kernel code have to be run without interruption to prevent critical errors in the systems.
 Such sections are called critical sections.
 Interrupts are usually disabled on entering a critical section.
 Therefore, servicing the interrupt is postponed what causes a higher interrupt latency.
@@ -199,7 +199,7 @@ This delay also referred to as jitter.
 \end{figure}
 
 In contrast, \textit{latency} is the time a real-time task or a piece of code actually needs to execute. 
-There are mainly four kind of delays and one kind of latency:
+There are mainly three kind of delays and one kind of latency:
 \begin{enumerate}
 	\item Delays from the Operating System
 	\item Delays from interrupts (fig. \ref{fig_delay})
@@ -225,7 +225,7 @@ The last cause of delays is caching.
 Caches are fast buffers which allow faster data access to data currently cached.
 They are often built up hierarchical (level 1, level 2, ...) and divided into data and instruction caches.
 A typical set up are separate level 1 data and instruction caches for each \ac{CPU} and a shared level 2 cache for both data and instructions for all \acp{CPU}.
-On one hand, it caches increase the performance of an application significantly by reducing slower memory accesses to the \ac{RAM}. 
+On one hand, caches increase the performance of an application significantly by reducing slower memory accesses to the \ac{RAM}. 
 On the other hand, the cache is used by every process on the system.
 This can cause data currently needed by a real-time application not to be present in the cache, a cache miss occurs.
 The reload of the data to the cache causes a delay.
@@ -234,9 +234,9 @@ The delay is hardware dependent.
 \subsection{Latencies from Task Execution and Synchronization}
 The last aspect is more correctly defined as latency, not as delay.
 It specifies the time which is caused by using several synchronization methods provided by the \ac{OS}. 
-These latencies are implementation specific.
-This time is predictable:
-\\The obvious one is the task switching time when a context switch occurs.
+These latencies are implementation specific and can be measured.
+\par
+The obvious one is the task switching time when a context switch occurs.
 This is not avoidable and happens either when the timer tick occurs (refer to \ref{ss_timer_tick}), a task blocks, finishes or voluntarily releases the \ac{CPU}.
 Another latency related to scheduling is the preemption time.
 This is the time which it takes the \ac{OS} to interrupt a low priority task and schedule a high priority task.
@@ -281,7 +281,7 @@ Priorities can be changed in runtime.
 \par
 All tasks are managed in doubly linked lists dependent on their state (see fig. \ref{fig_freertos_ready_queue}). 
 The Ready state is implemented as a list array indexed by the priority level. 
-When the scheduler is invoked, it first updated the Ready lists and then schedules the next task.
+When the scheduler is invoked, it first updates the Ready lists and then schedules the next task.
 In case there are multiple tasks in one list, the \ac{RR} algorithm is used to pick the one.
 
 \begin{figure}[htb]
@@ -344,7 +344,7 @@ For faster data access, program data stored in the file system is loaded from ha
 This is called mapping physical memory (from the file system) to virtual memory (\ac{RAM}).
 Because of efficiency considerations, the data blocks are managed in pages of consequent data which usually consist of several kBs.
 The pages used by the real-time application could be flushed from the \ac{RAM} which causes hardly predicable delays by reloading of pages.
-Yet, there is the possibility to to lock specific pages for critical data or applications in \ac{RAM}.
+Yet, there is the possibility to lock specific pages for critical data or applications in \ac{RAM}.
 This feature should be used carefully because it might increase the run time of one application but decrease the over-all system performance.   
 
 \subsection{Scheduling in Linux}\label{ss_scheduling_in_linux} 
@@ -411,9 +411,10 @@ Softirqs are statically registered in the kernel during compile time and are onl
 Their number is limited by the \ac{OS}.
 In standard Linux they are invoked when the system is returning from a hardware interrupt, in the \textit{ksoftirqd} thread or by an explicit function call to \textit{do\_softirq()}.
 Softirqs - even the same type - can run concurrently on multiple \acp{CPU} but cannot interrupt other softirqs.
-Usually, all raised softirqs are handled by the do\_softirq function, but when too many softirqs are raised are pending to be executed, they are moved to the ksoftirqd thread which is scheduled when the \ac{OS} is not busy.
+Usually, all raised softirqs are handled by the do\_softirq function, but when too many softirqs are pending to be executed, they are moved to the ksoftirqd thread which is scheduled when the \ac{OS} is not busy.
 Tasklets are built on top of softirqs and are not related to tasks as the name may suggest. 
-Compared to softirqs, tasklets have a lighter interface and tasklets of the same type cannot run concurrently on any \ac{CPU}.
+Compared to softirqs, tasklets have a lighter interface.
+Further, tasklets of the same type cannot run concurrently, even on different \acp{CPU}.
 Moreover, they can be created dynamically during run time.
 The last option to defer work is to use to a work queue.
 Work queues schedule kernel threads and can sleep if necessary compared to the other two options
@@ -469,7 +470,7 @@ One other big factor to reduce latencies was the introduction of threaded interr
 Originally, interrupt service requests were handled completely in interrupt context.
 This means that high priority tasks had to wait for low priority interrupts to complete, e.g. disk \ac{I/O}.
 A solution to this is moving the work from the interrupt context to an interruptible thread.
-Therefore, when an interrupt occurs, a working thread in started (or resumed) in the \ac{ISR}.
+Therefore, when an interrupt occurs, this thread is unblocked by the \ac{ISR}.
 As default, those threads have a real-time priority (refer to \ref{ss_scheduling_in_linux}) of 50 in the current implementation.
 This mechanism allows priority based regulation of the \ac{ISR} execution because priorities of real-time tasks can be changed dynamically. 
 Moreover, the delay caused by interrupts decreases significantly for high-priority real-time tasks.
@@ -527,10 +528,9 @@ Based on the introduced delays in section \ref{s_hardware_delays_and_os_jitter},
 	\end{equation}  		
 		\begin{enumerate}
 			\item Execution time for application code $ t_{app} $ 
-			\item Execution time $ t_{sync} $ for \ac{OS} related features where $ n_{sync} $ is the number of \ac{OS} 
-						related features and $ x_{sync}^{i} $ is the number of times this feature was used in the application 
+			\item Execution time $ t_{sync} $ for \ac{OS} related features where $ n_{sync} $ is the number of \ac{OS} related features and $ x_{sync}^{i} $ is the number of times this feature was used in the application 
 						$ t_{sync} = \sum\limits_{i=1}^{n_{sync}} {x_{sync}^{i} * t_{sync}^{i}} $
-			\item Execution time for \acp{ISR} belonging to the application $ n_{isr} $ is the number of 
+			\item Execution time for \acp{ISR} belonging to the application where $ n_{isr} $ is the number of 
 						\acp{ISR} executed during the application and $ x_{isr}^{i} $ is the number of times this interrupt
 						occurs during the application
 						$ t_{isr} = \sum\limits_{i=1}^{n_{isr}} {x_{isr}^{i} * t_{isr}^{i}} $						

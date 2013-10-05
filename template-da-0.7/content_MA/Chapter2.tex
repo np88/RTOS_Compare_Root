@@ -32,7 +32,7 @@ The Zynq platform will be used in projects where most likely both \ac{PS} and \a
 This chip is especially useful to combine a powerful \ac{CPU} and own hardware designs.
 To make use of the \ac{PL}, a pulse generator \ac{FPGA} module was implemented.
 It is connected as \ac{GPIO} device.
-The pulse generator is used to trigger interrupts which are then handles by the \ac{GIC} of the \ac{APU} (see figure \ref{fig_pulse_generator}). 
+The pulse generator is used to trigger interrupts which are handled by the \ac{GIC} of the \ac{APU} (see figure \ref{fig_pulse_generator}). 
 
 \begin{figure}[htb]
 		\begin{center}
@@ -93,7 +93,8 @@ The goal of the configuration is to create a minimal version of Linux.
 This means to eliminate kernel tools (e.g. tracing tools) and unnecessary drivers from the system. 
 Driver initialization has also a negative impact on the boot time.
 Moreover, drivers can cause a larger memory print of the system and delays during runtime. 
-As the detailed process of driver elimination is not of interest at this point, only the most important steps will be pointed out:\\
+As the detailed process of driver elimination is not of interest at this point, only the most important steps will be pointed out.
+\par
 The \ac{OS} under test is based on a real system which will be used by Siemens in later projects.
 Therefore, only the drivers needed in this system will be kept in the kernel.
 This does not necessarily have an impact on the implemented test application:
@@ -258,16 +259,6 @@ In such cases, the complete list has to be searched from the beginning.
 Therefore, the task switching time is slightly higher than for task switching within the same priority level.
 Both \acp{OS} implement a yield function which allows the calling task to invoke the scheduler.
 It can be used in the experiment.
-\par
-Two tasks of the same priority are set up, their composition is the same. 
-Both perform a for-loop with the number of executions.
-The first instruction in the loop is the recording of the start time.
-Then a yield is performed what causes a context switch (see table \ref{tab_task_switching}). 
-The first instruction of the newly scheduled task is the recording of the end time.
-Obviously, the first start time is recorded twice because the two tasks are equal.
-Hence, the start time of the last test run is not valid.
-When the for-loop is executed 50000 times in each task, 100000 context switches are performed in total.
-An advantage of this method is that all data is collected without any overhead which has to be subtracted afterwards.
 
 \begin{table}[htbp]
 	\centering
@@ -286,18 +277,28 @@ An advantage of this method is that all data is collected without any overhead w
 	\caption{Task Switching Algorithm}
 	\label{tab_task_switching}
 \end{table}
+
+Two tasks of the same priority are set up, their composition is the same. 
+Both perform a for-loop with the number of executions.
+The first instruction in the loop is the recording of the start time.
+Then a yield is performed what causes a context switch (see table \ref{tab_task_switching}). 
+The first instruction of the newly scheduled task is the recording of the end time.
+Obviously, the first start time is recorded twice because the two tasks are equal.
+Hence, the start time of the last test run is not valid.
+When the for-loop is executed 50000 times in each task, 100000 context switches are performed in total.
+An advantage of this method is that all data is collected without any overhead which has to be subtracted afterwards.
  
 \section{Semaphore Shuffle Time}
-The semaphore shuffle time defined by Kar is used to measure the overhead caused by using semaphores to ensure mutual exclusion.
+The semaphore shuffle time proposed by Kar is used to measure the overhead caused by using semaphores to ensure mutual exclusion.
 More precisely, it is the time between a task B being blocked on a semaphore which is taken by task A and then unblocked when the semaphore is released.  
 Besides, it is possible, that a task protects a critical section by mutexes, but is not interrupted by another task.
-This case has to be considered as well.
-Based on the above test cases, not counting semaphores but mutexes are used to implement mutual exclusion.
+This has to be considered as well.
+Based on the test cases, not counting semaphores but mutexes are used for the implementation.
 \par
-Furthermore, signaling is a widely used feature to synchronize events, therefore it has to be included in the benchmark as well.  
+Furthermore, signaling is a widely used feature to synchronize events, therefore it has to be included in the benchmark.  
 Consequently, the semaphore shuffling results in three different tests.
 The synchronization tests are important as they can influence the design of an application.
-For time critical applications, it is preferable to use the fastest methods avaiable.
+For time critical applications, the fastest methods available is preferred.
 
 \paragraph{Semaphore Shuffling Time by Kar}
 In the first benchmark, two tasks are passing a mutex from one to the other.
@@ -510,8 +511,8 @@ It is not designed to be exposed to unexpected conditions.
 \subsection{Interrupt Measurement LinuxRT}
 %There are more interrupts involved (e.g. Ethernet and \ac{UART}) in the LinuxRT system than in FreeRTOS.
 As already mentioned, \acp{ISR} are processed as threads in LinuxRT.
-Dependent on the application, there is also the possibility to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
-The threaded version is part of the kernel preemption and reduces the overall jitter on real-time applications as the threads are preemptive.
+Depending on the application, there is also the possibility to execute the handler in interrupt context (see \ref{ss_threaded_interrupts}).
+The threaded version is part of the kernel preemption and reduces the overall jitter in real-time applications as the threads are preemptive.
 For fast interrupt handling hard \acp{IRQ} are usually used and will be used in this experiment. 
 \par
 Interrupt service routines in Linux can only be installed in kernel modules. 

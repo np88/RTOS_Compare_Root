@@ -72,7 +72,7 @@ More applications are found in medical systems or industry processing control.
 %In firm real-time systems, deadline misses may occur at rare intervals and cause loss of \ac{QoS}, but not a complete system failure.
 In soft real-time systems, deadlines can be missed but decrease the \ac{QoS}. 
 These kind of systems are usually used for applications with a continuous data flow like multimedia streaming applications or on-line reservation systems.
-Missing data packets in these application may cause noise in a video conference but no harm of lives.
+Missing data packets in these application may cause noise in a video conference but no harm to lives.
 
 \subsection{Choosing the right OS}
 The class of a system always depends on its application. To meet the given requirements,
@@ -100,9 +100,9 @@ Furthermore, companies like ENEA \cite{stromblad:elfrtoemd} make an effort to im
 A hard real-time \ac{OS} is for example PikeOS \cite{sysgo:prt} which was developed by \textit{SYSGO Embedded Systems} and is not related to Linux.
 
 \subsection{The preferred RTOS}
-The operation systems described above are not the optimum choice for developers because their either their configuration consumes a lot of time or they cannot be configured to meet the needed real-time requirements.
+The operation systems described above are not the optimum choice for developers because either their configuration consumes a lot of time or they cannot be configured to meet the needed real-time requirements.
 The optimum system provides all necessary drivers, requires as low configuration and modification as possible and can guarantee the right level of real-time capability. 
-Further, it should be free of charge, have a high level of support and run real-time and best-effort \footnote{Best-effort tasks are tasks which do not need to meet any timings.} tasks concurrently.
+Further, it should be free of charge, have a high level of support and run real-time and best-effort tasks\footnote{Best-effort tasks are tasks which do not need to meet any timings.} concurrently.
 Most of the systems are either proprietary and therefore not free of charge for development or light-weight systems which barely provide any drivers.
 The Linux real-time extension \ac{RTAI} is hard to install and has a complex \ac{API} what makes the use of it unattractive \cite{mitschang:heulfrvr}.
 Further, the current \ac{RTAI} version supports only the old Linux kernel version 2.6.38.8 \cite{rtai} whereas the current mainline kernel is already at version 3.12. 
@@ -112,7 +112,7 @@ It already supports the Linux kernel version 3.5.
 An open-source alternative which is easy to set up is the Linux PREEMT\_RT patch (further: \textit{LinuxRT})\footnote{From now on, aspects related to both LinuxRT and mainline Linux will be referred to as Linux only.}.
 In the past years, a lot of effort was made to improve low-latency and predictability.
 It is currently available for up to Kernel 3.10.
-Moreover, it provides all advantages of mainline Linux which is widely used in embedded systems because is supports many hardware platforms, has a large community and high driver support.
+Moreover, it provides all advantages of mainline Linux which is widely used in embedded systems because it supports many hardware platforms, has a large community and high driver support.
 The downside of LinuxRT is that it also inherits some disadvantages of mainline Linux, for instance it is not mathematically provable \cite{clark:itrtlfed}.
 Yet, LinuxRT has already been used on computers which have gone into space and it is favored by musicians as ``jitter from mainline Linux would cause a scratching sound'' \cite{clark:itrtlfed}.
 LinuxRT sounds very promising for future applications.
