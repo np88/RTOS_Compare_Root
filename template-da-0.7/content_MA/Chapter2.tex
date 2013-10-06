@@ -225,7 +225,8 @@ There are three bottlenecks in this process:
 The default Linux configuration provided by Xilinx does not include an \ac{FPGA} bitstream and is run from \ac{SD} card.
 This takes 13 seconds in total.
 Whereas $t_{boot}$ is only 3 seconds and $t_{fpga}$ is 0, the other delays sum up to 10 seconds, which is mostly due to the transfer of the Linux image and the file system . 
-Besides, by adding a bitstream to the boot image, this time increases by another $ t_{fpga} $ which depends on the size of the bit stream.   
+Besides, by adding a bitstream to the boot image, this time increases to a total of 20 s. 
+This is due to $ t_{fpga} $ which depends on the size of the bit stream.   
 \par
 The very first step to decrease this time has already been done by compressing the Linux kernel (see \ref{sss_linuxrt}).
 The next step is to move the bitstream inside of the boot image.

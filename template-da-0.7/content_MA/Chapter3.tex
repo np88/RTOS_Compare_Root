@@ -1,6 +1,6 @@
 \chapter{Results}\label{ch_results}
 In this chapter, the results from the previously described experiments are presented.
-Moreover, the non-deterministic aspects of the are further investigated for both operating systems. 
+Moreover, the non-deterministic aspects are further investigated for both operating systems. 
 The main observation is - as expected - that LinuxRT is usually slower than FreeRTOS and has a higher jitter. 
 This is especially recognizable when the benchmarks become more complex, for example for the deadlock breaking time or for the preemption time.
 To create the same initial situation for every benchmark, the Linux operating system was rebooted every time before performing a test.
@@ -17,22 +17,22 @@ An important factor is $t_{fpga}$ as the boot time highly depends on the size of
 \subsection{Boot Time of Linux}
 The boot time in Linux $ t_{boot}^{linux} $ was initially 20 seconds when using the boot configuration with a custom kernel from Xilinx (see \ref{ss_booting_in_linux}). 
 With the new boot configuration described in section \ref{ss_booting_in_linux} the boot time could be reduced to 7.5 seconds. 
-One main factor is the \ac{FPGA} configuration of the \ac{FSBL} which takes 11 seconds in the original configuration.
+One main factor is the \ac{FPGA} configuration by the \ac{FSBL} which takes 7 seconds in the original configuration.
 The change of the file system has an impact of 2 seconds as well but this is a minor factor as the \ac{UBI} gets slower with increasing memory. 
-Extensive use of the system caused for example a command history and further cache data to be stored and checked on start-up.
+Extensive use of the system caused a command history and further cached data to be stored in the file system and checked on start-up.
 This leads to an increase of the boot time to 9 seconds when the series of benchmarks was finished.
 Yet, it is still possible to load the file system in read-only mode which decreases $ t_{boot}^{linux} $ to 5.7 s.
-This can be for example used in a running systems where no writing of data to the file system is necessary.
-In configuration mode, the system can be easily booted in read-write mode so that existing applications or configuration files can be updated. 
+For example, this can be used in running systems where no writing of data to the file system is necessary.
+In a configuration mode, the system can be booted in read-write mode so that existing applications or configuration files can be updated. 
 The result of this experiment is a boot time which was decreased by 55 \% in read-write mode and by 71.5 \% in read-only mode.
 
 \section{Task Switching Results}\label{s_task_switching_results}
 The measurements are presented in two different graphs. 
 The upper one always shows the number of the occurrence of one latency over time. 
-Both axes are scaled logarithmically. 
 This curve gives a good overview over the statistic and deviation of the measurement.
 The lower picture shows the latencies plotted over time. 
 This curve shows time dependent events like the timer tick.  
+Similar curves will also be presented for the results of the other measurements.
 %Further, this presentation of the results is not only valid for the task switching time but for all results presented in the following.
 Table \ref{tab_summary_task_switching} summarizes the results for the task switching latency.
 Details on the results are provided in the following sections.
@@ -61,25 +61,26 @@ Details on the results are provided in the following sections.
 \end{figure}
 As the blue color in figure \ref{fig_tast_switching_result_free} shows, the mean value for FreeRTOS task switching is 238 ns. 
 The standard deviation for the test set is 3.8 ns (1.6 \%).
-The peaks at the time of 0.1 and 0.2 us are showing the active timer tick. 
-The probability to capture the timer tick in this experiment is very high because a large density of the test program code is included into the time measurement.
+The peaks at the time of 0.01 and 0.02 s are showing the active timer tick. 
+The probability to capture the timer tick in this experiment is very high because the test program is permanently executed.
 The maximum value measured for the tick is 1.059 us.
-When the task switching time is subtracted from this value, the resulting tick overhead is 821 ns.
+When the mean task switching time is subtracted from this value, the resulting tick overhead is 821 ns.
 The reason for the different tick times (1.059 us and 0.752 us) cannot be clearly verified, as no proper tracing tools were available. 
 Yet, some assumptions can be made on the behavior of the system. 
 In table \ref{tab_task_switching}, the test algorithm is described. 
 Depending on the point in time when the tick interrupts the code execution, the delay time can vary.
 When the interrupt occurs before line 2 was executed, a task switch is performed and the time stop in line 3 is executed.
 When the code continues to run, a yield is performed in line 5.
-After the context switch, Task 1 continues in line 2 and another context switch is performed. 
+After the context switch, task 1 is resumed in line 2 and another context switch is performed. 
 So actually two context switches are measured. 
 Another scenario which is theoretically possible is that the tick interrupts the test program right between line 3 and 4. 
 In that case, the tick would not be visible in the graph.
-Moreover, the delay can be caused by loading data needed by the \ac{ISR} to the cache.
+Moreover, delays can be caused by loading data into the cache.
 \par
-Further, small spike clusters which cause a jitter of about 35 ns are visible during the complete test.
-Those cannot be explained by the test setup of the software, so it seems likely that they are caused by hardware, e.g. the cache mechanism.  
-The delays observed in this experiments are also valid for the following experiments.
+Further, small spike clusters which cause a jitter of about 35 ns are visible throughout the complete test.
+Those cannot be explained by the test setup of the software.
+It seems likely that they are caused by hardware, e.g. the cache mechanism.  
+The delays observed in this experiments can also be found in the following experiments and will not be explained separately.
  
 \subsection{Task Switching Results LinuxRT} 
 The mean value for task switching in LinuxRT is 1.46 us and the standard deviation is 131 ns (9.0 \%).
