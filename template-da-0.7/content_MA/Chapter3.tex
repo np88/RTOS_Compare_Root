@@ -91,7 +91,7 @@ Therefore, the maximum tick overhead is 17.485 us.
 The reasons for the different tick timer delays can not be clearly determined because no appropriate tracing tools were available.
 Besides the different timer tick entry points and the cache mechanism, the reasons for different latencies will be discussed later (refer to section \ref{ss_jitter_in_linux}). 
 As in FreeRTOS, small spike clusters are visible during the complete test.
-Because of the higher noise, they do not become as apparent as in the FreeRTOS measurement.
+Because of the higher noise, they are not as apparent as in the FreeRTOS measurement.
 
 \begin{figure}[htb]
 	\begin{center}
@@ -107,20 +107,20 @@ Whereas the yield function in Linux causes a hierarchy of function calls, the yi
 \section{Semaphore Results}
 This sections summarizes the results for the single mutex latency, the semaphore shuffling time and the event signaling. 
 As the plots look very similar to section \ref{s_task_switching_results}, only the resulting values will be presented.
-The single semaphore experiment shows the overhead arising when no other task interrupts an execution code secured by semaphores. 
-The semaphore shuffling experiment defined by Kar quantifies the semaphore overhead when a second task tries to access data which is locked by a semaphore. 
+The single semaphore experiment shows the overhead arising when no other task interrupts executed code secured by semaphores. 
+The semaphore shuffling experiment defined by Kar quantifies the overhead when a second task tries to access an already locked semaphore. 
 The last experiment measures the latency which is caused by event synchronization. 
-Concretely, this means waking up a task by signaling a binary semaphore in FreeRTOS or a condition variable in Linux.
+More precisely, this means waking up a task by triggering a binary semaphore in FreeRTOS or a condition variable in Linux.
 \par
 In time critical applications, the choice of the synchronization method can be crucial.
-For example, sometimes the overhead of priority inheritance can be avoided by specific application design.
+For example, overhead of priority inheritance can be avoided by careful application design.
 
 \subsection{Semaphore Results FreeRTOS}
-All semaphore functions in FreeRTOS are based on message queues.
+All semaphore functions in FreeRTOS are based on message queues (for details refer to section \ref{sss_semaphores_freertos}).
 Mutexes support priority inheritance compared to the other kind of semaphores provided in FreeRTOS.
 Therefore, the overhead when working with mutexes is slightly higher. 
 The results of this measurement are presented in table \ref{tab_results_semaphores_freertos}. 
-As already mentioned, the causes of delays are summarized in section \ref{ss_task_switching_results_freertos}.
+The causes of delays are summarized in section \ref{ss_task_switching_results_freertos}.
 
 \begin{table}[htbp]
 	\centering
@@ -150,10 +150,10 @@ Comparing the mean values (see table \ref{tab_results_semaphores_linux}), the si
 Still, the standard deviation is much higher (46 \% compared to 5.9 \%).
 The semaphore shuffling time in LinuxRT is 3.3 times higher than in FreeRTOS.
 This is mainly caused by two context switches which are part of this experiment (see table \ref{tab_sem_kar}). 
-They are caused by the blocking at the mutex of task 2 in line 4 and by the call yield function of task 1 in line 6.
-The switch takes about 3 us and therefore almost half of the time. 
-Even when considering the task switch time in the experiment, the latency in LinuxRT is still higher than in FreeRTOS.
-The same problem arises for the event signaling experiment which contains one context switch.
+They are caused when task 2 is blocked at the mutex (line 4) and when task 1 calls the yield function (line 6).
+The switches take about 3 us in total and therefore almost half of the time. 
+Even when considering the task switching time in this experiment, the latency in LinuxRT is still higher than in FreeRTOS.
+The same problem arises for the event signaling test which contains one context switch.
 Here, FreeRTOS is 3.01 times faster than Linux. 
 
 \begin{table}[htbp]
@@ -178,28 +178,16 @@ Here, FreeRTOS is 3.01 times faster than Linux.
 \end{table}
 
 \section{Message Passing Time}
-Message passing is another mechanism of task synchronization.
-The algorithm (see table \ref{tab_message_passing}) also provides some points where a task switch can cause faulty results.
-One possible error is that the execution is interrupt between line 2 and 3.
-This causes one additional task switching delay because task 2 is not schedulable, so task 1 will be rescheduled.
+Message passing is another way of task synchronization.
+The algorithm (see table \ref{tab_message_passing}) provides points where a task switch by the timer tick causes faulty results.
+One error occurs when the execution is interrupt after line 2.
+This causes one additional task switch.
+As task 2 is not schedulable at this point, task 1 is rescheduled.
 Another error can happen when task 2 is interrupted before blocking on the queue.
-This causes the message to be already available in the queue after task 1 yields the processor.
-Therefore, task 2 does not block but retrieves the message immediately what takes less time than the original procedure.Table \ref{tab_summary_message_passing} summarizes the results for the message passing latency.
-
-\begin{figure}[htb!]
-	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_FreeRTOS_start_end}
-	\end{center}
-	\caption{Message Passing Result FreeRTOS} \label{fig_message_passing_free}
-\end{figure}
-
-\begin{figure}[htb!]
-	\begin{center}
-		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 		{inputs/pictures_ch3/message_passing_latency_measurements_cfg6_int_saves}
-	\end{center}
-	\caption{Message Passing Result LinuxRT} \label{fig_message_passing_linux}
-\end{figure}
-
+This causes the message to be already available in the queue when task 1 yields the processor.
+Therefore, task 2 can retrieve the message immediately. 
+Consequently, less time is used than in the original procedure.
+Table \ref{tab_summary_message_passing} summarizes the results for the message passing latency.
 \begin{table}[htbp!]
 	\centering
 		\begin{tabular}{|l||l|l|}
@@ -214,23 +202,43 @@ Therefore, task 2 does not block but retrieves the message immediately what take
 	\caption{Result Summary of the Message Passing Latency}
 	\label{tab_summary_message_passing}
 \end{table}
+\begin{figure}[htb!]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/message_passing_latency_FreeRTOS_start_end}
+	\end{center}
+	\caption{Message Passing Result FreeRTOS} \label{fig_message_passing_free}
+\end{figure}
 
 \subsection{Message Passing in FreeRTOS}
 The mean time for passing one message with the content of one byte is 901 ns. 
 The standard deviation is 24.9 ns (2.76 \%) and the maximum peak occuring while the timer interrupt is active is 2.531 us.
-This makes a total overhead of 1,63 us. 
+This makes a total overhead of 1.63 us. 
 The lower graph (figure \ref{fig_message_passing_free}) clearly shows the error cases discussed above. 
 The upper graph only shows the values which are centered around the mean. 
+It shows the latency occurrence deviation which is not influenced by the timer tick in detail.
 This is done for all upper plots shown in the rest of the document. 
 
 \subsection{Message Passing in LinuxRT}
- was used for this experiment, not the POSIX \ac{API} as it is not supported by the platform.
-The mean time for passing one message in LinuxRT with the content of one byte is 5.135 us (see figure \ref{fig_message_passing_linux}). 
+As already mentioned, the System V \ac{API} was used for this experiment, not the POSIX \ac{API} as it is not supported by the platform.
+The mean time for passing one message in LinuxRT with the content of one byte is 5.135 us (see figure \ref{fig_message_passing_linux}).
+\begin{figure}[htb]
+	\begin{center}
+		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 		{inputs/pictures_ch3/message_passing_latency_measurements_cfg6_int_saves}
+	\end{center}
+	\caption{Message Passing Result LinuxRT} \label{fig_message_passing_linux}
+\end{figure}
 The standard deviation is 268 ns (5.22 \%) and the maximum peak occuring while the timer interrupt is active is 18.657 us.
 This makes a total overhead of 13.522 us. 
 The mean message passing latency in FreeRTOS is 5.7 times faster than in LinuxRT.
+The upper graph in figure \ref{fig_message_passing_linux} shows that the distribution of the latency occurrence is similar to a Gaussian curve.
 
 \section{Deadlock Breaking Time}
+The detailed algorithm to obtain the deadlock breaking time is described in table \ref{tab_deadlock}.
+This time provides an orientation on the time the operating system needs to resolve a priority inversion using the implemented priority inheritance algorithm.
+As the schedulable tasks have different priorities in this experiment, the timer tick only causes an unnecessary context switch on occurrence. 
+It results in the same task being continued.
+This experiment has similarities to the semaphore shuffling but also includes the priority inheritance component.
+Table \ref{tab_summary_deadlock} summarizes the results for deadlock breaking time.
 \begin{figure}[htb!]
 	\begin{center}
 		\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] 			{inputs/pictures_ch3/deadlock_results_measurements_cfg6_int_saves}
@@ -238,11 +246,6 @@ The mean message passing latency in FreeRTOS is 5.7 times faster than in LinuxRT
 	\caption{Deadlock Breaking Time LinuxRT} \label{fig_deadlock_result_linux}
 \end{figure}
 
-The detailed algorithm to obtain the deadlock breaking time is described in table \ref{tab_deadlock}.
-This time gives an orientation on the time the operating system needs to resolve a priority inversion by the implemented priority inheritance algorithm.
-As usually only one active task is running in this experiment, the timer tick causes an unnecessary context switch which results in the same task being continued.
-This experiment has similarities to the semaphore shuffling but also includes the priority inheritance component.
-Table \ref{tab_summary_deadlock} summarizes the results for deadlock breaking time.
 
 \begin{table}[htb]
 	\centering
@@ -262,7 +265,9 @@ Table \ref{tab_summary_deadlock} summarizes the results for deadlock breaking ti
 \subsection{Deadlock Breaking Time in FreeRTOS}
 The mean time for the deadlock breaking time in FreeRTOS is 2.113 us. 
 The standard deviation is 34.5 ns (1.63 \%) and the maximum peak occuring while the timer interrupt is active is 3.854 us.
-This makes a total overhead of 1,74 us. 
+This makes a total overhead of 1,74 us.
+Compared to the LinuxRT graphs, the FreeRTOS graphs do not show similarities to a Gaussian curve.
+Yet, the majority of the values is concentrated within 2 us and 2.2 us.
 \begin{figure}[htb!]
 	\begin{center}
 	\includegraphics[trim=2.5cm 1.5cm 2.5cm 2.5cm, scale=0.7] {inputs/pictures_ch3/deadlock_results_FreeRTOS_start_end}
@@ -275,17 +280,20 @@ The mean time for the deadlock breaking time in LinuxRT is 20.68 us.
 The standard deviation is 643 ns (3.11 \%) and the maximum peak occuring while the timer interrupt is active is 37.146 us.
 This makes a total overhead of 16.466 us.
 The LinuxRT implementation is 9.79 times slower than the same implementation in FreeRTOS.
+As already shown for the message passing time, the graph for the deadlock breaking time is similar to a Gaussian curve (see figure \ref{fig_deadlock_result_linux}). 
  
 \section{Interrupt Latency}\label{s_interrupt_latency} 
 The interrupt latency depends not only on the underlying hardware but also on the handling by the operating system.
 In the test, a pulse generator triggers an interrupt which is processed by the system.
-A \ac{LED} which is turned off indicates that the processing has been completed. 
+An \ac{LED} which is turned off indicates that the processing has been completed. 
 The \ac{LED} is explicitly turned off to capture the occurrence of multiple latencies in one picture without capturing the rise time of the \ac{LED}.
 While the only interrupt which is being handled directly by FreeRTOS is the timer tick, Linux supports more advanced handling of interrupts.
 Therefore, the analysis of the interrupt latency in Linux is more complex (see section \ref{ss_interrupt_latency_results_in_linux}). 
 In the first test, the \ac{LED} is turned off directly in the \ac{ISR}.
-In the second test, the interrupt triggers a task in the user space which disables the \ac{LED}. 
-Both tests are repeated under network load.
+This \ac{ISR} is implemented in the device driver for LinuxRT.
+In the second test, the interrupt triggers a task which disables the \ac{LED}. 
+The task is a thread in the user space for LinuxRT.
+Both tests are repeated under network load in Linux.
 The results for interrupt latency without load are summarized in table \ref{tab_summary_interrupts}
 
 \begin{table}[htb]
@@ -309,9 +317,9 @@ The results for interrupt latency without load are summarized in table \ref{tab_
 
 \subsection{Interrupt Latency Results in FreeRTOS}
 As there is no \ac{OS} overhead in the interrupt handling in FreeRTOS, it is very fast and predictive.
-The time to handle the interrupt internally and turn on an \ac{LED} from the \ac{ISR} takes no more than 750 ns. 
+The time to handle the interrupt internally and turn off an \ac{LED} from the \ac{ISR} takes no more than 750 ns. 
 The mean value is 727.71 ns and the standard deviation 4.775 ns (0.66 \%). 
-When the \ac{LED} is turned on from a user task which is unblocked by the \ac{ISR}, the mean time increases to 933.66 ns.
+When the \ac{LED} is turned off from a user task which is unblocked by the \ac{ISR}, the mean time increases to 933.66 ns.
 The standard deviation for this experiment is 41.01 ns (4.39 \%) and the maximum measured value is 1.163 us.
   
 %\begin{figure}[htb]
@@ -324,27 +332,27 @@ The standard deviation for this experiment is 41.01 ns (4.39 \%) and the maximum
 \subsection{Interrupt Latency Results in Linux}\label{ss_interrupt_latency_results_in_linux}
 The interrupt handling in Linux is quiet complex and many different cases have to be considered. 
 As already mentioned, the \acp{ISR} in LinuxRT are threaded to reduce interrupt delays for critical tasks. 
-Obviously, this increases the total latency for threaded interrupts because of context switching.
+Obviously, this increases the total latency for threaded interrupts because of addional context switching.
 So for real-time applications, the \ac{ISR} would be proceeded non-threaded, as in this benchmark.
 Further, the tests were also performed under load condition as it is desirable to run best-effort applications on LinuxRT, not only real-time applications. 
 This experiment shows very well the influence of \ac{I/O} bound load on the Linux system.
 
 \subsubsection{The fastest Interrupt Handling in Linux}
 The first test which was performed is very similar to the FreeRTOS test. 
-It tests the standard Linux system's interrupt latency.
+It tests the mainline Linux system's interrupt latency.
 This means that the interrupts are handled non-threaded and the \ac{LED} is lightened in the \ac{ISR} directly.
 The setup was tested on a standard Linux system.
 The mean value for 50000 measurements is 1.812 us with a standard deviation of 433.06 ns (22.90 \%). 
 This is only 2.5 times higher than in FreeRTOS. 
 The maximum measured value is 3.51 us.
-When put under stress by a constant SCP transfer, the value increases to a mean value of 2.679 us and a standard deviation of 1.30 us (48.53 \%).
+When put under stress by a constant \ac{SSH} transfer, the value increases to a mean value of 2.679 us and a standard deviation of 1.30 us (48.53 \%).
 The maximum value rises to 29.5 us.
 \par
 When the same experiment was repeated for LinuxRT, the mean value is 1.783 us with a standard deviation of 441.63 ns (24.77 \%). 
 The maximum measured value is 2.85 us.
 As expected, the values are comparable to mainline Linux.
 After stressing the system, the mean value stays almost constant at 1.982 us, but the standard deviation rises to 1.212 us (61.15 \%) and the maximum recorded value to 10.835 us.
-In this experiment already can be seen that the maximum value, the jitter, decreases by about 60 \%.
+In this experiment can be seen that the jitter decreases by about 60 \% compared to the mainline kernel.
 
 \subsubsection{Interrupt Handling and User Processes in LinuxRT}\label{sss_interrupt_handling_user_rt}
 \begin{figure}[htb]
@@ -353,12 +361,12 @@ In this experiment already can be seen that the maximum value, the jitter, decre
 	\end{center}
 	\caption[Interrupt Latency LinuxRT]{Interrupt Latency LinuxRT, Resolution 5 us} 	\label{fig_interrupt_latency_linuxrt}
 \end{figure}
-Usually, programmer prefer to write programs in user space and not kernel modules. 
+Usually, programmer prefer to write programs in user space rather than kernel modules. 
 Therefore, in this test a typical user thread scenario is simulated.
 A thread is waiting for an interrupt to occur and then issues a write command to turn off an \ac{LED}. 
 Both experiments were repeated for mainline Linux and LinuxRT. 
 The results were recorded by an oscilloscope.
-In the figures (\ref{fig_interrupt_latency_linuxrt} - \ref{fig_interrupt_latency_linux_load}), the upper channel shows the pulse generator which triggers the interrupt.
+In the figures (\ref{fig_interrupt_latency_linuxrt} - \ref{fig_interrupt_latency_linux_load}), the upper channel shows the pulse which triggers the interrupt.
 This signal was visualized using an \ac{LED} and then measured by an oscilloscope. 
 The lower channel shows the reaction of the \ac{OS} which turns off an \ac{LED}. 
 This graph shows 50000 samples recorded over time. 
@@ -405,15 +413,16 @@ The maximum value is at 26.47 us.
 	\caption[Interrupt Latency mainline Linux with Load]{Interrupt Latency mainline Linux with Load, resolution 15 us} \label{fig_interrupt_latency_linux_load}
 \end{figure}
 Figure \ref{fig_interrupt_latency_linux_load} shows the same experiment stressed with \ac{I/O} load.  
-As in LinuxRT, the maximum registered value is unacceptably large: 90.92 us and more than three times higher than without load.
+The maximum registered value 90.92 us is unacceptably large.
+It is more than three times higher than the maximum without load.
 Moreover, an even higher value could be observed in other experiments.
 The mean value is at 15.853 us and the standard deviation at 6.01 us (37.91 \%).
-From this experiment, the strength of LinuxRT becomes visible as the high network load can be preempted by real-time tasks with higher priority.
+From this experiment, the strength of LinuxRT becomes evident as the high network load can be preempted by real-time tasks with higher priority.
 
 \section{Preemption Time}
 The situation captured in this benchmark is often occurring in real-time applications.  
 The preemption time is related to the interrupt latency, but measures the time that it takes to interrupt a low priority task and then continue a high priority task.
-Another difference is that the test program does not record the time it takes to communicate with the peripheral devices (trigger interrupt, turning on \ac{LED}).
+Another difference in the benchmark setup is that the test program does not record the time it takes to communicate with the peripheral devices (trigger interrupt, turning on \ac{LED}).
 The \ac{GPIO} interrupt is triggered by the interrupt generator every 5 ms.
 
 \subsection{Preemption Time in FreeRTOS}
@@ -429,7 +438,8 @@ The standard deviation is 75 us (3.55 \%).
 In figure \ref{fig_preemption_result_free}, the results of the experiment are shown.
 The maximum value is 2.626 us. 
 Because the results were recorded only every 5 ms, it is likely that one peak in the in the upper plot results from the test being interrupted by the timer tick. 
-The other peak results from the uninterrupted measurement. 
+As no tracing tools were available to verify this, this is only an assumption.
+The other peak would result from the uninterrupted measurement. 
 
 \subsection{Preemption Time in LinuxRT}
 \begin{figure}[htb]
@@ -440,8 +450,8 @@ The other peak results from the uninterrupted measurement.
 \end{figure}
 The mean value measured for the preemption time in LinuxRT is 7.133 us and the standard deviation is 7.156 us (100.32 \%). 
 In figure \ref{fig_preemption_result_linux}, the results of the experiment are shown.
-The upper graph is of similar type as the FreeRTOS graph.
-The only difference are the really high peaks occurring constantly throughout the measurement.  
+The upper graph is comparable to the FreeRTOS graph.
+The difference in the results is that high peaks are occurring constantly throughout the measurement. 
 The maximum value is 125.922 us.
 This results in a total maximum overhead of 118.789 us which is one of the highest measured in all tests. 
 The source of this high jitter could not be further localized as the tracing possibilities were limited and the installation of proper tracing tools would extend the limits of this work. 
@@ -455,7 +465,7 @@ Formula \ref{eq_indet_app} describes the worst case scenario:\\
 $t_{jitter} = t_{tick} + t_{int} + t_{cache} + t_{swap} + t_{daem}$ \\
 Based on the results, the single parameters will be discussed for the operating systems under test. 
 As already mentioned, the cache time will not be handled because cache performance analysis is such a complex topic that it would exceed the limitations of this work.
-The results presented are only valid for the current system setup and can be different for setups with e.g. multi-core support.
+The results presented are only valid for the current system setup and can be different for setups with, for instance, multi-core support.
 As already mentioned, the jitter in FreeRTOS is very predictive and can be reduced to the timer tick only.
 For Linux, the overall system performance is stable when the application is designed correctly and no \ac{I/O} load is applied to the system.
 
@@ -467,11 +477,11 @@ The largest value recorded is 4.312 us in the single semaphore experiment.
 Therefore, $ t_{tick} $ will be set to 4.312 us.
 \par
 The final $t_{jitter}$ results to $ t_{tick} $ and 4.312 us for FreeRTOS.
-The equation shows impressively how low \ac{OS} jitter is and consequently, how deterministic the system behaves.  
+The equation shows very well how low \ac{OS} jitter is and consequently, how deterministic the system behaves.  
  
 \subsection{Jitter in Linux}\label{ss_jitter_in_linux}
 The jitter sources in Linux have to be investigated more closely than the ones in FreeRTOS.
-As described in section \ref{ss_linuxRT_application_design}, some significant jitter sources can simply be eliminated by careful system and application design.
+As described in section \ref{ss_linuxRT_application_design}, some significant jitter sources can be eliminated by careful system and application design.
 
 \subsubsection{Page Swapping} 
  
@@ -490,9 +500,9 @@ As described in section \ref{ss_linuxRT_application_design}, some significant ji
 \end{figure}
 
 As already mentioned, page swapping can cause delays and should be turned off for time critical applications. 
-The benchmark set has been performed without \ac{RAM} locking as well to investigate the result of the call to mlockall() function.
-The effects of page swapping are visualized for the mutex shuffling (figure \ref{fig_no_mlock_mutex_shuffling}) and the deadlock breaking benchmark (figure \ref{fig_no_mlock_deadlock}).
-The figures clearly show, that page swapping has a negative effect on the application performance.
+The benchmark set has been performed without \ac{RAM} locking to investigate the effect of the call to mlockall() function.
+The rusults are visualized for the mutex shuffling (figure \ref{fig_no_mlock_mutex_shuffling}) and the deadlock breaking benchmark (figure \ref{fig_no_mlock_deadlock}).
+The figures clearly shows that page swapping has a negative effect on the application performance.
 Table \ref{tab_results_ram_lock} shows a comparison for both benchmarks with and without the \ac{RAM} lock.
 
 \begin{table}[htbp]
@@ -515,24 +525,27 @@ Table \ref{tab_results_ram_lock} shows a comparison for both benchmarks with and
 \end{table}
 
 The test shows that the \ac{RAM} lock has only a slight effect on the mean result, but the standard deviation increases especially for applications with a small mean time. 
-Further, the maximum tick delay highly increases for this configuration.
+Further, the maximum tick delay highly increases.
 
 \subsubsection{Daemons}
-The number of daemons in Linux can be controlled actively, especially in embedded distributions, the number of daemons is limited by default.
+The number of daemons in Linux can be controlled actively.
+Especially in embedded distributions, the number of daemons is limited by default.
 The daemons available in the custom system are an \ac{SSH} and an \ac{FTP} daemon.
-Both require an Ethernet connection and as shown in section \ref{s_interrupt_latency}, this is not acceptable for a real-time application.
+Both require an Ethernet connection.
+As shown in section \ref{s_interrupt_latency}, this is not acceptable for a real-time application.
 Consequently, both daemons are not allowed to actively communicate via network while a critical application is running.
+The effects caused by an \ac{SSH} daemon are demonstrated in section \ref{sss_interrupt_handling_user_rt}.
 
 \subsubsection{CPU Bound Load}
 \ac{CPU} bound load means that a process is performing a task where no \ac{I/O} communication is necessary.
 These can be for example processes which are collecting system data for statistical purposes. 
 Further, bottom halves of \acp{ISR} can also perform \ac{CPU} bound actions based on data which was previously collected during the top half of the interrupt.
 As this kind of load always depends on correct priority settings, real-time tasks should not be affected by \ac{CPU} load. 
-An experiment where \ac{CPU} load was simulated by the Stress program shows no difference in behavior between the stressed and the non-stressed system.
+An experiment where \ac{CPU} load was simulated by the Stress program shows no difference in between the stressed and the non-stressed system.
 
 \subsubsection{Timer Tick and Interrupt Delays}
 The highest captured value for the timer tick which can for sure be defined as $t_{tick}$ is 28.892 us in the single semaphore benchmark.
-The tick value is significantly larger than in FreeRTOS because Linux is performing more operations than rescheduling and updating of the internal timers. 
+The tick value is significantly larger than in FreeRTOS because Linux performs more operations besides rescheduling and updating of the internal timers. 
 For example, it checks and invokes \ac{RCU} callbacks.
 Moreover, the hierarchy of nested function calls has a high impact on the over-all performance of the system. 
 The interrupt latency benchmarks proves that LinuxRT has a lower throughput but behaves more deterministic under heavy \ac{I/O} load. 
@@ -545,7 +558,7 @@ Yet, this does not mean that LinuxRT cannot be used for real-time applications a
 It is possible to use a multi-core configuration and process interrupts with only a number of dedicated \acp{CPU}.
 This would be even possible for the current hardware platform as the board inherits a dual core processor.
 Further, there are a few mechanisms which propose ways to work around the timer tick.
-Lee and Park introduce a technique to improve real-time performance by predicting the timer interrupt \cite{lee:dltfirtpoelbpoti}.
+Lee and Park introduce a technique to improve real-time performance by predicting the timer tick \cite{lee:dltfirtpoelbpoti}.
 
 \section{Summary}\label{s_summary}
 This section briefly summarizes the results which were presented throughout this chapter and gives a final comparison between the two operating systems under test.
@@ -593,21 +606,22 @@ In the final right column, the factor between the mean FreeRTOS and mean LinuxRT
 The results point out the strengths and weaknesses of LinuxRT compared to FreeRTOS.
 Therefore, it becomes clear which kind of applications can be served by a LinuxRT system and where it gets to its limits.
 \par
-Linux suffers especially from long interrupt latency times due to its complex interrupt handling and the separation between user and kernel device access.
+Linux suffers especially from long interrupt latency times due to its complex interrupt handling and the separation between user and kernel for device accesses.
 Still, when using the non-threaded interrupt handling for LinuxRT, it is possible to handle \ac{I/O} inputs from user space at a mean time of 12.303 us. Considering the worst case time for interrupt handling, an interrupt could be processed within 30 us.
 Even with load, an interrupt can be processed within 40 us. 
 This is more than twice as fast than the mainline kernel worst-case time.
 This means that the jitter arising from putting the system under network load is only about 10 us.
 Yet, the delays are very high in the preemption test, up to 125 us.
 As the origin of this could not be detected, these delays should be handled with care.
-Practically, user space programs should be written when the processing of sensor data needs complex calculations which for example include usage of an \ac{FPU}.
+Practically, user space programs should only be written when the processing of sensor data needs complex calculations which for example include usage of an \ac{FPU}.
 Simple sensor-actor applications can be processed directly in the \ac{ISR}.
 The worst-case time of 3 us without additional interrupt load is very fast and barely slower than in FreeRTOS. 
 Obviously, the maximum latency of the application $t_{app}$ has to be considered as well.
 \par
-Besides the interrupt handling, the other Rhealstone benchmarks give an idea of the overall performance of LinuxRT compared to FreeRTOS and correspond to $t_{os}$. 
 The performance of an application can be estimated by calculating $t_{det}$ (compare to section \ref{ss_applications_and_realtime_tasks}) for the given algorithm.
-Especially task switching, message passing and deadlock breaking causes significantly larger delays in LinuxRT.
+Besides the interrupt handling, the other Rhealstone benchmarks give an idea of the overall performance of LinuxRT compared to FreeRTOS.
+They correspond to $t_{os}$. 
+Especially task switching, message passing and deadlock breaking cause significantly larger delays in LinuxRT.
 Applications with a high number of tasks and many task switches suffer from slow context switching in Linux. 
 This is a point where code optimization in the Linux kernel could increase performance as Linux and FreeRTOS are using the same scheduling algorithm for real-time tasks.  
 The other aspect where Linux performs really bad is resolving deadlock situations by using priority inheritance.
@@ -615,39 +629,42 @@ The complexity of the POSIX compliant \ac{API} is particularly recognizable at t
 One solution to this problem is preventing shared resources between high and low priority tasks while designing the application. 
 Yet, mistakes or inattention during the design phase can quickly lead to unexpected program behavior.
 Depending on the real-time requirements, LinuxRT can fail because it needs about 20 us to resolve a deadlock. 
-A better solution to this problem would be the design of a light-weight synchronization \ac{API} for real-time applications.
-As semaphores and mutexes are a very common memory access synchronization technique, this would cause some significant performance improvement.
+\par
+A solution to this problem would be the design of a light-weight synchronization \ac{API} for real-time applications.
+As semaphores are a very common memory access synchronization technique, this would cause some significant performance improvement.
 It would also reduce the standard deviation which is in general higher in LinuxRT than in FreeRTOS.
 %The downside of this approach is a higher memory footprint of the operating system.
 Further, it was shown that event signaling is twice as fast than message passing in LinuxRT for the used \acp{API}.
-Because both methods implement similar functions, it is faster to use event signaling and shared memory between two threads than passing messages.
+Because both methods implement similar functions, it is faster to use event signaling and shared memory between two threads than message passing.
 In FreeRTOS, the related \acp{API} calls perform almost the same.
 This shows the correctness of the results as the semaphore implementation in FreeRTOS is completely based on message queues.
 \par
-One more aspect is that LinuxRT has a large boot time compared to FreeRTOS. 
+One other aspect is that LinuxRT has a large boot time compared to FreeRTOS. 
 Still, 5.5 s is acceptable for most real-time applications if it is possible to run the file system in read-only mode.
 An option is to boot the \ac{OS} in read-write mode only when diagnostics or system updates have to be done.
 %The disadvantage of this method is that software cannot be updated on-the-fly, but in real-time systems updates should not be made while the system is running anyway.
-The current boot configuration could be even further improved e.g. by loading drivers as modules and not as part of the kernel.
+The current boot configuration could be even further improved, for instance by loading drivers as modules and not as part of the kernel.
 \par
 Besides the application design, the system has to be set up carefully to minimize $t_{jitter}$. 
-A complex \ac{OS} like LinuxRT will not work for real-time applications without being tuned or without restrictions although this would the most desirable situation.
+A complex \ac{OS} like LinuxRT will not work for real-time applications without being tuned or without restrictions although this would be the most desirable situation.
 Consequently, the jitter has to be either considered during application design or removed before running the real-time application.
 The possible alternatives strongly depend on the underlying hardware.
 The current single core configuration does not allow the unlimited usage of \ac{I/O} devices because this has a strong impact on the real-time performance. 
 Still, it has to be pointed out that the worst case value of $t_{int}$ is only about 10 us larger than in the idle case when putting the LinuxRT system under network load. 
 This time is acceptable for a large group of soft real-time applications.
-Still, there is some insecurity because the source of the preemption time jitter was not found. 
-It is a positive result for the RT patch, but the programmer still needs to be aware that this worst-case value is only valid for the current system configuration. 
-The configuration does include the hardware, the \ac{OS} setup, the interrupts generated by the pulse generator and the network load as stress factor.
-Other jitter factors like $t_{swap}$ and unnecessary daemons were eliminated if possible.
+Yet, there is some insecurity because the source of the preemption time jitter was not found. 
+Summarized, this is a positive result for the RT patch, but the programmer needs to be aware that this worst-case value is only valid for the current system configuration. 
+The configuration includes the hardware, the \ac{OS} setup, the interrupts generated by the pulse generator and the network load as stress factor.
+Other jitter factors like $t_{swap}$ and daemons were eliminated if possible.
 \par
 The test system was set up as single core system.
 Another hardware setup which exploits the hardware provided by the evaluation platform is a dual core system. 
 Linux has the advantage of assigning \ac{CPU} affinity to special \acp{IRQ}.
-This means that $t_{tick}$ and $t_{int}$ can be completely moved to another \ac{CPU}, so that time-critical tasks can run on one specific \ac{CPU} without being disturbed.
-By doing this, $t_{jitter}$ is nearly eliminated so that mainly $t_{det}$ remains as execution time.
-The downside of this method is that one \ac{CPU} is heavily loaded by communicating with \ac{I/O} devices while the other one can only run interrupible, \ac{CPU} bound processes.
+This means that $t_{int}$ can be completely moved to another \ac{CPU}, so that time-critical tasks can run on one specific \ac{CPU}.
+By doing this, $t_{jitter}$ is reduced to $t_{tick}$.
+In Linux kernel 3.10, an attempt was made to move the timer tick to one \ac{CPU} only.
+So it could be possible to remove $t_{jitter}$ completely.
+The downside of this method is that one \ac{CPU} is heavily loaded by communicating with \ac{I/O} devices while the other one can only run interruptible, \ac{CPU} bound processes.
 \par
 Although $t_{jitter}$ can be minimized in the introduced method, LinuxRT is barely used for real-time applications in industry.
 This is mainly due to the complexity of the operating system which makes it hard to meet necessary verification demands.
@@ -657,4 +674,4 @@ Under certain conditions, LinuxRT is a promising candidate for soft real-time.
 Yet, the hard real-time systems usually needs certification what is the main drawback of LinuxRT. 
 Further, the memory footprint might be too large for certain hardware platforms. 
 Still, it is worth trying whether an operating system like LinuxRT can meet the demands of a certain application.
-The advantages are still overwhelming: Driver support for a wide range of hardware platforms, a large community, portability between different platforms, advanced synchronization features and application maintenance independent of the \ac{OS}.
+The advantages are overwhelming: Driver support for a wide range of hardware platforms, a large community, portability between different platforms, advanced synchronization features and application maintenance independent of the \ac{OS}.
