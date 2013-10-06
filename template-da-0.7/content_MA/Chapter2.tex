@@ -107,7 +107,7 @@ The final configuration reduces the kernel size from 2.8 MB to 1.9 MB.
 The time measurement should be as accurate as possible.
 High measuring overheads could falsify the results, so software timers should be avoided. 
 One elegant way is to access the \ac{CPU} cycle counter register of the ARM Cortex-A9 processor using inline-assembly code \cite{arm:aarmaaae}.
-This code is compiled into very few assembly instructions [ref to appendix] when copying the register value to an array.
+This code is compiled into very few assembly instructions (compare appendix 1.D) when copying the register value to an array.
 The advantages of this method is not only low overhead but also the \ac{OS} independence of the assembly code.
 Hence this method can be used for both FreeRTOS and LinuxRT.
 However, the \ac{CPU} has to keep running at the same frequency during the complete test run, otherwise the results will be wrong.
