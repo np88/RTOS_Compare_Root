@@ -1,11 +1,11 @@
 \chapter{Estimation of Application Run Time}\label{ch_estimation_of_application_run_time}
-In this chapter, the results gained during the measurements (see chapter \ref{ch_measurements}) and the model for application latency estimation are used to actually estimate the run time of two predefined scenarios.
+In this chapter, the results gained during the measurements (see chapter \ref{ch_results}) and the model for application latency estimation (see chapter \ref{ch_background}) are used to actually estimate the run time of two predefined scenarios.
 The number of scenarios which can be modeled is limited due to the limited number of test cases in the Rhealstone benchmark.
 Yet, it would extend the scope of this work to measure all possible parameters which can be used to estimate the run time of an application.
-Extending the number of those parameters can be part of future work.
+Extending the number of those parameters will be part of future work.
 \par
 The run time of an application can be defined by a deterministic and a non-deterministic part (see section \ref{ss_applications_and_realtime_tasks}). 
-The deterministic part $t_{det}$ (formula \ref{eq_det_app}) is set up of the application code and optionally used synchronization mechanisms and interrupt handling.
+The deterministic part $t_{det}$ (formula \ref{eq_det_app}) is set up of the application code and, optionally, used synchronization mechanisms and interrupt handling.
 The non-deterministic part $t_{jitter}$ (formula \ref{eq_indet_app}) contains all aspects which do not belong to the application but occur while the application is executed, for instance the timer tick or other interrupts.  
 \par
 Utilizing the above formulas, the application run time which is influenced by the \ac{OS} (synchronization mechanisms) and the hardware setup (interrupts) can be estimated. 
@@ -13,12 +13,12 @@ A precondition for a correct estimation is that $t_{app}$ is equal for all opera
 Therefore, no \ac{OS} specific \acp{API} should be used here.
 \par
 An application latency estimation is usually done before the application is implemented. 
-This means that $t_{app}$ can only be estimated. 
+This means that $t_{app}$ is not known and has to be estimated if needed. 
 Further, the formula can be used to calculate how much time is left to execute application specific code if a deadline has to be met. 
 Two examples show the utilization of the application latency estimation.
 These examples are synthetic examples and were not tested as real applications because this goes beyond the limits of this work.
 A reference implementation on the existing hardware will be part of future work.
-This will show the precision of this technique.
+It will show the precision of this technique.
 The estimation can be performed with mean values if no hard timing requirements are necessary. 
 Further, pessimistic values can be used to get a worst-case timing estimation.
 
@@ -39,9 +39,9 @@ The run time estimation will be performed for FreeRTOS, LinuxRT and LinuxRT with
 For the first to cases $t_{jitter}$ equals $t_{tick}$.
 It is assumed that no other disturbing factors are present in the system.
 In the last test, a network daemon is added to the system which also uses interrupts.
-It is active throughout while the test is running. 
+It is active while the test is running. 
 This is the same daemon which has already been used in the interrupt latency benchmark (see section \ref{s_interrupt_latency}). 
-Therefore, the system is constantly put under network load by sending data via \ac{SSH}.
+The system is constantly put under network load by sending data via \ac{SSH}.
 \par
 In the current example, the data is processed in a user process which later signals the underlying hardware that it is done. 
 This can be estimated by the interrupt latency measured in the experiments. 
@@ -50,20 +50,20 @@ All measured times can be used as parameters for the two formulas.
 
 \subsection{Mean Latency Estimation}\label{sss_mean_latency_estimation}
 The mean latency is of interest when no hard real-time requirements are necessary. 
-It can be used for general estimation or for soft real-time.
-The deterministic part $t_{det}$ is calculated by adding $t_{sync}$ and $t_{isr}$, $t_{app}$ will not be considered. 
+It can be used for general timing estimation or for soft real-time.
+The deterministic part $t_{det}$ is calculated by adding $t_{sync}$ and $t_{isr}$.
+$t_{app}$ will not be considered as the main goal is to determine all timings caused by the \ac{OS}.
 The non-deterministic part $t_{jitter}$ is calculated by adding $t_{tick}$ and $t_{daem}$ if available.
-It is not of importance as the main goal is to determine all timings caused by the \ac{OS}.
 For the mean latency estimation the measured mean values (see table \ref{tab_summary}) are inserted in the formula.
-For the third test, the mean value from the interrupt latency test under load was taken (see section \ref{sss_interrupt_handling_user_rt}).
-Moreover, the delay caused by the daemon has to be considered for $t_{app}$ and $t_{sync}$.
+For the third estimation, the mean value from the interrupt latency benchmark under load was taken (see section \ref{sss_interrupt_handling_user_rt}).
+The delay caused by the daemon has to be considered for $t_{app}$ and $t_{sync}$.
 This can only be done accurately if the number of interrupts per second and their execution time is known.
-As this is not the case, the value has to be estimated as well.
+As this is not the case, the value has to be estimated.
 The only timing which is known both with and without load is the interrupt latency.
 The factor between both is $15.678 us / 12.921 us = 1.2134 $.   
 This factor will be used to calculate the delay for $t_{app}$ and $t_{sync}$ when a network daemon is available.
 As there is no mean value for $t_{tick}$, the worst-case value is used here. 
-The results are shown in table \ref{tab_example1_mean}:
+The results are shown in table \ref{tab_example1_mean}.
 \begin{table}[htbp]
 	\centering
 		\begin{tabular}{|l|l|l|l|}
@@ -91,19 +91,19 @@ The results are shown in table \ref{tab_example1_mean}:
 
 As expected, the result for FreeRTOS is very low. 
 Depending on $t_{app}$, the \ac{OS} overhead can be more or less significant. 
-For small $t_{app}$, the difference between the \ac{OS} overhead for LinuxRT and LinuxRT with load is very small. 
-For larger $t_{app}$, it would increase significantly. 
+For large $t_{app}$, the difference between the \ac{OS} overhead for LinuxRT and LinuxRT with load is very small. 
+For smaller $t_{app}$, it would increase significantly. 
 The accuracy of this estimation has not yet been verified by an implementation.
 Yet, it can be assumed that the mean value estimation without load is very accurate as there is no jitter except the timer tick.
 The estimation for $t_{daem}$ in the last test could be improved and therefore makes the result less accurate.
    
 \subsection{Pessimistic Latency Estimation}\label{sss_pessimistic_latency_estimation}
-The pessimistic latency estimation is performed for hard real-time requirements. 
+The pessimistic latency estimation can be performed for hard real-time requirements. 
 It is set up similar to the mean latency estimation (see section \ref{sss_mean_latency_estimation}), but uses worst-case values instead of mean values. 
 The worst-case values are calculated from the mean value adding the mean value multiplied with the standard deviation.
 The worst-case value for the LinuxRT interrupts does not need to be calculated but can be used directly from the corresponding benchmark (see section \ref{sss_interrupt_handling_user_rt}). 
 The results for this estimation are shown in table \ref{tab_example1_pessimistic}.  
- \begin{table}[htbp]
+ \begin{table}[htbp!]
 	\centering
 		\begin{tabular}{|l|l|l|l|}
 			\hline
@@ -127,19 +127,20 @@ The results for this estimation are shown in table \ref{tab_example1_pessimistic
 	\caption{Pessimistic Latency Estimation for Example 1}
 	\label{tab_example1_pessimistic}
 \end{table}
+
 The results of this estimation are very high as the highest value possible is assumed for every parameter. 
 In real applications, the probability of the occurrence of such a large value is very low.
 Still, it is necessary to calculate this value if hard real-time has to be guaranteed.    
 \par
 This estimation shows very well the low jitter of FreeRTOS, the pessimistic value is only 3.82 \% larger than the mean.
-The pessimistic estimation of LinuxRT without load is 36.63 \% larger than the mean value and for LinuxRT with load it is even 48.22 \%. 
+The pessimistic estimation of LinuxRT without load is 36.63 \% larger than the mean value and for LinuxRT with load it is even 48.22 \% larger. 
 
 \section{Example 2: Multi-Tasking with Priority Inversion}
 The second example shows a multi-tasking scenario where tasks with different priorities access the same data.
-As above, this test was not yet implemented to check the accuracy of this estimation.
+As above, this test was not yet implemented to check the accuracy of the estimation.
 The task with the highest priority is woken up by the timer tick periodically. 
 It has to update a data set which is used by multiple lower priority tasks. 
-Other tasks with a medium priority also exist in the application and can block the low priority task.
+Other tasks with medium priority also exist in the application and can block the low priority tasks.
 Due to the use of semaphores, this can cause priority inversion.
 If the data has been updated, another task has to be woken up which does some application specific work.
 The detailed process is shown in the following:
@@ -152,17 +153,17 @@ The detailed process is shown in the following:
 	\item High-priority task wakes up processing task ($t_{sync}$)
 \end{enumerate}
 This example is slightly easier than the first one as it does not use any interrupt handling. 
-Still, some tasks may need to react to changes in the data set in a definite amount of time.
+Yet, some tasks may need to react to changes in the data set in a definite amount of time.
 One example for such an application is an automatic air conditioning system where the data is read from a sensor and the temperature has to be adjusted eventually. 
 The air conditioning could be embedded in a more complex application which, for instance, also controls the light in a house.
-The test setup is similar to section \ref{ss_example_1}, a mean and a pessimistic latency estimation is done for this example. 
+The test setup is similar to section \ref{ss_example_1}, a mean and a pessimistic latency estimation are done for this example. 
 
 \subsection{Mean Latency Estimation}\label{sss_mean_latency_estimation2}
 No interrupts were used in this example, consequently $t_{isr}$ is zero.
-$t_{sync}$ is a combination of the deadlock breaking time and event singaling. 
+$t_{sync}$ is a combination of the deadlock breaking time and event signaling. 
 Moreover, the high-priority task is scheduled right after the timer tick, therefore $t_{tick}$ is zero as well.
 It is assumed that the task takes less than the tick period to complete. 
-Further, the same assumptions regarding the daemon latency are made as for the first example (see section \ref{sss_mean_latency_estimation}).
+Further, the same assumptions regarding the daemon latency like for the first example are made here (see section \ref{sss_mean_latency_estimation}).
 The results are shown in table \ref{tab_example2_mean}:
 \begin{table}[htbp]
 	\centering
@@ -194,8 +195,8 @@ In the last test case, the jitter from the daemon is proportional to the applica
 
 \subsection{Pessimistic Latency Estimation}\label{sss_pessimistic_latency_estimation2}
 This example can also be repeated for the pessimistic latency estimation.
-For details on the configuration refer to section \ref{sss_mean_latency_estimation2} and for details on the calculation of the pessimistic parameters refer to sections \ref{sss_pessimistic_latency_estimation}
-The results are shown in table \ref{tab_example2_pessimistic}:
+For details on the configuration refer to section \ref{sss_mean_latency_estimation2} and for details on the calculation of the pessimistic parameters refer to sections \ref{sss_pessimistic_latency_estimation}.
+The results are shown in table \ref{tab_example2_pessimistic}.
 \begin{table}[htbp]
 	\centering
 		\begin{tabular}{|l|l|l|l|}
@@ -221,9 +222,10 @@ The results are shown in table \ref{tab_example2_pessimistic}:
 	\caption{Pessimistic Latency Estimation for Example 2}
 	\label{tab_example2_pessimistic}
 \end{table}
-The jitter in this example is much lower than for the other example where interrupts were used and the timer tick was present.
+
+The jitter in this example is much lower than for example 1 where interrupts were used and the timer tick was present.
 For FreeRTOS, the worst-case value is only 1.28 \% larger than the mean value.
-For Linux, it is only 3.53 \% and the same value under load when not considering the application time. 
+For Linux, it is only 3.53 \% in both test scenarios when not considering the application time. 
 %\subsection{Single Mutex Results}
 
 %\begin{figure}[htb]

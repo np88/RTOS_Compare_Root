@@ -13,21 +13,22 @@ In the following, the main parts of this thesis are summarized:
 	\item
 	In the second chapter, a detailed background on operating systems is given with focus on FreeRTOS and LinuxRT.
 	Based on that, sources of delays caused by hard ware and the \ac{OS} are analyzed.
+	This is expressed by a formula for application latency estimation.
 	Finally, it is discussed which delays occur in the \acp{OS} under test and how they can be minimized or completely eliminated.
 	\item
 	Derived from the analysis in chapter two, a set of benchmarks to quantify the operating systems is defined in chapter three.
-	These are mainly based on the real-time Rhealstone benchmark proposed by Kar.
-	Some extensions to measure boot time and detailed interrupt handling were made.
+	These are mainly based on the Rhealstone real-time benchmark proposed by Kar.
+	Some extensions to measure boot time and detailed interrupt handling are made.
 	Further, the underlying test hardware platform is introduced.
 	\item
 	The fourth chapter contains the results of the test which were described in chapter three.
 	Further, a comparison and interpretation of these results is given.
 	One important result is the maximum interrupt latency under network load.
-	Moreover, the complexity of the Linux POSIX \ac{API} is clearly shown in the results.
+	Moreover, the complexity of the Linux POSIX \ac{API} is clearly visible in the results.
 	This enables concrete optimization of sources which have strong impact on the system behavior.	
 	The results obtained give the possibility to compare different synchronization methods, tune the performance of an application and estimate whether an \ac{OS} is suitable for a specific task or not.
 	\item 
-	The last chapter utilizes the model derived in chapter \ref{ch_background} and the results from chapter 	\ref{ch_estimation_of_application_run_time} to actually estimate the latency of two theoretical applications.
+	The last chapter utilizes the model derived in chapter \ref{ch_background} and the results from chapter 	\ref{ch_results} to actually estimate the latency of two theoretical applications.
 \end{itemize}
 
 The goal of this work was to make a comparison between the two operating systems LinuxRT and FreeRTOS. 
@@ -41,7 +42,7 @@ This work uses the Rhealstone method to create a benchmark suite and to obtain t
 With minor modifications, the test programs can also be run on different hardware platforms and used to compare them.
 The result of this work is not a concrete answer to the question when to utilize which operating system but a guideline.
 The model and the parameters resulting from implementing the Rhealstone benchmark provide a solid base to estimate the \ac{OS} overhead for real-time applications. 
-It shows the risks and limitations of LinuxRT but also its possibilities: It is up to the right configuration. 
+It shows the risks and limitations of LinuxRT but also its possibilities. 
 
 \section{Outlook and future Work}
 The benchmarks provide a solid base to compare operating systems.
@@ -51,7 +52,7 @@ Yet, there are always possibilities to enhance and extend the functionality.
 To make the estimation technique available for more applications, the number of parameters for the model has to be increased. 
 One important parameter is for example the time which it takes to access hardware from an application, for instance to turn on an \ac{LED}. 
 Although this time is part of the interrupt latency, some applications might need to write to devices without the occurrence of an interrupt.
-Another factor is the time until the interrupt reaches the application without reacting to it. 
+Another factor is the time until the interrupt reaches the application without producing an output. 
 
 \subsection{System Setup}
 As already mentioned (see chapter \ref{s_summary}), the system setup used in this work can be changed.
@@ -61,13 +62,16 @@ Nevertheless, some effort has been made in this domain \cite{mistry:affmaer}.
 As Linux supports this feature in its kernel configuration, it can be exploited during system design.
 For example, non-critical interrupts can be handled by only one specific \ac{CPU} and the real-time tasks can run on different one.
 This is often done when the underlying hardware resources are available. 
+\par
+Further, especially the test programs for Linux can be run on different hardware without large modifications.
+Consequently, they can not only be used to compare \acp{OS} to each other but also hardware platforms.
 
 \subsection{Periodic Timers}
 One important aspect for real-time system which was not handled in this work is the implementation of periodic tasks.
 As the name suggests, these tasks are scheduled periodically by the operating system.
 Depending on their function, some tasks may need different periods to execute their work.
 Therefore, it is important to investigate whether the \ac{OS} provides a timer function and its accuracy.
-At the current time, both FreeRTOS and LinuxRT provide a timer function.
+Currently, both FreeRTOS and LinuxRT provide a timer function.
 In FreeRTOS, the time resolution depends on the tick interval of the system.
 The Linux kernel provides high-resolution timers independent of the timer tick.
 
@@ -75,7 +79,7 @@ The Linux kernel provides high-resolution timers independent of the timer tick.
 Power consumption may not obviously seem to be related to the operating system but more to the underlying hardware platform.
 Still, the \ac{OS} can provide functions to control this hardware and, for instance, put a device into sleep mode or to reduce the \ac{CPU} frequency.
 Especially Linux provides a lot of kernel configurations to enable and disable power saving modes.
-Another way to save power is to put the kernel into a tickless mode which was discussed previously \ref{ss_timer_tick}.
+Another way to save power is to put the kernel into a tickless mode (refer to section \ref{ss_timer_tick} for details).
 This function is available in both operating systems.
 Going one step further, the Linux developers have released kernel 3.10 which provides a first version of a (nearly) full tickless mode \cite{corbet:nftoi}.
 This means not only stopping the timer tick when the system is idle but removing the tick almost completely. 
@@ -83,8 +87,8 @@ Doing this is a big step towards saving power and as well a huge step towards re
 
 \subsection{Light-weight APIs}
 An obvious result from the experiments was the inefficiency of the POSIX \ac{API} compared to the FreeRTOS \ac{API}.
-This is not only related to more nested function calls but also to the amount of configurations this \ac{API} provide.
+This is not only related to more nested function calls but also to the amount of configurations this \ac{API} provides.
 It is worth investigating how much of this functionality is really necessary.
-Linux' performance is up to nine times slower for \ac{API} calls than the one FreeRTOS, six times if the application can be considered free of priority inversion.
-An obvious solution to this problem is the implementation of a light-weight \ac{API} for real-time applications which provides less configuration options.
+Linux' performance is up to nine times slower for \ac{API} calls than the FreeRTOS one, six times if the application can be considered free of priority inversion.
+A solution to this problem is the implementation of a light-weight \ac{API} for real-time applications with less configuration options.
 Consequently, the operating system would become more attractive in terms of performance compared to its competitors.

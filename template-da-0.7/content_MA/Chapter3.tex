@@ -662,7 +662,7 @@ Another hardware setup which exploits the hardware provided by the evaluation pl
 Linux has the advantage of assigning \ac{CPU} affinity to special \acp{IRQ}.
 This means that $t_{int}$ can be completely moved to another \ac{CPU}, so that time-critical tasks can run on one specific \ac{CPU}.
 By doing this, $t_{jitter}$ is reduced to $t_{tick}$.
-In Linux kernel 3.10, an attempt was made to move the timer tick to one \ac{CPU} only.
+In Linux kernel 3.10, an attempt was made to move the timer tick to one \ac{CPU} only \cite{corbet:nftoi}.
 So it could be possible to remove $t_{jitter}$ completely.
 The downside of this method is that one \ac{CPU} is heavily loaded by communicating with \ac{I/O} devices while the other one can only run interruptible, \ac{CPU} bound processes.
 \par
